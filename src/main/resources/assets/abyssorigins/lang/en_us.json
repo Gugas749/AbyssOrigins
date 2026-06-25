@@ -1,0 +1,14 @@
+{
+  "item.abyssorigins.umbrella":       "Umbrella",
+  "item.abyssorigins.human_heart":    "Human Heart",
+  "item.abyssorigins.blood_bottle":   "Blood Bottle",
+
+  "resource.abyssorigins.blood":      "Blood",
+
+  "key.categories.abyssorigins":      "AbyssOrigins",
+  "key.abyssorigins.ability1":        "Ability 1 (R)",
+  "key.abyssorigins.ability2":        "Ability 2 (V)",
+  "key.abyssorigins.origin_info":     "Origin Info (O)",
+
+  "gui.abyssorigins.origin_info":     "Origin Info"
+}

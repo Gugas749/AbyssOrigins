@@ -1,0 +1,14 @@
+{
+  "item.abyssorigins.umbrella":       "Guarda-chuva",
+  "item.abyssorigins.human_heart":    "Coração Humano",
+  "item.abyssorigins.blood_bottle":   "Garrafa de Sangue",
+
+  "resource.abyssorigins.blood":      "Sangue",
+
+  "key.categories.abyssorigins":      "AbyssOrigins",
+  "key.abyssorigins.ability1":        "Habilidade 1 (R)",
+  "key.abyssorigins.ability2":        "Habilidade 2 (V)",
+  "key.abyssorigins.origin_info":     "Info de Origem (O)",
+
+  "gui.abyssorigins.origin_info":     "Info de Origem"
+}
