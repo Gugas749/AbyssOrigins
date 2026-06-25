@@ -4,6 +4,7 @@ import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.network.ModPackets;
 import com.gugas749.abyssorigins.registry.OriginRegistry;
+import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -45,6 +46,7 @@ public class Abyssorigins {
 
     public Abyssorigins(IEventBus modEventBus, ModContainer modContainer) {
         OriginAttachments.register(modEventBus);
+        SkillAttachments.register(modEventBus);
         ModItems.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);

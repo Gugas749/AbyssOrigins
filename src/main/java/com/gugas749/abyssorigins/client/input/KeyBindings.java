@@ -16,33 +16,26 @@ public class KeyBindings {
     public static final String CATEGORY = "key.categories.abyssorigins";
 
     public static final KeyMapping ABILITY_1 = new KeyMapping(
-        "key.abyssorigins.ability1",
-        KeyConflictContext.IN_GAME,
-        InputConstants.Type.KEYSYM,
-        GLFW.GLFW_KEY_R,
-        CATEGORY
-    );
+        "key.abyssorigins.ability1", KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
 
     public static final KeyMapping ABILITY_2 = new KeyMapping(
-        "key.abyssorigins.ability2",
-        KeyConflictContext.IN_GAME,
-        InputConstants.Type.KEYSYM,
-        GLFW.GLFW_KEY_V,
-        CATEGORY
-    );
+        "key.abyssorigins.ability2", KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
 
     public static final KeyMapping ORIGIN_INFO = new KeyMapping(
-        "key.abyssorigins.origin_info",
-        KeyConflictContext.IN_GAME,
-        InputConstants.Type.KEYSYM,
-        GLFW.GLFW_KEY_O,
-        CATEGORY
-    );
+        "key.abyssorigins.origin_info", KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, CATEGORY);
+
+    public static final KeyMapping SKILL_TREE = new KeyMapping(
+        "key.abyssorigins.skill_tree", KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY);
 
     @SubscribeEvent
     public static void onRegisterBindings(RegisterKeyMappingsEvent event) {
         event.register(ABILITY_1);
         event.register(ABILITY_2);
         event.register(ORIGIN_INFO);
+        event.register(SKILL_TREE);
     }
 }

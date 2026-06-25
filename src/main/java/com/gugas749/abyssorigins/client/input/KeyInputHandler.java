@@ -4,6 +4,7 @@ import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
 import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.client.gui.OriginInfoScreen;
+import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
 import com.gugas749.abyssorigins.network.packet.ActivateAbilityPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -38,6 +39,10 @@ public class KeyInputHandler {
 
         if (KeyBindings.ORIGIN_INFO.consumeClick()) {
             mc.setScreen(new OriginInfoScreen());
+        }
+
+        if (KeyBindings.SKILL_TREE.consumeClick()) {
+            mc.setScreen(new SkillTreeScreen());
         }
     }
 }
