@@ -203,9 +203,7 @@ public class BloodDrainGazePassive extends OriginPassive {
 
     @Override
     public void onEquip(Player player) {
-        player.displayClientMessage(Component.literal(
-            ChatFormatting.DARK_RED + "\u263D Blood Gaze: "
-            + ChatFormatting.GRAY + "Crouch and stare at a creature for 5 seconds to drain it!"), false);
+
     }
 
     @Override

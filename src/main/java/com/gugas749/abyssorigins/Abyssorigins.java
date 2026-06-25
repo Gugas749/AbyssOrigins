@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins;
 
+import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.network.ModPackets;
@@ -45,6 +46,9 @@ public class Abyssorigins {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Abyssorigins(IEventBus modEventBus, ModContainer modContainer) {
+        // Register client-side HUD config
+        modContainer.registerConfig(ModConfig.Type.CLIENT, AbyssOriginsConfig.CLIENT_SPEC);
+
         OriginAttachments.register(modEventBus);
         SkillAttachments.register(modEventBus);
         ModItems.register(modEventBus);

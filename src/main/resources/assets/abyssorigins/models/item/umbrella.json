@@ -2,7 +2,7 @@
 	"credit": "Made by ThariCorvy - Vampirism",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "abyssveiladdon:item/umbrella"
+		"0": "abyssorigins:item/umbrella"
 	},
 	"elements": [
 		{

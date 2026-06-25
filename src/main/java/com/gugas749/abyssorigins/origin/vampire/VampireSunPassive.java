@@ -53,8 +53,6 @@ public class VampireSunPassive extends OriginPassive {
 
     @Override
     public void onEquip(Player player) {
-        player.displayClientMessage(Component.literal(
-            ChatFormatting.DARK_RED + "As a Vampire, you burn in sunlight. "
-            + "Carry an \u00a7bUmbrella\u00a7c or unlock \u00a76Daywalker\u00a7c to survive."), false);
+
     }
 }

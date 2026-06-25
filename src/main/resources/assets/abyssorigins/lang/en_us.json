@@ -10,5 +10,21 @@
   "key.abyssorigins.ability2":        "Ability 2 (V)",
   "key.abyssorigins.origin_info":     "Origin Info (O)",
 
-  "gui.abyssorigins.origin_info":     "Origin Info"
+  "gui.abyssorigins.origin_info":     "Origin Info",
+
+  "key.abyssorigins.hud_config":                   "HUD Config (H)",
+  "gui.abyssorigins.hud_config":                   "HUD Configuration",
+
+  "abyssorigins.config.showOriginHud":             "Origin Info Panel",
+  "abyssorigins.config.showResourceBar":           "Resource Bar (Blood)",
+  "abyssorigins.config.showXpBar":                 "XP Bar",
+  "abyssorigins.config.showAbilityIndicators":     "Ability Indicators",
+  "abyssorigins.config.showCooldownOverlays":      "Cooldown Overlays",
+  "abyssorigins.config.showKeybindHints":          "Keybind Hints",
+  "abyssorigins.config.showBloodNumeric":          "Blood Numeric Value",
+  "abyssorigins.config.originInfoPosition":        "Info Panel Position",
+  "abyssorigins.config.abilityIndicatorsPosition": "Ability Indicators Position",
+
+  "abyssorigins.config.enableAll":                 "Enable All",
+  "abyssorigins.config.disableAll":                "Disable All"
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "abyssveiladdon:item/human_heart"
+    "layer0": "abyssorigins:item/human_heart"
   }
 }
