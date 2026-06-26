@@ -13,14 +13,26 @@ public class VampireNightPassive extends OriginPassive {
     }
     @Override public void onTick(Player player) {
         if (player.level().isClientSide()) return;
-        if (!player.hasEffect(MobEffects.NIGHT_VISION))
-            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0, false, false));
+
+        // Refresh when below 8 seconds remaining — never lets it expire
+        var nightVision = player.getEffect(MobEffects.NIGHT_VISION);
+        if (nightVision == null || nightVision.getDuration() < 200) {
+            player.addEffect(new MobEffectInstance(
+                    MobEffects.NIGHT_VISION, 500, 1, false, false));
+        }
+
+        // Same pattern for speed
         boolean dark = !player.level().isDay()
-            || player.level().getMaxLocalRawBrightness(player.blockPosition()) < 8;
+                || player.level().getMaxLocalRawBrightness(player.blockPosition()) < 8;
         if (dark) {
-            if (!player.hasEffect(MobEffects.MOVEMENT_SPEED))
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 40, 0, false, false));
-        } else { player.removeEffect(MobEffects.MOVEMENT_SPEED); }
+            var speed = player.getEffect(MobEffects.MOVEMENT_SPEED);
+            if (speed == null || speed.getDuration() < 60) {
+                player.addEffect(new MobEffectInstance(
+                        MobEffects.MOVEMENT_SPEED, 300, 0, false, false));
+            }
+        } else {
+            player.removeEffect(MobEffects.MOVEMENT_SPEED);
+        }
     }
     @Override public void onRemove(Player player) {
         player.removeEffect(MobEffects.NIGHT_VISION);

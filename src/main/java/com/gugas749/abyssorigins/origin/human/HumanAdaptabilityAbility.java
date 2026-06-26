@@ -17,7 +17,7 @@ public class HumanAdaptabilityAbility extends OriginAbility {
     @Override
     public void activate(Player player, Level level) {
         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED,    160, 1, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 160, 0, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 160, 1, false, true));
         player.displayClientMessage(
             Component.translatable("abyssorigins.message.adaptability_activated"), true);
     }

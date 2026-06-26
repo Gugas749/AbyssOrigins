@@ -13,10 +13,16 @@ public class HumanResiliencePassive extends OriginPassive {
             "abyssorigins.passive.human_resilience.desc");
     }
     @Override public void onTick(Player player) {
-        if (player.level().isClientSide()) return;
-        if (++timer < 10) return; timer = 0;
+        if (player.level().isClientSide())
+            return;
+
+        if (++timer < 10)
+            return;
+
+        timer = 0;
+
         if (player.getHealth() <= 8.0f)
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 0, false, false));
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 0, false, false));
     }
     @Override public void onRemove(Player player) { player.removeEffect(MobEffects.DAMAGE_RESISTANCE); timer = 0; }
 }

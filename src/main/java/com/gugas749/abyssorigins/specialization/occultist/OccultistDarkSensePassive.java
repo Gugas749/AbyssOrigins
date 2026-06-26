@@ -21,9 +21,10 @@ public class OccultistDarkSensePassive extends SpecializationPassive {
         OccultVisionAbility.tick(player, player.level());
 
         // Permanent night vision (dimmer than vampire — no speed bonus)
-        if (!player.hasEffect(MobEffects.NIGHT_VISION)) {
+        var nightVision = player.getEffect(MobEffects.NIGHT_VISION);
+        if (nightVision == null || nightVision.getDuration() < 200) {
             player.addEffect(new MobEffectInstance(
-                MobEffects.NIGHT_VISION, 300, 0, false, false));
+                    MobEffects.NIGHT_VISION, 500, 0, false, false));
         }
     }
 
