@@ -150,5 +150,54 @@
   "abyssorigins.skill.vamp_ascended_daywalker.name":     "Caminhante Diurno",
   "abyssorigins.skill.vamp_ascended_daywalker.desc":     "Imune ao dano solar. Caminha livremente à luz do dia. +2 corações.",
   "abyssorigins.skill.vamp_ascended_progenitor.name":    "Progenitor",
-  "abyssorigins.skill.vamp_ascended_progenitor.desc":    "+20% dano, +4 corações. Servos fornecem sangue passivo."
+  "abyssorigins.skill.vamp_ascended_progenitor.desc":    "+20% dano, +4 corações. Servos fornecem sangue passivo.",
+
+
+
+  "key.abyssorigins.spec_ability": "Habilidade de Especialização (F)",
+
+  "gui.abyssorigins.tab.origin_skills":      "Habilidades de Origem",
+  "gui.abyssorigins.tab.spec_skills":        "Habilidades de Especialização",
+  "gui.abyssorigins.tab.spec_skills_locked": "Especialização (Nenhuma)",
+
+  "abyssorigins.spec.occultist.name":        "Ocultista",
+  "abyssorigins.spec.occultist.description": "Um praticante das artes proibidas. Vês para além do véu do mundo dos vivos, percebendo auras, almas e verdades ocultas que outros não conseguem.",
+
+  "abyssorigins.passive.occultist_dark_sense.name": "Sentido das Trevas",
+  "abyssorigins.passive.occultist_dark_sense.desc": "Os teus sentidos estendem-se além da perceção normal. Visão noturna permanente.",
+
+  "abyssorigins.ability.occult_vision.name": "Visão Oculta",
+  "abyssorigins.ability.occult_vision.desc": "Vê as auras de todos os jogadores próximos. A cor revela a sua origem. 30 segundos. [F]",
+
+  "abyssorigins.message.occult_vision_activated":  "Visão Oculta ativa. O véu levanta-se...",
+  "abyssorigins.message.occult_vision_ended":       "Visão Oculta desvaneceu.",
+  "abyssorigins.message.occult_vision_indicator":   "\u25C6 Visão Oculta \u25C6",
+
+  "abyssorigins.message.spec_set":             "[AbyssOrigins] A tua especialização foi definida para %1$s.",
+  "abyssorigins.message.spec_removed":         "[AbyssOrigins] A tua especialização foi removida.",
+  "abyssorigins.message.spec_level_up":        "[AbyssOrigins] Nível de especialização %1$s! +%2$s ponto(s) de habilidade.",
+
+  "abyssorigins.skilltree.occultist.name": "Artes Ocultas",
+
+  "abyssorigins.skill.occultist.dark_knowledge.name":      "Conhecimento das Trevas",
+  "abyssorigins.skill.occultist.dark_knowledge.desc":      "A tua compreensão do oculto aprofunda-se. +1 armadura, ligeiro aumento de dano.",
+  "abyssorigins.skill.occultist.veil_sight.name":          "Visão do Véu",
+  "abyssorigins.skill.occultist.veil_sight.desc":          "Alcance da Visão Oculta estendido e duração aumentada.",
+  "abyssorigins.skill.occultist.shadow_rites.name":        "Ritos das Sombras",
+  "abyssorigins.skill.occultist.shadow_rites.desc":        "+10% de dano na escuridão. Os rituais tornam-se mais poderosos.",
+  "abyssorigins.skill.occultist.soul_drain.name":          "Drenar Alma",
+  "abyssorigins.skill.occultist.soul_drain.desc":          "Absorve força vital. 5% do dano causado cura-te.",
+  "abyssorigins.skill.occultist.hex_mark.name":            "Marca de Hex",
+  "abyssorigins.skill.occultist.hex_mark.desc":            "Alvos vistos através da Visão Oculta recebem +15% de dano teu.",
+  "abyssorigins.skill.occultist.blood_ritual.name":        "Ritual de Sangue",
+  "abyssorigins.skill.occultist.blood_ritual.desc":        "O poder ritual melhora as tuas habilidades de origem. Cooldowns -10%.",
+  "abyssorigins.skill.occultist.phantom_step.name":        "Passo Fantasma",
+  "abyssorigins.skill.occultist.phantom_step.desc":        "+8% de velocidade. Breve invisibilidade após usar Visão Oculta.",
+  "abyssorigins.skill.occultist.dark_covenant.name":       "Pacto das Trevas",
+  "abyssorigins.skill.occultist.dark_covenant.desc":       "Um pacto com as trevas. +3 corações, +2 armadura. Drenar Alma cura o dobro.",
+  "abyssorigins.skill.occultist.umbral_form.name":         "Forma Umbral",
+  "abyssorigins.skill.occultist.umbral_form.desc":         "Atravessa parcialmente as sombras. +15% de dano, breve fase após habilidades.",
+  "abyssorigins.skill.occultist.ascended_occultist.name":  "Ocultista Ascendido",
+  "abyssorigins.skill.occultist.ascended_occultist.desc":  "O pináculo da mestria oculta. Todas as habilidades melhoradas. Visão de aura permanente."
 }
+

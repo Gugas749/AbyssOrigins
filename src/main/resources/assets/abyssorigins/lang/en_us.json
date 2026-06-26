@@ -150,5 +150,54 @@
   "abyssorigins.skill.vamp_ascended_daywalker.name":     "Daywalker",
   "abyssorigins.skill.vamp_ascended_daywalker.desc":     "Immune to sun damage. Walk freely in daylight. +2 hearts.",
   "abyssorigins.skill.vamp_ascended_progenitor.name":    "Progenitor",
-  "abyssorigins.skill.vamp_ascended_progenitor.desc":    "+20% damage, +4 hearts. Thralls provide passive blood."
+  "abyssorigins.skill.vamp_ascended_progenitor.desc":    "+20% damage, +4 hearts. Thralls provide passive blood.",
+
+
+
+  "key.abyssorigins.spec_ability": "Specialization Ability (F)",
+
+  "gui.abyssorigins.tab.origin_skills":      "Origin Skills",
+  "gui.abyssorigins.tab.spec_skills":        "Specialization Skills",
+  "gui.abyssorigins.tab.spec_skills_locked": "Specialization (None)",
+
+  "abyssorigins.spec.occultist.name":        "Occultist",
+  "abyssorigins.spec.occultist.description": "A practitioner of forbidden arts. You see beyond the veil of the living world, perceiving auras, souls, and the hidden truths others cannot.",
+
+  "abyssorigins.passive.occultist_dark_sense.name": "Dark Sense",
+  "abyssorigins.passive.occultist_dark_sense.desc": "Your senses extend beyond normal perception. Permanent night vision.",
+
+  "abyssorigins.ability.occult_vision.name": "Occult Vision",
+  "abyssorigins.ability.occult_vision.desc": "See the auras of all nearby players. Their color reveals their origin. 30 seconds. [F]",
+
+  "abyssorigins.message.occult_vision_activated":  "Occult Vision active. The veil lifts...",
+  "abyssorigins.message.occult_vision_ended":       "Occult Vision faded.",
+  "abyssorigins.message.occult_vision_indicator":   "\u25C6 Occult Vision \u25C6",
+
+  "abyssorigins.message.spec_set":             "[AbyssOrigins] Your specialization has been set to %1$s.",
+  "abyssorigins.message.spec_removed":         "[AbyssOrigins] Your specialization has been removed.",
+  "abyssorigins.message.spec_level_up":        "[AbyssOrigins] Specialization level %1$s! +%2$s skill point(s).",
+
+  "abyssorigins.skilltree.occultist.name": "Occult Arts",
+
+  "abyssorigins.skill.occultist.dark_knowledge.name":      "Dark Knowledge",
+  "abyssorigins.skill.occultist.dark_knowledge.desc":      "Your understanding of the occult deepens. +1 armor, slight damage boost.",
+  "abyssorigins.skill.occultist.veil_sight.name":          "Veil Sight",
+  "abyssorigins.skill.occultist.veil_sight.desc":          "Occult Vision range extended and duration increased.",
+  "abyssorigins.skill.occultist.shadow_rites.name":        "Shadow Rites",
+  "abyssorigins.skill.occultist.shadow_rites.desc":        "+10% damage in darkness. Rituals become more powerful.",
+  "abyssorigins.skill.occultist.soul_drain.name":          "Soul Drain",
+  "abyssorigins.skill.occultist.soul_drain.desc":          "Absorb life force. 5% of damage dealt heals you.",
+  "abyssorigins.skill.occultist.hex_mark.name":            "Hex Mark",
+  "abyssorigins.skill.occultist.hex_mark.desc":            "Targets seen through Occult Vision take +15% damage from you.",
+  "abyssorigins.skill.occultist.blood_ritual.name":        "Blood Ritual",
+  "abyssorigins.skill.occultist.blood_ritual.desc":        "Ritual power enhances your origin abilities. Cooldowns -10%.",
+  "abyssorigins.skill.occultist.phantom_step.name":        "Phantom Step",
+  "abyssorigins.skill.occultist.phantom_step.desc":        "+8% movement speed. Brief invisibility after using Occult Vision.",
+  "abyssorigins.skill.occultist.dark_covenant.name":       "Dark Covenant",
+  "abyssorigins.skill.occultist.dark_covenant.desc":       "A pact with the darkness. +3 hearts, +2 armor. Soul Drain heals double.",
+  "abyssorigins.skill.occultist.umbral_form.name":         "Umbral Form",
+  "abyssorigins.skill.occultist.umbral_form.desc":         "Partially phase through shadow. +15% damage, brief phasing after abilities.",
+  "abyssorigins.skill.occultist.ascended_occultist.name":  "Ascended Occultist",
+  "abyssorigins.skill.occultist.ascended_occultist.desc":  "The pinnacle of occult mastery. All abilities enhanced. Aura vision is permanent."
 }
+

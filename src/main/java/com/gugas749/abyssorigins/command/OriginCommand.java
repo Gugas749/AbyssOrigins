@@ -40,8 +40,7 @@ public class OriginCommand {
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("origin", StringArgumentType.string())
                             .suggests((ctx, builder) -> {
-                                AbyssOriginsAPI.getAllOrigins().forEach(o ->
-                                    builder.suggest(o.getId().getPath()));
+                                AbyssOriginsAPI.getAllOrigins().forEach(o -> builder.suggest(o.getId().getPath()));
                                 return builder.buildFuture();
                             })
                             .executes(OriginCommand::setOrigin))))
@@ -65,6 +64,8 @@ public class OriginCommand {
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                             .executes(OriginCommand::addSkillPoints))))
+                // ---- Specialization subcommand ----
+                .then(SpecializationCommand.build())
         );
     }
 
@@ -72,36 +73,19 @@ public class OriginCommand {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             String originArg    = StringArgumentType.getString(ctx, "origin");
-
             ResourceLocation id = originArg.contains(":")
                 ? ResourceLocation.parse(originArg)
                 : ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, originArg);
-
             Origin origin = AbyssOriginsAPI.getOrigin(id);
-            if (origin == null) {
-                ctx.getSource().sendFailure(Component.literal(
-                    "Unknown origin: " + originArg + ". Use /abyssorigins list"));
-                return 0;
-            }
-
+            if (origin == null) { ctx.getSource().sendFailure(Component.literal("Unknown origin: " + originArg)); return 0; }
             AbyssOriginsAPI.setPlayerOrigin(player, origin);
             player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(origin.getId());
             XpEventHandler.grantStartingPoints(player);
-            ModPackets.syncPlayer(player);
-            ModPackets.syncSkills(player);
-
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + player.getName().getString() + "'s origin to "
-                + origin.getDisplayName()).withStyle(ChatFormatting.GREEN), true);
-
-            // Player-facing message via lang
-            player.sendSystemMessage(Component.translatable(
-                "abyssorigins.message.origin_set", origin.getDisplayName()));
+            ModPackets.syncAll(player);
+            ctx.getSource().sendSuccess(() -> Component.literal("Set " + player.getName().getString() + "'s origin to " + origin.getDisplayName().getString()).withStyle(ChatFormatting.GREEN), true);
+            player.sendSystemMessage(Component.translatable("abyssorigins.message.origin_set", origin.getDisplayName()));
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int resetOrigin(CommandContext<CommandSourceStack> ctx) {
@@ -109,19 +93,11 @@ public class OriginCommand {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             AbyssOriginsAPI.setPlayerOrigin(player, null);
             player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(null);
-            ModPackets.syncPlayer(player);
-            ModPackets.syncSkills(player);
-
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "Cleared " + player.getName().getString() + "'s origin.")
-                .withStyle(ChatFormatting.YELLOW), true);
-
+            ModPackets.syncAll(player);
+            ctx.getSource().sendSuccess(() -> Component.literal("Cleared " + player.getName().getString() + "'s origin.").withStyle(ChatFormatting.YELLOW), true);
             player.sendSystemMessage(Component.translatable("abyssorigins.message.origin_cleared"));
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int infoOrigin(CommandContext<CommandSourceStack> ctx) {
@@ -130,46 +106,20 @@ public class OriginCommand {
             Origin origin         = AbyssOriginsAPI.getPlayerOrigin(player);
             PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
             PlayerSkillData skills= player.getData(SkillAttachments.PLAYER_SKILLS.get());
-
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "=== " + player.getName().getString() + " ===").withStyle(ChatFormatting.GOLD), false);
-            if (origin == null) {
-                ctx.getSource().sendSuccess(() -> Component.literal(
-                    "No origin assigned.").withStyle(ChatFormatting.GRAY), false);
-            } else {
-                ctx.getSource().sendSuccess(() -> Component.literal(
-                    "Origin: " + origin.getDisplayName() + " (" + origin.getId() + ")")
-                    .withStyle(ChatFormatting.YELLOW), false);
-                ctx.getSource().sendSuccess(() -> Component.literal(
-                    "Level: " + data.getOriginLevel()
-                    + " | XP: " + data.getOriginXp()
-                    + " | Skill Points: " + skills.getSkillPoints())
-                    .withStyle(ChatFormatting.GREEN), false);
-                ctx.getSource().sendSuccess(() -> Component.literal(
-                    "Skills unlocked: " + skills.getUnlockedSkills().size())
-                    .withStyle(ChatFormatting.AQUA), false);
-                if (origin.getResourceType() != null)
-                    ctx.getSource().sendSuccess(() -> Component.literal(
-                        "Resource: " + String.format("%.1f", data.getResource())
-                        + " / " + origin.getResourceType().getMaxAmount())
-                        .withStyle(ChatFormatting.RED), false);
+            ctx.getSource().sendSuccess(() -> Component.literal("=== " + player.getName().getString() + " ===").withStyle(ChatFormatting.GOLD), false);
+            if (origin == null) ctx.getSource().sendSuccess(() -> Component.literal("No origin assigned.").withStyle(ChatFormatting.GRAY), false);
+            else {
+                ctx.getSource().sendSuccess(() -> Component.literal("Origin: " + origin.getDisplayName().getString() + " | Level: " + data.getOriginLevel() + " | XP: " + data.getOriginXp() + " | SP: " + skills.getSkillPoints()).withStyle(ChatFormatting.YELLOW), false);
+                if (origin.getResourceType() != null) ctx.getSource().sendSuccess(() -> Component.literal("Resource: " + String.format("%.1f", data.getResource()) + "/100").withStyle(ChatFormatting.RED), false);
             }
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int listOrigins(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(() ->
-            Component.literal("=== Available Origins ===").withStyle(ChatFormatting.GOLD), false);
-        AbyssOriginsAPI.getAllOrigins().forEach(origin ->
-            ctx.getSource().sendSuccess(() ->
-                Component.literal("  - " + origin.getDisplayName()
-                    + " \u00a77(" + origin.getId().getPath() + ")"
-                    + " [" + origin.getImpactLevel() + "]")
-                .withStyle(ChatFormatting.YELLOW), false));
+        ctx.getSource().sendSuccess(() -> Component.literal("=== Available Origins ===").withStyle(ChatFormatting.GOLD), false);
+        AbyssOriginsAPI.getAllOrigins().forEach(o -> ctx.getSource().sendSuccess(() ->
+            Component.literal("  - " + o.getDisplayName().getString() + " \u00a77(" + o.getId().getPath() + ") [" + o.getImpactLevel() + "]").withStyle(ChatFormatting.YELLOW), false));
         return 1;
     }
 
@@ -181,13 +131,9 @@ public class OriginCommand {
             data.setOriginLevel(level);
             data.setOriginXp(XpEventHandler.xpRequiredToReach(level));
             ModPackets.syncPlayer(player);
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + player.getName().getString() + "'s level to " + level), true);
+            ctx.getSource().sendSuccess(() -> Component.literal("Set " + player.getName().getString() + "'s level to " + level), true);
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int addXp(CommandContext<CommandSourceStack> ctx) {
@@ -196,14 +142,9 @@ public class OriginCommand {
             int amount = IntegerArgumentType.getInteger(ctx, "amount");
             XpEventHandler.grantXp(player, amount);
             PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "Added " + amount + " XP to " + player.getName().getString()
-                + " (now " + data.getOriginXp() + " XP, level " + data.getOriginLevel() + ")"), true);
+            ctx.getSource().sendSuccess(() -> Component.literal("Added " + amount + " XP to " + player.getName().getString() + " (now level " + data.getOriginLevel() + ")"), true);
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int addSkillPoints(CommandContext<CommandSourceStack> ctx) {
@@ -213,15 +154,9 @@ public class OriginCommand {
             PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
             skills.addSkillPoints(amount);
             ModPackets.syncSkills(player);
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                "Added " + amount + " skill points to " + player.getName().getString()
-                + " (now " + skills.getSkillPoints() + ")"), true);
-            player.sendSystemMessage(Component.translatable(
-                "abyssorigins.message.skill_points_granted", String.valueOf(amount)));
+            player.sendSystemMessage(Component.translatable("abyssorigins.message.skill_points_granted", String.valueOf(amount)));
+            ctx.getSource().sendSuccess(() -> Component.literal("Added " + amount + " SP to " + player.getName().getString()), true);
             return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
-            return 0;
-        }
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 }

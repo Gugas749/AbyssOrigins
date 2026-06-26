@@ -117,7 +117,7 @@ public class OriginInfoScreen extends Screen {
     private void renderTitleBar(GuiGraphics gfx) {
         gfx.fill(0, 0, width, 22, 0xDD000008);
         gfx.fill(0, 21, width, 22, originColor);
-        String title = "\u2694 " + playerOrigin.getDisplayName() + " Dashboard";
+        String title = "\u2694 " + playerOrigin.getDisplayName().getString() + " Dashboard";
         gfx.drawString(font, title, (width - font.width(title)) / 2, 7, COLOR_TEXT_BRIGHT, true);
         gfx.drawString(font, "[ESC] Close", 10, 7, COLOR_TEXT_DIM, false);
     }
@@ -127,7 +127,7 @@ public class OriginInfoScreen extends Screen {
         int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
 
         gfx.fill(ix, iy, ix + 4, iy + 16, originColor);
-        gfx.drawString(font, playerOrigin.getDisplayName(), ix + 10, iy + 4, COLOR_TEXT_BRIGHT, true);
+        gfx.drawString(font, playerOrigin.getDisplayName().getString(), ix + 10, iy + 4, COLOR_TEXT_BRIGHT, true);
         iy += 22;
 
         gfx.drawString(font, "Impact: " + getImpactStars(playerOrigin.getImpactLevel()),
@@ -194,8 +194,7 @@ public class OriginInfoScreen extends Screen {
         }
     }
 
-    private void renderAbilitySlot(GuiGraphics gfx, OriginAbility ability, int index,
-                                   int x, int y, int w, int h, boolean hovered) {
+    private void renderAbilitySlot(GuiGraphics gfx, OriginAbility ability, int index, int x, int y, int w, int h, boolean hovered) {
         int cd    = ClientOriginData.getAbilityCooldown(index);
         int maxCd = ClientOriginData.getAbilityMaxCooldown(index);
         boolean onCd = cd > 0;
@@ -217,7 +216,7 @@ public class OriginInfoScreen extends Screen {
         gfx.fill(kbx, cy - 1, kbx + font.width(kb) + 4, cy + 10, 0xAA000000);
         gfx.drawString(font, kb, kbx + 2, cy, 0xFFffff88, false);
 
-        gfx.drawString(font, ability.getDisplayName(), kbx + font.width(kb) + 10, cy, COLOR_TEXT_BRIGHT, false);
+        gfx.drawString(font, ability.getDisplayName().getString(), kbx + font.width(kb) + 10, cy, COLOR_TEXT_BRIGHT, false);
         cy += 14;
 
         String desc = ability.getDescription().getString();
@@ -246,16 +245,17 @@ public class OriginInfoScreen extends Screen {
         for (int i = 0; i < Math.min(passives.size(), 6); i++) {
             OriginPassive p = passives.get(i);
             // Skip internal passives (bat form timer etc.)
-            if (p.getDescription().equals("Internal bat form countdown.")) continue;
+            if (p.getId().equals("vampire_bat_form_tick")) continue;
+
             gfx.fill(ix, iy, ix + iw, iy + 18, 0x44000000);
             String icon = getPassiveIcon(p.getId());
-            gfx.drawString(font, icon + " " + p.getDisplayName(), ix + 4, iy + 5, COLOR_TEXT, false);
+            gfx.drawString(font, icon + " " + p.getDisplayName().getString(), ix + 4, iy + 5, COLOR_TEXT, false);
+
             iy += 22;
         }
 
-        int extra = (int) passives.stream()
-            .filter(p -> !p.getDescription().equals("Internal bat form countdown."))
-            .count() - 6;
+        int extra = (int) passives.stream().filter(p -> !p.getId().equals("vampire_bat_form_tick")).count() - 6;
+
         if (extra > 0)
             gfx.drawString(font, "+" + extra + " more...", ix, iy, COLOR_TEXT_DIM, false);
     }

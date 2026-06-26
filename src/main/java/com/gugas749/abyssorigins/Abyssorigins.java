@@ -2,10 +2,12 @@ package com.gugas749.abyssorigins;
 
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
+import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.item.ModCreativeTab;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.network.ModPackets;
 import com.gugas749.abyssorigins.registry.OriginRegistry;
+import com.gugas749.abyssorigins.registry.SpecializationRegistry;
 import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -51,6 +53,7 @@ public class Abyssorigins {
 
         OriginAttachments.register(modEventBus);
         SkillAttachments.register(modEventBus);
+        SpecializationAttachments.register(modEventBus);
         ModItems.register(modEventBus);
         ModCreativeTab.register(modEventBus);
 
@@ -61,7 +64,10 @@ public class Abyssorigins {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(OriginRegistry::registerAll);
+        event.enqueueWork(() -> {
+            OriginRegistry.registerAll();
+            SpecializationRegistry.registerAll();  // new
+        });
         LOGGER.info("[AbyssOrigins] Origins registered.");
     }
 
