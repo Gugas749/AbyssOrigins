@@ -23,10 +23,17 @@ public record SyncSkillsPacket(List<String> unlockedSkills, int skillPoints)
 
     public static final StreamCodec<FriendlyByteBuf, SyncSkillsPacket> STREAM_CODEC =
         StreamCodec.of(
-            (buf, p) -> { buf.writeInt(p.unlockedSkills.size()); p.unlockedSkills.forEach(buf::writeUtf); buf.writeInt(p.skillPoints); },
-            buf -> { int n = buf.readInt(); List<String> s = new ArrayList<>(n);
-                     for (int i=0;i<n;i++) s.add(buf.readUtf());
-                     return new SyncSkillsPacket(s, buf.readInt()); }
+            (buf, p) -> {
+                buf.writeInt(p.unlockedSkills.size());
+                p.unlockedSkills.forEach(buf::writeUtf);
+                buf.writeInt(p.skillPoints);
+            },
+            buf -> {
+                int n = buf.readInt();
+                List<String> s = new ArrayList<>(n);
+                for (int i = 0; i < n; i++) s.add(buf.readUtf());
+                return new SyncSkillsPacket(s, buf.readInt());
+            }
         );
 
     @Override
@@ -41,14 +48,21 @@ public record SyncSkillsPacket(List<String> unlockedSkills, int skillPoints)
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
 
-            // Update data attachment
             PlayerSkillData data = mc.player.getData(SkillAttachments.PLAYER_SKILLS.get());
-            pkt.unlockedSkills.forEach(data::unlockSkill);
-            int delta = pkt.skillPoints - data.getSkillPoints();
-            data.addSkillPoints(delta);
+
+            // REPLACE — not add. Previous implementation was additive which
+            // caused skill points to accumulate incorrectly on every sync.
+            data.copyFrom(buildFromPacket(pkt));
 
             // Feed HUD cache
             ClientOriginData.updateSkills(pkt.unlockedSkills, pkt.skillPoints);
+        }
+
+        private static PlayerSkillData buildFromPacket(SyncSkillsPacket pkt) {
+            PlayerSkillData fresh = new PlayerSkillData();
+            pkt.unlockedSkills.forEach(fresh::unlockSkill);
+            fresh.addSkillPoints(pkt.skillPoints);
+            return fresh;
         }
     }
 }

@@ -88,13 +88,26 @@ public class ClientOriginData {
     public static Set<String>  getUnlockedSkills()        { return Collections.unmodifiableSet(unlockedSkills); }
     public static boolean      hasSkill(String id)        { return unlockedSkills.contains(id); }
 
-    /** XP progress within current level (0.0–1.0). Level = xp / 100. */
     public static float getXpProgress() {
-        int xpInLevel = xp % 100;
-        return xpInLevel / 100f;
+        int level        = ClientOriginData.level;
+        int xpFloor      = xpRequiredToReach(level);      // total XP to reach current level
+        int xpCeiling    = xpRequiredToReach(level + 1);  // total XP to reach next level
+        int xpIntoLevel  = xp - xpFloor;
+        int xpNeeded     = xpCeiling - xpFloor;
+        if (xpNeeded <= 0) return 1f;
+        return Math.min(1f, (float) xpIntoLevel / xpNeeded);
     }
 
     public static int getXpForNextLevel() {
-        return 100; // fixed XP_PER_LEVEL constant
+        return com.gugas749.abyssorigins.event.XpEventHandler.xpForLevel(level);
+    }
+
+    // Helper mirroring the server-side method
+    private static int xpRequiredToReach(int targetLevel) {
+        int total = 0;
+        for (int lvl = 1; lvl < targetLevel; lvl++) {
+            total += com.gugas749.abyssorigins.event.XpEventHandler.xpForLevel(lvl);
+        }
+        return total;
     }
 }

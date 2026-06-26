@@ -6,13 +6,13 @@
   "resource.abyssorigins.blood":      "Blood",
 
   "key.categories.abyssorigins":      "AbyssOrigins",
-  "key.abyssorigins.ability1":        "Ability 1 (R)",
-  "key.abyssorigins.ability2":        "Ability 2 (V)",
-  "key.abyssorigins.origin_info":     "Origin Info (O)",
+  "key.abyssorigins.ability1":        "Ability 1",
+  "key.abyssorigins.ability2":        "Ability 2",
+  "key.abyssorigins.origin_info":     "Origin Info",
 
   "gui.abyssorigins.origin_info":     "Origin Info",
 
-  "key.abyssorigins.hud_config":                   "HUD Config (H)",
+  "key.abyssorigins.hud_config":                   "HUD Config",
   "gui.abyssorigins.hud_config":                   "HUD Configuration",
 
   "abyssorigins.config.showOriginHud":             "Origin Info Panel",

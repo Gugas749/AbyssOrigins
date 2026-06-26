@@ -18,8 +18,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Abyssorigins.MODID)
 public class OriginEventHandler {
 
-    // How often (in ticks) to sync resource to client during passive drain
-    private static final int SYNC_INTERVAL = 20; // once per second
+    private static final int SYNC_INTERVAL = 20;
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -31,8 +30,9 @@ public class OriginEventHandler {
         if (savedId != null) {
             Origin origin = AbyssOriginsAPI.getOrigin(savedId);
             if (origin != null) {
-                // Restore to API cache and re-apply passives
                 AbyssOriginsAPI.setPlayerOrigin(player, origin);
+                // Grant starting points if this is effectively a new assignment
+                XpEventHandler.grantStartingPoints(player);
                 Abyssorigins.LOGGER.info("[AbyssOrigins] Restored origin {} for {}",
                     savedId, player.getName().getString());
             } else {
@@ -42,8 +42,8 @@ public class OriginEventHandler {
             }
         }
 
-        // Always sync state to client on join
         ModPackets.syncPlayer(player);
+        ModPackets.syncSkills(player);
     }
 
     @SubscribeEvent
@@ -53,14 +53,13 @@ public class OriginEventHandler {
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        // Preserve data across death (attachment has copyOnDeath, but we also
-        // need to re-apply passives because the new entity is fresh)
         if (!event.isWasDeath()) return;
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
 
-        PlayerOriginData newData = event.getEntity().getData(OriginAttachments.PLAYER_ORIGIN.get());
+        PlayerOriginData newData = sp.getData(OriginAttachments.PLAYER_ORIGIN.get());
         ResourceLocation savedId = newData.getOriginId();
 
-        if (savedId != null && event.getEntity() instanceof ServerPlayer sp) {
+        if (savedId != null) {
             Origin origin = AbyssOriginsAPI.getOrigin(savedId);
             if (origin != null) {
                 AbyssOriginsAPI.setPlayerOrigin(sp, origin);
@@ -79,27 +78,20 @@ public class OriginEventHandler {
 
         PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
 
-        // Tick cooldowns
         data.tickCooldown1();
         data.tickCooldown2();
 
-        // Passive resource drain
         ResourceType resource = origin.getResourceType();
-        if (resource != null && resource.getDrainPerTick() > 0) {
-            data.drainResource(resource.getDrainPerTick());
-
-            // If resource hits 0, apply starvation-like effect
-            if (data.getResource() <= 0) {
-                onResourceDepleted(sp, origin);
+        if (resource != null) {
+            if (resource.getDrainPerTick() > 0) {
+                data.drainResource(resource.getDrainPerTick());
+                if (data.getResource() <= 0) onResourceDepleted(sp);
+            }
+            if (resource.getRegenPerTick() > 0) {
+                data.addResource(resource.getRegenPerTick());
             }
         }
 
-        // Passive resource regen
-        if (resource != null && resource.getRegenPerTick() > 0) {
-            data.addResource(resource.getRegenPerTick());
-        }
-
-        // Tick passives
         origin.getPassives().forEach(passive -> {
             try { passive.onTick(player); }
             catch (Exception e) {
@@ -108,16 +100,13 @@ public class OriginEventHandler {
             }
         });
 
-        // Sync to client once per second
         if (player.tickCount % SYNC_INTERVAL == 0) {
             ModPackets.syncPlayer(sp);
         }
     }
 
-    private static void onResourceDepleted(ServerPlayer player, Origin origin) {
-        // Default: hurt player for running out of their resource
-        // Specific origins can override this behaviour in their passives
-        if (player.tickCount % 40 == 0) { // every 2 seconds
+    private static void onResourceDepleted(ServerPlayer player) {
+        if (player.tickCount % 40 == 0) {
             player.hurt(player.damageSources().starve(), 1.0f);
         }
     }

@@ -46,7 +46,6 @@ public class Abyssorigins {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Abyssorigins(IEventBus modEventBus, ModContainer modContainer) {
-        // Register client-side HUD config
         modContainer.registerConfig(ModConfig.Type.CLIENT, AbyssOriginsConfig.CLIENT_SPEC);
 
         OriginAttachments.register(modEventBus);
