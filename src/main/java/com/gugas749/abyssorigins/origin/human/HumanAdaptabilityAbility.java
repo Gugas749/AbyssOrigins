@@ -19,7 +19,7 @@ public class HumanAdaptabilityAbility extends OriginAbility {
         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED,    160, 1, false, true));
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 160, 0, false, true));
         player.displayClientMessage(
-            Component.literal("§e⚡ Adaptability! You push beyond your limits."), true);
+            Component.translatable("abyssorigins.message.adaptability_activated"), true);
     }
 
     @Override

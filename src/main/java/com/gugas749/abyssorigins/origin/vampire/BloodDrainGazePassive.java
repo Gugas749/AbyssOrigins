@@ -3,7 +3,6 @@ package com.gugas749.abyssorigins.origin.vampire;
 import com.gugas749.abyssorigins.api.OriginPassive;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -25,14 +24,8 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-/**
- * Passive blood drain via gaze.
- * Crouch + stare at a creature with blood for 5 seconds to begin draining it.
- * Ported from VeilOrigins' BloodDrainGazePassive, adapted to AbyssOrigins data layer.
- */
 public class BloodDrainGazePassive extends OriginPassive {
 
-    // ---- Blacklists (same as VeilOrigins) ----------------------------------------
     private static final Set<String> BLOODLESS = Set.of(
         "zombie","zombie_villager","husk","drowned","skeleton","stray","wither_skeleton",
         "phantom","wither","zoglin","zombified_piglin","skeleton_horse","zombie_horse",
@@ -46,25 +39,17 @@ public class BloodDrainGazePassive extends OriginPassive {
         "cod","salmon","tropical_fish","pufferfish","silverfish","cave_spider"
     );
 
-    // ---- Config ------------------------------------------------------------------
-    private final float damagePerTick;
-    private final float healPerTick;
-    private final float resourcePerTick;
-    private final int   ticksToStart;     // 100 ticks = 5 seconds
-    private final double maxRange;
+    private final float damagePerTick   = 0.5f;
+    private final float healPerTick     = 0.25f;
+    private final float resourcePerTick = 1.0f;
+    private final int   ticksToStart    = 100;
+    private final double maxRange       = 8.0;
 
-    // ---- State (per player) ------------------------------------------------------
     private static final Map<UUID, DrainState> DRAIN_STATES = new HashMap<>();
 
     public BloodDrainGazePassive() {
         super("blood_drain_gaze", "Blood Gaze",
             "Crouch and stare at a living creature for 5 seconds to drain its blood.");
-        // Full vampire values
-        this.damagePerTick   = 0.5f;
-        this.healPerTick     = 0.25f;
-        this.resourcePerTick = 1.0f;
-        this.ticksToStart    = 100;
-        this.maxRange        = 8.0;
     }
 
     @Override
@@ -91,17 +76,18 @@ public class BloodDrainGazePassive extends OriginPassive {
             state.ticks = 0;
             state.draining = false;
             player.displayClientMessage(
-                Component.literal(ChatFormatting.DARK_GRAY + "[Focusing on " + target.getName().getString() + "...]"), true);
+                Component.translatable("abyssorigins.message.blood_gaze_focusing",
+                    target.getName().getString()), true);
         }
 
         state.ticks++;
 
-        // Progress bar
         if (!state.draining && state.ticks < ticksToStart && state.ticks % 20 == 0) {
             int pct = (state.ticks * 100) / ticksToStart;
-            String bar = ChatFormatting.DARK_RED + "\u2588".repeat(pct / 10)
-                       + ChatFormatting.DARK_GRAY + "\u2591".repeat(10 - pct / 10)
-                       + " " + ChatFormatting.RED + pct + "%";
+            // Progress bar uses raw formatting — kept as-is since it's visual only
+            String bar = "\u00a74" + "\u2588".repeat(pct / 10)
+                       + "\u00a78" + "\u2591".repeat(10 - pct / 10)
+                       + " \u00a7c" + pct + "%";
             player.displayClientMessage(Component.literal(bar), true);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.2f, 1.5f);
@@ -111,7 +97,7 @@ public class BloodDrainGazePassive extends OriginPassive {
             if (!state.draining) {
                 state.draining = true;
                 player.displayClientMessage(
-                    Component.literal(ChatFormatting.DARK_RED + "\u26A1 Blood Drain Activated! \u26A1"), true);
+                    Component.translatable("abyssorigins.message.blood_gaze_activated"), true);
                 player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.5f, 1.5f);
             }
@@ -130,16 +116,16 @@ public class BloodDrainGazePassive extends OriginPassive {
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 2, false, false));
 
         if (state.ticks % 10 == 0) spawnParticles(player, target);
-        if (state.ticks % 20 == 0) {
+        if (state.ticks % 20 == 0)
             player.level().playSound(null, target.getX(), target.getY(), target.getZ(),
                 SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.3f, 0.5f);
-        }
 
         if (target.isDeadOrDying()) {
             player.displayClientMessage(
-                Component.literal(ChatFormatting.DARK_RED + "\u2726 " + target.getName().getString() + " has been drained! \u2726"), false);
+                Component.translatable("abyssorigins.message.blood_gaze_drained",
+                    target.getName().getString()), false);
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 1, false, true));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 200, 0, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,  200, 0, false, true));
             data.addResource(30f);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5f, 0.5f);
@@ -195,16 +181,14 @@ public class BloodDrainGazePassive extends OriginPassive {
     private void resetDrain(Player player, DrainState state) {
         if (state.draining)
             player.displayClientMessage(
-                Component.literal(ChatFormatting.DARK_GRAY + "[Blood drain interrupted]"), true);
+                Component.translatable("abyssorigins.message.blood_gaze_interrupted"), true);
         state.targetId = null;
         state.ticks    = 0;
         state.draining = false;
     }
 
     @Override
-    public void onEquip(Player player) {
-
-    }
+    public void onEquip(Player player) {}
 
     @Override
     public void onRemove(Player player) {

@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.client.input;
 
+import com.gugas749.abyssorigins.Abyssorigins;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
@@ -9,8 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import org.lwjgl.glfw.GLFW;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD,
-    modid = com.gugas749.abyssorigins.Abyssorigins.MODID)
+@EventBusSubscriber(value = Dist.CLIENT, modid = Abyssorigins.MODID)
 public class KeyBindings {
 
     public static final String CATEGORY = "key.categories.abyssorigins";

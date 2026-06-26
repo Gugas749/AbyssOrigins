@@ -1,19 +1,21 @@
 {
-  "item.abyssorigins.umbrella":       "Umbrella",
-  "item.abyssorigins.human_heart":    "Human Heart",
-  "item.abyssorigins.blood_bottle":   "Blood Bottle",
+  "item.abyssorigins.umbrella":     "Umbrella",
+  "item.abyssorigins.human_heart":  "Human Heart",
+  "item.abyssorigins.blood_bottle": "Blood Bottle",
+  "itemGroup.abyssorigins":         "AbyssOrigins",
 
-  "resource.abyssorigins.blood":      "Blood",
+  "resource.abyssorigins.blood": "Blood",
 
   "key.categories.abyssorigins":      "AbyssOrigins",
   "key.abyssorigins.ability1":        "Ability 1",
   "key.abyssorigins.ability2":        "Ability 2",
   "key.abyssorigins.origin_info":     "Origin Info",
+  "key.abyssorigins.skill_tree":      "Skill Tree",
+  "key.abyssorigins.hud_config":      "HUD Config",
 
   "gui.abyssorigins.origin_info":     "Origin Info",
-
-  "key.abyssorigins.hud_config":                   "HUD Config",
-  "gui.abyssorigins.hud_config":                   "HUD Configuration",
+  "gui.abyssorigins.skill_tree":      "Skill Tree",
+  "gui.abyssorigins.hud_config":      "HUD Configuration",
 
   "abyssorigins.config.showOriginHud":             "Origin Info Panel",
   "abyssorigins.config.showResourceBar":           "Resource Bar (Blood)",
@@ -24,7 +26,35 @@
   "abyssorigins.config.showBloodNumeric":          "Blood Numeric Value",
   "abyssorigins.config.originInfoPosition":        "Info Panel Position",
   "abyssorigins.config.abilityIndicatorsPosition": "Ability Indicators Position",
-
   "abyssorigins.config.enableAll":                 "Enable All",
-  "abyssorigins.config.disableAll":                "Disable All"
+  "abyssorigins.config.disableAll":                "Disable All",
+
+  "abyssorigins.message.origin_set":               "[AbyssOrigins] Your origin has been set to %1$s.",
+  "abyssorigins.message.origin_cleared":           "[AbyssOrigins] Your origin has been cleared.",
+  "abyssorigins.message.skill_points_starting":    "[AbyssOrigins] You have %1$s skill points to spend. Press K to open the skill tree.",
+  "abyssorigins.message.skill_points_granted":     "[AbyssOrigins] +%1$s skill point(s) granted. Press K to open the skill tree.",
+  "abyssorigins.message.level_up":                 "[AbyssOrigins] Origin level up! Now level %1$s. +%2$s skill point(s). Press K to open the skill tree.",
+
+  "abyssorigins.message.blood_drain_no_target":    "No target in range.",
+  "abyssorigins.message.blood_drain_gained":       "+%1$s Blood",
+  "abyssorigins.message.blood_bottle_not_for_you": "This is not meant for you...",
+  "abyssorigins.message.blood_bottle_restored":    "\u2764 The blood restores your essence.",
+
+  "abyssorigins.message.bat_form_activated":       "Bat Form! (15 seconds)",
+  "abyssorigins.message.bat_form_ending_soon":     "Bat form ending in 3 seconds...",
+  "abyssorigins.message.bat_form_ending":          "Bat form ending!",
+  "abyssorigins.message.bat_form_ended":           "You return to your normal form.",
+
+  "abyssorigins.message.blood_gaze_focusing":      "[Focusing on %1$s...]",
+  "abyssorigins.message.blood_gaze_activated":     "\u26A1 Blood Drain Activated! \u26A1",
+  "abyssorigins.message.blood_gaze_interrupted":   "[Blood drain interrupted]",
+  "abyssorigins.message.blood_gaze_drained":       "\u2726 %1$s has been drained! \u2726",
+
+  "abyssorigins.message.blood_critical":           "\u26A0 Your blood is critically low! Find sustenance.",
+
+  "abyssorigins.message.adaptability_activated":   "\u26A1 Adaptability! You push beyond your limits.",
+
+  "abyssorigins.message.skill_unlocked":           "[AbyssOrigins] Unlocked: %1$s",
+  "abyssorigins.message.skill_prereqs_missing":    "[AbyssOrigins] You must unlock prerequisites first.",
+  "abyssorigins.message.skill_not_enough_points":  "[AbyssOrigins] Not enough skill points. Need %1$s, have %2$s."
 }

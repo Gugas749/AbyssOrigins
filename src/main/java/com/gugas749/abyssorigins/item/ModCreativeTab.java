@@ -18,11 +18,10 @@ public class ModCreativeTab {
         CREATIVE_TABS.register("abyssorigins_tab", () ->
             CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.abyssorigins"))
-                .icon(() -> new ItemStack(ModItems.BLOOD_BOTTLE.get()))
+                .icon(() -> new ItemStack(ModItems.HUMAN_HEART.get()))
                 .displayItems((params, output) -> {
                     output.accept(ModItems.UMBRELLA.get());
                     output.accept(ModItems.HUMAN_HEART.get());
-                    output.accept(ModItems.BLOOD_BOTTLE.get());
                 })
                 .build()
         );

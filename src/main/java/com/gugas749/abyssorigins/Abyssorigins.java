@@ -2,6 +2,7 @@ package com.gugas749.abyssorigins;
 
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
+import com.gugas749.abyssorigins.item.ModCreativeTab;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.network.ModPackets;
 import com.gugas749.abyssorigins.registry.OriginRegistry;
@@ -51,6 +52,7 @@ public class Abyssorigins {
         OriginAttachments.register(modEventBus);
         SkillAttachments.register(modEventBus);
         ModItems.register(modEventBus);
+        ModCreativeTab.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerPackets);

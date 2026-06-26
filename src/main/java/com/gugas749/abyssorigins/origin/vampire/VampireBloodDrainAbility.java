@@ -4,7 +4,6 @@ import com.gugas749.abyssorigins.api.OriginAbility;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.network.ModPackets;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -21,10 +20,10 @@ import java.util.List;
 
 public class VampireBloodDrainAbility extends OriginAbility {
 
-    private static final float DRAIN_RANGE   = 3.0f;
-    private static final float DRAIN_DAMAGE  = 2.0f;
-    private static final float HEAL_AMOUNT   = 2.0f;
-    private static final float BLOOD_GAIN    = 15.0f;
+    private static final float DRAIN_RANGE  = 3.0f;
+    private static final float DRAIN_DAMAGE = 2.0f;
+    private static final float HEAL_AMOUNT  = 2.0f;
+    private static final float BLOOD_GAIN   = 15.0f;
 
     public VampireBloodDrainAbility() {
         super("vampire_blood_drain", "Blood Drain",
@@ -44,11 +43,10 @@ public class VampireBloodDrainAbility extends OriginAbility {
 
         if (targets.isEmpty()) {
             player.displayClientMessage(
-                Component.literal(ChatFormatting.GRAY + "No target in range."), true);
+                Component.translatable("abyssorigins.message.blood_drain_no_target"), true);
             return;
         }
 
-        // Closest target
         LivingEntity target = targets.stream()
             .min((a, b) -> Double.compare(a.distanceToSqr(player), b.distanceToSqr(player)))
             .orElse(null);
@@ -60,7 +58,6 @@ public class VampireBloodDrainAbility extends OriginAbility {
         PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
         data.addResource(BLOOD_GAIN);
 
-        // Crimson spore particles from target to player
         if (level instanceof ServerLevel sl) {
             Vec3 tPos = target.position().add(0, target.getBbHeight() / 2, 0);
             Vec3 pPos = player.position().add(0, player.getEyeHeight(), 0);
@@ -75,7 +72,8 @@ public class VampireBloodDrainAbility extends OriginAbility {
             SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 1.0f, 0.8f);
 
         player.displayClientMessage(
-            Component.literal(ChatFormatting.DARK_RED + "+" + (int)BLOOD_GAIN + " Blood"), true);
+            Component.translatable("abyssorigins.message.blood_drain_gained",
+                String.valueOf((int) BLOOD_GAIN)), true);
 
         if (player instanceof ServerPlayer sp) ModPackets.syncPlayer(sp);
     }

@@ -36,7 +36,6 @@ public class OriginCommand {
         dispatcher.register(
             Commands.literal("abyssorigins")
                 .requires(src -> src.hasPermission(2))
-
                 .then(Commands.literal("set")
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("origin", StringArgumentType.string())
@@ -46,37 +45,28 @@ public class OriginCommand {
                                 return builder.buildFuture();
                             })
                             .executes(OriginCommand::setOrigin))))
-
                 .then(Commands.literal("reset")
                     .then(Commands.argument("player", EntityArgument.player())
                         .executes(OriginCommand::resetOrigin)))
-
                 .then(Commands.literal("info")
                     .then(Commands.argument("player", EntityArgument.player())
                         .executes(OriginCommand::infoOrigin)))
-
                 .then(Commands.literal("list")
                     .executes(OriginCommand::listOrigins))
-
                 .then(Commands.literal("setlevel")
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("level", IntegerArgumentType.integer(1, 50))
                             .executes(OriginCommand::setLevel))))
-
-                // addxp now goes through XpEventHandler so level-ups fire correctly
                 .then(Commands.literal("addxp")
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                             .executes(OriginCommand::addXp))))
-
                 .then(Commands.literal("addskillpoints")
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                             .executes(OriginCommand::addSkillPoints))))
         );
     }
-
-    // ---- set ------------------------------------------------------------
 
     private static int setOrigin(CommandContext<CommandSourceStack> ctx) {
         try {
@@ -96,10 +86,7 @@ public class OriginCommand {
 
             AbyssOriginsAPI.setPlayerOrigin(player, origin);
             player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(origin.getId());
-
-            // Grant starting points if never had them
             XpEventHandler.grantStartingPoints(player);
-
             ModPackets.syncPlayer(player);
             ModPackets.syncSkills(player);
 
@@ -107,10 +94,9 @@ public class OriginCommand {
                 "Set " + player.getName().getString() + "'s origin to "
                 + origin.getDisplayName()).withStyle(ChatFormatting.GREEN), true);
 
-            player.sendSystemMessage(Component.literal(
-                "§6[AbyssOrigins] §eYour origin has been set to §b"
-                + origin.getDisplayName() + "§e."));
-
+            // Player-facing message via lang
+            player.sendSystemMessage(Component.translatable(
+                "abyssorigins.message.origin_set", origin.getDisplayName()));
             return 1;
         } catch (Exception e) {
             ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
@@ -118,12 +104,9 @@ public class OriginCommand {
         }
     }
 
-    // ---- reset ----------------------------------------------------------
-
     private static int resetOrigin(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-
             AbyssOriginsAPI.setPlayerOrigin(player, null);
             player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(null);
             ModPackets.syncPlayer(player);
@@ -133,16 +116,13 @@ public class OriginCommand {
                 "Cleared " + player.getName().getString() + "'s origin.")
                 .withStyle(ChatFormatting.YELLOW), true);
 
-            player.sendSystemMessage(Component.literal(
-                "§6[AbyssOrigins] §eYour origin has been cleared."));
+            player.sendSystemMessage(Component.translatable("abyssorigins.message.origin_cleared"));
             return 1;
         } catch (Exception e) {
             ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
             return 0;
         }
     }
-
-    // ---- info -----------------------------------------------------------
 
     private static int infoOrigin(CommandContext<CommandSourceStack> ctx) {
         try {
@@ -152,9 +132,7 @@ public class OriginCommand {
             PlayerSkillData skills= player.getData(SkillAttachments.PLAYER_SKILLS.get());
 
             ctx.getSource().sendSuccess(() -> Component.literal(
-                "=== " + player.getName().getString() + " ===")
-                .withStyle(ChatFormatting.GOLD), false);
-
+                "=== " + player.getName().getString() + " ===").withStyle(ChatFormatting.GOLD), false);
             if (origin == null) {
                 ctx.getSource().sendSuccess(() -> Component.literal(
                     "No origin assigned.").withStyle(ChatFormatting.GRAY), false);
@@ -170,12 +148,11 @@ public class OriginCommand {
                 ctx.getSource().sendSuccess(() -> Component.literal(
                     "Skills unlocked: " + skills.getUnlockedSkills().size())
                     .withStyle(ChatFormatting.AQUA), false);
-                if (origin.getResourceType() != null) {
+                if (origin.getResourceType() != null)
                     ctx.getSource().sendSuccess(() -> Component.literal(
-                        "Resource: " + String.format("%.1f", data.getResource()) + " / "
-                        + origin.getResourceType().getMaxAmount())
+                        "Resource: " + String.format("%.1f", data.getResource())
+                        + " / " + origin.getResourceType().getMaxAmount())
                         .withStyle(ChatFormatting.RED), false);
-                }
             }
             return 1;
         } catch (Exception e) {
@@ -183,8 +160,6 @@ public class OriginCommand {
             return 0;
         }
     }
-
-    // ---- list -----------------------------------------------------------
 
     private static int listOrigins(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSuccess(() ->
@@ -198,20 +173,14 @@ public class OriginCommand {
         return 1;
     }
 
-    // ---- setlevel -------------------------------------------------------
-
     private static int setLevel(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             int level = IntegerArgumentType.getInteger(ctx, "level");
-
             PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
-            // Recalculate XP floor so level display is consistent
             data.setOriginLevel(level);
             data.setOriginXp(XpEventHandler.xpRequiredToReach(level));
-
             ModPackets.syncPlayer(player);
-
             ctx.getSource().sendSuccess(() -> Component.literal(
                 "Set " + player.getName().getString() + "'s level to " + level), true);
             return 1;
@@ -221,16 +190,11 @@ public class OriginCommand {
         }
     }
 
-    // ---- addxp ----------------------------------------------------------
-
     private static int addXp(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             int amount = IntegerArgumentType.getInteger(ctx, "amount");
-
-            // Use XpEventHandler so level-up logic and skill point grants fire correctly
             XpEventHandler.grantXp(player, amount);
-
             PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
             ctx.getSource().sendSuccess(() -> Component.literal(
                 "Added " + amount + " XP to " + player.getName().getString()
@@ -242,24 +206,18 @@ public class OriginCommand {
         }
     }
 
-    // ---- addskillpoints -------------------------------------------------
-
     private static int addSkillPoints(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             int amount = IntegerArgumentType.getInteger(ctx, "amount");
-
             PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
             skills.addSkillPoints(amount);
             ModPackets.syncSkills(player);
-
             ctx.getSource().sendSuccess(() -> Component.literal(
                 "Added " + amount + " skill points to " + player.getName().getString()
                 + " (now " + skills.getSkillPoints() + ")"), true);
-
-            player.sendSystemMessage(Component.literal(
-                "§6[AbyssOrigins] §a+" + amount + " skill point"
-                + (amount > 1 ? "s" : "") + "§e granted. Press §bK§e to open the skill tree."));
+            player.sendSystemMessage(Component.translatable(
+                "abyssorigins.message.skill_points_granted", String.valueOf(amount)));
             return 1;
         } catch (Exception e) {
             ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));

@@ -17,9 +17,6 @@ public class ModItems {
     public static final DeferredItem<Item> HUMAN_HEART = ITEMS.register(
         "human_heart", HumanHeartItem::new);
 
-    public static final DeferredItem<Item> BLOOD_BOTTLE = ITEMS.register(
-        "blood_bottle", BloodBottleItem::new);
-
     public static void register(IEventBus bus) {
         ITEMS.register(bus);
     }

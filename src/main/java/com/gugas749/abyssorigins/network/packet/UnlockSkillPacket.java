@@ -10,6 +10,7 @@ import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import com.gugas749.abyssorigins.skilltree.registry.SkillEffectHandler;
 import com.gugas749.abyssorigins.skilltree.registry.SkillTreeRegistry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -49,44 +50,35 @@ public record UnlockSkillPacket(String skillNodeId) implements CustomPacketPaylo
 
             PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
 
-            // Already unlocked
             if (skills.hasSkill(skillNodeId)) return;
 
-            // Check prerequisites
             for (String preReq : node.getPrereqs()) {
                 if (!skills.hasSkill(preReq)) {
-                    player.sendSystemMessage(
-                        net.minecraft.network.chat.Component.literal(
-                            "§c[AbyssOrigins] You must unlock prerequisites first."));
+                    player.sendSystemMessage(Component.translatable(
+                        "abyssorigins.message.skill_prereqs_missing"));
                     return;
                 }
             }
 
-            // Check skill points
             if (skills.getSkillPoints() < node.getPointCost()) {
-                player.sendSystemMessage(
-                    net.minecraft.network.chat.Component.literal(
-                        "§c[AbyssOrigins] Not enough skill points. Need "
-                        + node.getPointCost() + ", have " + skills.getSkillPoints() + "."));
+                player.sendSystemMessage(Component.translatable(
+                    "abyssorigins.message.skill_not_enough_points",
+                    String.valueOf(node.getPointCost()),
+                    String.valueOf(skills.getSkillPoints())));
                 return;
             }
 
-            // Unlock
             skills.spendSkillPoints(node.getPointCost());
             skills.unlockSkill(skillNodeId);
 
-            // Apply effect
-            if (!node.getEffectId().isEmpty()) {
+            if (!node.getEffectId().isEmpty())
                 SkillEffectHandler.onSkillUnlocked(player, node.getEffectId());
-            }
 
-            // Sync
             ModPackets.syncPlayer(player);
             ModPackets.syncSkills(player);
 
-            player.sendSystemMessage(
-                net.minecraft.network.chat.Component.literal(
-                    "§a[AbyssOrigins] Unlocked: §e" + node.getDisplayName()));
+            player.sendSystemMessage(Component.translatable(
+                "abyssorigins.message.skill_unlocked", node.getDisplayName()));
         });
     }
 }

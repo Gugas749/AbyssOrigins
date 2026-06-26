@@ -1,19 +1,21 @@
 {
-  "item.abyssorigins.umbrella":       "Guarda-chuva",
-  "item.abyssorigins.human_heart":    "Coração Humano",
-  "item.abyssorigins.blood_bottle":   "Garrafa de Sangue",
+  "item.abyssorigins.umbrella":     "Guarda-chuva",
+  "item.abyssorigins.human_heart":  "Coração Humano",
+  "item.abyssorigins.blood_bottle": "Garrafa de Sangue",
+  "itemGroup.abyssorigins":         "AbyssOrigins",
 
-  "resource.abyssorigins.blood":      "Sangue",
+  "resource.abyssorigins.blood": "Sangue",
 
   "key.categories.abyssorigins":      "AbyssOrigins",
-  "key.abyssorigins.ability1":        "Habilidade 1 (R)",
-  "key.abyssorigins.ability2":        "Habilidade 2 (V)",
-  "key.abyssorigins.origin_info":     "Info de Origem (O)",
+  "key.abyssorigins.ability1":        "Habilidade 1",
+  "key.abyssorigins.ability2":        "Habilidade 2",
+  "key.abyssorigins.origin_info":     "Info de Origem",
+  "key.abyssorigins.skill_tree":      "Árvore de Habilidades",
+  "key.abyssorigins.hud_config":      "Config do HUD",
 
   "gui.abyssorigins.origin_info":     "Info de Origem",
-
-  "key.abyssorigins.hud_config":                   "Config do HUD (H)",
-  "gui.abyssorigins.hud_config":                   "Configuração do HUD",
+  "gui.abyssorigins.skill_tree":      "Árvore de Habilidades",
+  "gui.abyssorigins.hud_config":      "Configuração do HUD",
 
   "abyssorigins.config.showOriginHud":             "Painel de Informação da Origem",
   "abyssorigins.config.showResourceBar":           "Barra de Recurso (Sangue)",
@@ -24,7 +26,35 @@
   "abyssorigins.config.showBloodNumeric":          "Valor Numérico do Sangue",
   "abyssorigins.config.originInfoPosition":        "Posição do Painel de Info",
   "abyssorigins.config.abilityIndicatorsPosition": "Posição dos Indicadores",
-
   "abyssorigins.config.enableAll":                 "Ativar Tudo",
-  "abyssorigins.config.disableAll":                "Desativar Tudo"
+  "abyssorigins.config.disableAll":                "Desativar Tudo",
+
+  "abyssorigins.message.origin_set":               "[AbyssOrigins] A sua origem foi definida para %1$s.",
+  "abyssorigins.message.origin_cleared":           "[AbyssOrigins] A sua origem foi removida.",
+  "abyssorigins.message.skill_points_starting":    "[AbyssOrigins] Tens %1$s pontos de habilidade para gastar. Prime K para abrir a árvore.",
+  "abyssorigins.message.skill_points_granted":     "[AbyssOrigins] +%1$s ponto(s) de habilidade concedido(s). Prime K para abrir a árvore.",
+  "abyssorigins.message.level_up":                 "[AbyssOrigins] Nível de origem aumentou! Agora nível %1$s. +%2$s ponto(s). Prime K para abrir a árvore.",
+
+  "abyssorigins.message.blood_drain_no_target":    "Nenhum alvo no alcance.",
+  "abyssorigins.message.blood_drain_gained":       "+%1$s Sangue",
+  "abyssorigins.message.blood_bottle_not_for_you": "Isto não é para ti...",
+  "abyssorigins.message.blood_bottle_restored":    "\u2764 O sangue restaura a tua essência.",
+
+  "abyssorigins.message.bat_form_activated":       "Forma de Morcego! (15 segundos)",
+  "abyssorigins.message.bat_form_ending_soon":     "Forma de morcego a terminar em 3 segundos...",
+  "abyssorigins.message.bat_form_ending":          "Forma de morcego a terminar!",
+  "abyssorigins.message.bat_form_ended":           "Regressas à tua forma normal.",
+
+  "abyssorigins.message.blood_gaze_focusing":      "[A focar em %1$s...]",
+  "abyssorigins.message.blood_gaze_activated":     "\u26A1 Drenagem de Sangue Activada! \u26A1",
+  "abyssorigins.message.blood_gaze_interrupted":   "[Drenagem de sangue interrompida]",
+  "abyssorigins.message.blood_gaze_drained":       "\u2726 %1$s foi drenado! \u2726",
+
+  "abyssorigins.message.blood_critical":           "\u26A0 O teu sangue está criticamente baixo! Procura sustento.",
+
+  "abyssorigins.message.adaptability_activated":   "\u26A1 Adaptabilidade! Superas os teus limites.",
+
+  "abyssorigins.message.skill_unlocked":           "[AbyssOrigins] Desbloqueado: %1$s",
+  "abyssorigins.message.skill_prereqs_missing":    "[AbyssOrigins] Tens de desbloquear os pré-requisitos primeiro.",
+  "abyssorigins.message.skill_not_enough_points":  "[AbyssOrigins] Pontos insuficientes. Necessário %1$s, tens %2$s."
 }
