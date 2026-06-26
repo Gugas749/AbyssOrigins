@@ -167,7 +167,7 @@ public class OriginCommand {
         AbyssOriginsAPI.getAllOrigins().forEach(origin ->
             ctx.getSource().sendSuccess(() ->
                 Component.literal("  - " + origin.getDisplayName()
-                    + " §7(" + origin.getId().getPath() + ")"
+                    + " \u00a77(" + origin.getId().getPath() + ")"
                     + " [" + origin.getImpactLevel() + "]")
                 .withStyle(ChatFormatting.YELLOW), false));
         return 1;

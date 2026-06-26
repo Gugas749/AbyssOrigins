@@ -61,7 +61,7 @@ public class SkillTreeScreen extends Screen {
         originData = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
 
         if (origin == null) {
-            player.displayClientMessage(Component.literal("§eYou do not have an origin assigned."), false);
+            player.displayClientMessage(Component.literal("\u00a7eYou do not have an origin assigned."), false);
             onClose(); return;
         }
 
@@ -69,7 +69,7 @@ public class SkillTreeScreen extends Screen {
 
         if (skillTree == null) {
             Abyssorigins.LOGGER.warn("[AbyssOrigins] No skill tree found for origin: {}", origin.getId());
-            player.displayClientMessage(Component.literal("§eNo skill tree available for this origin yet."), false);
+            player.displayClientMessage(Component.literal("\u00a7eNo skill tree available for this origin yet."), false);
             onClose(); return;
         }
 
@@ -211,7 +211,7 @@ public class SkillTreeScreen extends Screen {
                 gfx.drawString(font, cost, x - font.width(cost) / 2, bottom - 10,
                     hasPoints ? 0xFFFFFF00 : 0xFFFF4444, true);
             } else {
-                gfx.drawString(font, "§a\u2713", x - font.width("§a\u2713") / 2, bottom - 10, 0xFFFFFF, true);
+                gfx.drawString(font, "\u00a7a\u2713", x - font.width("\u00a7a\u2713") / 2, bottom - 10, 0xFFFFFF, true);
             }
         }
     }
@@ -259,21 +259,21 @@ public class SkillTreeScreen extends Screen {
         boolean hasPoints = skills.getSkillPoints() >= node.getPointCost();
 
         List<String> lines = new ArrayList<>();
-        String prefix = unlocked ? "§a" : (excluded ? "§4§m" : (canUnlock ? "§e" : "§7"));
+        String prefix = unlocked ? "\u00a7a" : (excluded ? "\u00a74\u00a7m" : (canUnlock ? "\u00a7e" : "\u00a77"));
 
         // FIX: .getString() on all node.getDisplayName() / node.getDescription() calls
-        lines.add(prefix + "§l" + node.getDisplayName().getString());
-        lines.add("§5Tier " + node.getTier().getTier() + " §7| §"
+        lines.add(prefix + "\u00a7l" + node.getDisplayName().getString());
+        lines.add("\u00a75Tier " + node.getTier().getTier() + " \u00a77| \u00a7"
             + branchColorCode(node.getBranch()) + node.getBranch().name());
         lines.add("");
-        lines.add("§f" + node.getDescription().getString());
+        lines.add("\u00a7f" + node.getDescription().getString());
         lines.add("");
-        lines.add("§6Requirements:");
+        lines.add("\u00a76Requirements:");
 
         boolean levelMet = originData.getOriginLevel() >= node.getTier().getLevelRequired();
-        lines.add((levelMet ? "§a" : "§c") + " Level " + node.getTier().getLevelRequired()
+        lines.add((levelMet ? "\u00a7a" : "\u00a7c") + " Level " + node.getTier().getLevelRequired()
             + (levelMet ? " \u2713" : " \u2717"));
-        lines.add((hasPoints || unlocked ? "§a" : "§c") + " Cost: " + node.getPointCost() + " SP"
+        lines.add((hasPoints || unlocked ? "\u00a7a" : "\u00a7c") + " Cost: " + node.getPointCost() + " SP"
             + (hasPoints || unlocked ? " \u2713" : " \u2717"));
 
         for (String prereqId : node.getPrerequisites()) {
@@ -281,27 +281,27 @@ public class SkillTreeScreen extends Screen {
             if (prereq != null) {
                 boolean met = skills.hasSkill(prereqId);
                 // FIX: .getString() on prereq.getDisplayName()
-                lines.add((met ? "§a" : "§c") + " Requires: " + prereq.getDisplayName().getString()
+                lines.add((met ? "\u00a7a" : "\u00a7c") + " Requires: " + prereq.getDisplayName().getString()
                     + (met ? " \u2713" : " \u2717"));
             }
         }
 
         if (!node.getExclusions().isEmpty() && !unlocked) {
             lines.add("");
-            lines.add("§c§lWARNING: Locks out:");
+            lines.add("\u00a7c\u00a7lWARNING: Locks out:");
             for (String exclId : node.getExclusions()) {
                 SkillNode excl = skillTree.getSkill(exclId);
                 // FIX: .getString() on excl.getDisplayName()
-                if (excl != null) lines.add("§c \u2717 " + excl.getDisplayName().getString());
+                if (excl != null) lines.add("\u00a7c \u2717 " + excl.getDisplayName().getString());
             }
         }
 
         lines.add("");
-        if (unlocked)               lines.add("§a§l\u2713 UNLOCKED");
-        else if (excluded)          { lines.add("§4§l\u2717 LOCKED OUT"); lines.add("§7(Another skill excludes this)"); }
-        else if (canUnlock && hasPoints) lines.add("§e§lClick to unlock!");
-        else if (canUnlock)         lines.add("§cNeed more skill points");
-        else                        lines.add("§7Requirements not met");
+        if (unlocked)               lines.add("\u00a7a\u00a7l\u2713 UNLOCKED");
+        else if (excluded)          { lines.add("\u00a74\u00a7l\u2717 LOCKED OUT"); lines.add("\u00a77(Another skill excludes this)"); }
+        else if (canUnlock && hasPoints) lines.add("\u00a7e\u00a7lClick to unlock!");
+        else if (canUnlock)         lines.add("\u00a7cNeed more skill points");
+        else                        lines.add("\u00a77Requirements not met");
 
         int maxW = lines.stream().mapToInt(l -> font.width(l.replaceAll("\u00a7.", ""))).max().orElse(0);
         maxW = Math.min(maxW + 16, 280);
