@@ -20,8 +20,8 @@ public class OriginRegistry {
     private static void registerHuman() {
         Origin human = new Origin(
             ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, "human"),
-            "Human",
-            "An ordinary person in an extraordinary world. No supernatural gifts — only wit, resilience, and the will to survive.",
+            "abyssorigins.origin.human.name",
+            "abyssorigins.origin.human.description",
             ImpactLevel.LOW
         );
         human.setResourceType(null)
@@ -32,27 +32,24 @@ public class OriginRegistry {
     }
 
     private static void registerVampire() {
-        // Ability instance shared between ability slot and tick passive
         VampireBatFormAbility batForm = new VampireBatFormAbility();
 
         Origin vampire = new Origin(
             ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, "vampire"),
-            "Vampire",
-            "An immortal creature of the night. Blood is your sustenance; sunlight your doom. Master the darkness and prey upon the living.",
+            "abyssorigins.origin.vampire.name",
+            "abyssorigins.origin.vampire.description",
             ImpactLevel.HIGH
         );
         vampire.setHealthModifier(1.2f)
                .setDamageModifier(1.1f)
                .setResourceType(ResourceType.blood())
-               // Passives
                .addPassive(new VampireHungerPassive())
-               .addPassive(new VampireSunPassive())           // helmet does NOT protect — only umbrella or Daywalker skill
+               .addPassive(new VampireSunPassive())
                .addPassive(new VampireNightPassive())
-               .addPassive(new BloodDrainGazePassive())       // crouch + stare to drain
+               .addPassive(new BloodDrainGazePassive())
                .addPassive(new VampireBatFormTickPassive(batForm))
-               // Abilities
-               .addAbility(new VampireBloodDrainAbility())    // R — instant drain + blood gain
-               .addAbility(batForm);                          // V — bat form toggle
+               .addAbility(new VampireBloodDrainAbility())
+               .addAbility(batForm);
         AbyssOriginsAPI.registerOrigin(vampire);
     }
 }

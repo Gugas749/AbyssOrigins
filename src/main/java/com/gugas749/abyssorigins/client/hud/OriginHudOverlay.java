@@ -132,9 +132,9 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
             }
 
             if (AbyssOriginsConfig.showKeybindHints) {
-                String name = ability.getDisplayName().length() > 12
-                    ? ability.getDisplayName().substring(0, 11) + ".."
-                    : ability.getDisplayName();
+                String name = ability.getDisplayName().getString().length() > 12
+                    ? ability.getDisplayName().getString().substring(0, 11) + ".."
+                    : ability.getDisplayName().getString();
                 gfx.drawString(font, name, x + boxSize + 4, ay + 4,
                     ready ? COLOR_WHITE : COLOR_DARK_GRAY, true);
                 String kb = "[" + getKeybind(i) + "]";

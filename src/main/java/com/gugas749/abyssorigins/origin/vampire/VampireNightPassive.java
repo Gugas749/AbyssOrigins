@@ -6,38 +6,23 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
 public class VampireNightPassive extends OriginPassive {
-
     public VampireNightPassive() {
-        super("vampire_night", "Creature of the Night",
-            "You see perfectly in the dark and move faster at night.");
+        super("vampire_night",
+            "abyssorigins.passive.vampire_night.name",
+            "abyssorigins.passive.vampire_night.desc");
     }
-
-    @Override
-    public void onTick(Player player) {
+    @Override public void onTick(Player player) {
         if (player.level().isClientSide()) return;
-
-        // Always have night vision
-        if (!player.hasEffect(MobEffects.NIGHT_VISION)) {
-            player.addEffect(new MobEffectInstance(
-                MobEffects.NIGHT_VISION, 300, 0, false, false));
-        }
-
-        // Speed boost at night or underground (light level < 8)
-        boolean isNight = !player.level().isDay();
-        boolean isDark  = player.level().getMaxLocalRawBrightness(player.blockPosition()) < 8;
-
-        if (isNight || isDark) {
-            if (!player.hasEffect(MobEffects.MOVEMENT_SPEED)) {
-                player.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SPEED, 40, 0, false, false));
-            }
-        } else {
-            player.removeEffect(MobEffects.MOVEMENT_SPEED);
-        }
+        if (!player.hasEffect(MobEffects.NIGHT_VISION))
+            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0, false, false));
+        boolean dark = !player.level().isDay()
+            || player.level().getMaxLocalRawBrightness(player.blockPosition()) < 8;
+        if (dark) {
+            if (!player.hasEffect(MobEffects.MOVEMENT_SPEED))
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 40, 0, false, false));
+        } else { player.removeEffect(MobEffects.MOVEMENT_SPEED); }
     }
-
-    @Override
-    public void onRemove(Player player) {
+    @Override public void onRemove(Player player) {
         player.removeEffect(MobEffects.NIGHT_VISION);
         player.removeEffect(MobEffects.MOVEMENT_SPEED);
     }

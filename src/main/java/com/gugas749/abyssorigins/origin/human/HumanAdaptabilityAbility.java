@@ -8,12 +8,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class HumanAdaptabilityAbility extends OriginAbility {
-
     public HumanAdaptabilityAbility() {
-        super("human_adaptability", "Adaptability",
-            "Push beyond your limits: Haste II + Strength I for 8 seconds.", 45, 0);
+        super("human_adaptability",
+            "abyssorigins.ability.human_adaptability.name",
+            "abyssorigins.ability.human_adaptability.desc",
+            45, 0);
     }
-
     @Override
     public void activate(Player player, Level level) {
         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED,    160, 1, false, true));
@@ -21,7 +21,5 @@ public class HumanAdaptabilityAbility extends OriginAbility {
         player.displayClientMessage(
             Component.translatable("abyssorigins.message.adaptability_activated"), true);
     }
-
-    @Override
-    public boolean canActivate(Player player) { return true; }
+    @Override public boolean canActivate(Player player) { return true; }
 }

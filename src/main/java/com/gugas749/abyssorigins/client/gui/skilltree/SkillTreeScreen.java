@@ -21,13 +21,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-/**
- * Skill tree GUI — ported from VeilOrigins' SkillTreeScreen,
- * adapted to use AbyssOrigins' SkillNode / SkillTree / PlayerSkillData.
- *
- * Features: zoom, pan (drag), scroll-to-zoom toward cursor,
- * colour-coded branches and tiers, full tooltip, connection lines.
- */
 public class SkillTreeScreen extends Screen {
 
     private static final int NODE_SIZE    = 40;
@@ -40,17 +33,13 @@ public class SkillTreeScreen extends Screen {
     private PlayerOriginData originData;
     private Origin          origin;
 
-    // View state
     private float   zoom       = 1.0f;
     private float   panX       = 0;
     private float   panY       = 0;
     private boolean isDragging = false;
     private double  lastMouseX, lastMouseY;
 
-    // Hover
     private SkillNode hoveredNode = null;
-
-    // Mutually exclusive skill lockouts
     private final Set<String> excludedSkills = new HashSet<>();
 
     public SkillTreeScreen(Screen parent) {
@@ -58,7 +47,6 @@ public class SkillTreeScreen extends Screen {
         this.parent = parent;
     }
 
-    /** Convenience constructor — no parent screen */
     public SkillTreeScreen() { this(null); }
 
     @Override
@@ -73,49 +61,31 @@ public class SkillTreeScreen extends Screen {
         originData = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
 
         if (origin == null) {
-            player.displayClientMessage(
-                Component.literal("§eYou do not have an origin assigned."), false);
-            onClose();
-            return;
+            player.displayClientMessage(Component.literal("§eYou do not have an origin assigned."), false);
+            onClose(); return;
         }
 
         skillTree = SkillTreeRegistry.getTree(origin.getId()).orElse(null);
 
         if (skillTree == null) {
             Abyssorigins.LOGGER.warn("[AbyssOrigins] No skill tree found for origin: {}", origin.getId());
-            player.displayClientMessage(
-                Component.literal("§eNo skill tree available for this origin yet."), false);
-            onClose();
-            return;
+            player.displayClientMessage(Component.literal("§eNo skill tree available for this origin yet."), false);
+            onClose(); return;
         }
 
         calculateExcludedSkills();
-
-        // Center view
-        panX = this.width  / 2f;
+        panX = this.width / 2f;
         panY = this.height / 2f - 50;
 
-        // Close button
-        addRenderableWidget(Button.builder(
-            Component.literal("Close"), b -> onClose()
-        ).bounds(this.width / 2 - 40, this.height - 25, 80, 20).build());
-
-        // Zoom buttons
-        addRenderableWidget(Button.builder(
-            Component.literal("+"), b -> zoom = Math.min(2.0f, zoom + 0.1f)
-        ).bounds(this.width - 30, 50, 20, 20).build());
-
-        addRenderableWidget(Button.builder(
-            Component.literal("-"), b -> zoom = Math.max(0.5f, zoom - 0.1f)
-        ).bounds(this.width - 30, 75, 20, 20).build());
-
-        addRenderableWidget(Button.builder(
-            Component.literal("R"), b -> {
-                zoom = 1.0f;
-                panX = this.width  / 2f;
-                panY = this.height / 2f - 50;
-            }
-        ).bounds(this.width - 30, 100, 20, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Close"), b -> onClose())
+            .bounds(this.width / 2 - 40, this.height - 25, 80, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("+"), b -> zoom = Math.min(2.0f, zoom + 0.1f))
+            .bounds(this.width - 30, 50, 20, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("-"), b -> zoom = Math.max(0.5f, zoom - 0.1f))
+            .bounds(this.width - 30, 75, 20, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("R"), b -> {
+            zoom = 1.0f; panX = this.width / 2f; panY = this.height / 2f - 50;
+        }).bounds(this.width - 30, 100, 20, 20).build());
     }
 
     private void calculateExcludedSkills() {
@@ -127,9 +97,7 @@ public class SkillTreeScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        // Custom background — suppress default blur
-    }
+    public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {}
 
     @Override
     public void render(@NotNull GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
@@ -144,9 +112,8 @@ public class SkillTreeScreen extends Screen {
         drawConnections(gfx);
 
         hoveredNode = null;
-        for (SkillNode node : skillTree.getAllSkills()) {
+        for (SkillNode node : skillTree.getAllSkills())
             drawSkillNode(gfx, node, mouseX, mouseY);
-        }
 
         drawUIOverlay(gfx);
 
@@ -155,13 +122,10 @@ public class SkillTreeScreen extends Screen {
         super.render(gfx, mouseX, mouseY, partialTick);
     }
 
-    // ---- Drawing -------------------------------------------------------
-
     private void drawGridBackground(GuiGraphics gfx) {
         int gridSize = (int)(50 * zoom);
-        int ox = (int)(panX % gridSize);
-        int oy = (int)(panY % gridSize);
-        for (int x = ox; x < this.width; x  += gridSize) gfx.fill(x, 0, x + 1, this.height, 0x20FFFFFF);
+        int ox = (int)(panX % gridSize), oy = (int)(panY % gridSize);
+        for (int x = ox; x < this.width;  x += gridSize) gfx.fill(x, 0, x + 1, this.height, 0x20FFFFFF);
         for (int y = oy; y < this.height; y += gridSize) gfx.fill(0, y, this.width, y + 1,    0x20FFFFFF);
     }
 
@@ -179,39 +143,36 @@ public class SkillTreeScreen extends Screen {
             boolean toExcl   = excludedSkills.contains(to.getId());
 
             int color;
-            if (toDone)          color = 0xFF55FF55;
-            else if (toExcl)     color = 0xFF553333;
-            else if (fromDone)   color = 0xFFFFFF55;
-            else                 color = 0xFF444444;
+            if (toDone)        color = 0xFF55FF55;
+            else if (toExcl)   color = 0xFF553333;
+            else if (fromDone) color = 0xFFFFFF55;
+            else               color = 0xFF444444;
 
             drawConnection(gfx, fp[0], fp[1], tp[0], tp[1], color);
         }
     }
 
     private void drawConnection(GuiGraphics gfx, int x1, int y1, int x2, int y2, int color) {
-        int t   = Math.max(1, (int)(2 * zoom));
+        int t = Math.max(1, (int)(2 * zoom));
         int midY = (y1 + y2) / 2;
-        gfx.fill(x1 - t/2, y1,        x1 + t/2 + 1, midY,      color);
-        gfx.fill(Math.min(x1,x2) - t/2, midY - t/2,
-                 Math.max(x1,x2) + t/2 + 1, midY + t/2 + 1,     color);
-        gfx.fill(x2 - t/2, midY,      x2 + t/2 + 1, y2,        color);
+        gfx.fill(x1 - t/2, y1, x1 + t/2 + 1, midY, color);
+        gfx.fill(Math.min(x1,x2) - t/2, midY - t/2, Math.max(x1,x2) + t/2 + 1, midY + t/2 + 1, color);
+        gfx.fill(x2 - t/2, midY, x2 + t/2 + 1, y2, color);
     }
 
     private void drawSkillNode(GuiGraphics gfx, SkillNode node, int mouseX, int mouseY) {
         int[] pos    = screenPos(node.getGridX(), node.getGridY());
-        int x        = pos[0];
-        int y        = pos[1];
+        int x        = pos[0], y = pos[1];
         int size     = (int)(NODE_SIZE * zoom);
         int half     = size / 2;
-        int left     = x - half, top  = y - half;
+        int left     = x - half, top    = y - half;
         int right    = x + half, bottom = y + half;
 
         if (right < 0 || left > this.width || bottom < 0 || top > this.height) return;
 
         boolean unlocked  = skills.hasSkill(node.getId());
         boolean excluded  = excludedSkills.contains(node.getId());
-        boolean canUnlock = node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills,
-                                           originData.getOriginLevel());
+        boolean canUnlock = node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills, originData.getOriginLevel());
         boolean hasPoints = skills.getSkillPoints() >= node.getPointCost();
         boolean hovered   = mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom;
 
@@ -230,29 +191,25 @@ public class SkillTreeScreen extends Screen {
         gfx.fill(left - bw, top - bw, right + bw, bottom + bw, borderColor);
         gfx.fill(left, top, right, bottom, bgColor);
 
-        // Branch colour corner (top-right)
         int indSize = Math.max(4, (int)(8 * zoom));
         gfx.fill(right - indSize - 2, top + 2, right - 2, top + indSize + 2, node.getBranchColor());
-        // Tier colour corner (top-left)
         gfx.fill(left + 2, top + 2, left + indSize + 2, top + indSize + 2, node.getTierColor());
 
         if (zoom >= 0.7f) {
             int textColor = unlocked ? 0xFFFFFFFF : (excluded ? 0xFF666666 : (canUnlock ? 0xFFEEEEEE : 0xFFAAAAAA));
 
-            // Icon
             String icon = node.getIcon();
             gfx.drawString(font, icon, x - font.width(icon) / 2, y - 8, textColor, true);
 
-            // Name (truncated)
-            String name = node.getDisplayName();
+            // FIX: .getString() to resolve the Component to translated text
+            String name = node.getDisplayName().getString();
             if (font.width(name) > size - 4) name = name.substring(0, Math.min(7, name.length())) + "..";
             gfx.drawString(font, name, x - font.width(name) / 2, y + 2, textColor, true);
 
-            // Cost
             if (!unlocked) {
                 String cost = String.valueOf(node.getPointCost());
-                int costColor = hasPoints ? 0xFFFFFF00 : 0xFFFF4444;
-                gfx.drawString(font, cost, x - font.width(cost) / 2, bottom - 10, costColor, true);
+                gfx.drawString(font, cost, x - font.width(cost) / 2, bottom - 10,
+                    hasPoints ? 0xFFFFFF00 : 0xFFFF4444, true);
             } else {
                 gfx.drawString(font, "§a\u2713", x - font.width("§a\u2713") / 2, bottom - 10, 0xFFFFFF, true);
             }
@@ -261,24 +218,21 @@ public class SkillTreeScreen extends Screen {
 
     private void drawUIOverlay(GuiGraphics gfx) {
         int cx = this.width / 2;
-
-        // Title bar
         gfx.fill(0, 0, this.width, 45, 0xCC000000);
 
-        String title = skillTree.getDisplayName() + " Skill Tree";
+        // FIX: .getString() on tree.getDisplayName()
+        String title = skillTree.getDisplayName().getString() + " Skill Tree";
         gfx.drawString(font, title, cx - font.width(title) / 2, 8, 0xFFFFFFFF, true);
 
-        String info = String.format("Level %d  |  Skill Points: %d",
-            originData.getOriginLevel(), skills.getSkillPoints());
+        String info = String.format("Level %d | Skill Points: %d", originData.getOriginLevel(), skills.getSkillPoints());
         gfx.drawString(font, info, cx - font.width(info) / 2, 22, 0xFF55FF55, true);
 
         String zoomStr = String.format("Zoom: %.0f%%", zoom * 100);
         gfx.drawString(font, zoomStr, this.width - 70, 35, 0xFFAAAAAA, true);
 
-        String instructions = "Drag to pan  |  Scroll to zoom  |  Click to unlock";
+        String instructions = "Drag to pan | Scroll to zoom | Click to unlock";
         gfx.drawString(font, instructions, cx - font.width(instructions) / 2, this.height - 40, 0xFF888888, true);
 
-        // Branch legend
         int lx = 10, ly = 55;
         gfx.drawString(font, "Branches:", lx, ly, 0xFFAAAAAA, true); ly += 11;
         drawLegendItem(gfx, lx, ly, 0xFFFF4444, "Offense");   ly += 9;
@@ -301,18 +255,18 @@ public class SkillTreeScreen extends Screen {
     private void drawTooltip(GuiGraphics gfx, SkillNode node, int mouseX, int mouseY) {
         boolean unlocked  = skills.hasSkill(node.getId());
         boolean excluded  = excludedSkills.contains(node.getId());
-        boolean canUnlock = node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills,
-                                           originData.getOriginLevel());
+        boolean canUnlock = node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills, originData.getOriginLevel());
         boolean hasPoints = skills.getSkillPoints() >= node.getPointCost();
 
         List<String> lines = new ArrayList<>();
-
         String prefix = unlocked ? "§a" : (excluded ? "§4§m" : (canUnlock ? "§e" : "§7"));
-        lines.add(prefix + "§l" + node.getDisplayName());
+
+        // FIX: .getString() on all node.getDisplayName() / node.getDescription() calls
+        lines.add(prefix + "§l" + node.getDisplayName().getString());
         lines.add("§5Tier " + node.getTier().getTier() + " §7| §"
             + branchColorCode(node.getBranch()) + node.getBranch().name());
         lines.add("");
-        lines.add("§f" + node.getDescription());
+        lines.add("§f" + node.getDescription().getString());
         lines.add("");
         lines.add("§6Requirements:");
 
@@ -326,7 +280,8 @@ public class SkillTreeScreen extends Screen {
             SkillNode prereq = skillTree.getSkill(prereqId);
             if (prereq != null) {
                 boolean met = skills.hasSkill(prereqId);
-                lines.add((met ? "§a" : "§c") + " Requires: " + prereq.getDisplayName()
+                // FIX: .getString() on prereq.getDisplayName()
+                lines.add((met ? "§a" : "§c") + " Requires: " + prereq.getDisplayName().getString()
                     + (met ? " \u2713" : " \u2717"));
             }
         }
@@ -336,7 +291,8 @@ public class SkillTreeScreen extends Screen {
             lines.add("§c§lWARNING: Locks out:");
             for (String exclId : node.getExclusions()) {
                 SkillNode excl = skillTree.getSkill(exclId);
-                if (excl != null) lines.add("§c \u2717 " + excl.getDisplayName());
+                // FIX: .getString() on excl.getDisplayName()
+                if (excl != null) lines.add("§c \u2717 " + excl.getDisplayName().getString());
             }
         }
 
@@ -351,11 +307,10 @@ public class SkillTreeScreen extends Screen {
         maxW = Math.min(maxW + 16, 280);
         int th = lines.size() * 10 + 8;
 
-        int tx = mouseX + 15;
-        int ty = mouseY - 10;
-        if (tx + maxW > this.width - 10)   tx = mouseX - maxW - 15;
-        if (ty + th   > this.height - 10)  ty = this.height - th - 10;
-        if (ty < 50)                       ty = 50;
+        int tx = mouseX + 15, ty = mouseY - 10;
+        if (tx + maxW > this.width  - 10) tx = mouseX - maxW - 15;
+        if (ty + th   > this.height - 10) ty = this.height - th - 10;
+        if (ty < 50) ty = 50;
 
         gfx.fill(tx - 4, ty - 4, tx + maxW + 4, ty + th + 4, 0xF0100010);
         gfx.fill(tx - 3, ty - 3, tx + maxW + 3, ty + th + 3, 0xFF5000AA);
@@ -368,38 +323,21 @@ public class SkillTreeScreen extends Screen {
         }
     }
 
-    // ---- Interaction ---------------------------------------------------
-
     private boolean wasMousePressed = false;
 
     @Override
     public void tick() {
         super.tick();
-
         long win = org.lwjgl.glfw.GLFW.glfwGetCurrentContext();
         boolean pressed = org.lwjgl.glfw.GLFW.glfwGetMouseButton(win,
             org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
-
         double mx = minecraft.mouseHandler.xpos() * width  / minecraft.getWindow().getWidth();
         double my = minecraft.mouseHandler.ypos() * height / minecraft.getWindow().getHeight();
-
         if (pressed && !wasMousePressed) {
-            if (hoveredNode != null) {
-                tryUnlock(hoveredNode);
-            } else {
-                isDragging = true;
-                lastMouseX = mx;
-                lastMouseY = my;
-            }
+            if (hoveredNode != null) tryUnlock(hoveredNode);
+            else { isDragging = true; lastMouseX = mx; lastMouseY = my; }
         }
-
-        if (pressed && isDragging) {
-            panX += (float)(mx - lastMouseX);
-            panY += (float)(my - lastMouseY);
-            lastMouseX = mx;
-            lastMouseY = my;
-        }
-
+        if (pressed && isDragging) { panX += (float)(mx - lastMouseX); panY += (float)(my - lastMouseY); lastMouseX = mx; lastMouseY = my; }
         if (!pressed) isDragging = false;
         wasMousePressed = pressed;
     }
@@ -415,61 +353,35 @@ public class SkillTreeScreen extends Screen {
     }
 
     private void tryUnlock(SkillNode node) {
-        boolean unlocked  = skills.hasSkill(node.getId());
-        boolean excluded  = excludedSkills.contains(node.getId());
-        boolean canUnlock = node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills,
-                                           originData.getOriginLevel());
-        boolean hasPoints = skills.getSkillPoints() >= node.getPointCost();
-
-        if (!unlocked && !excluded && canUnlock && hasPoints) {
+        if (!skills.hasSkill(node.getId()) && !excludedSkills.contains(node.getId())
+                && node.canUnlock(skills.getUnlockedSkillsSet(), excludedSkills, originData.getOriginLevel())
+                && skills.getSkillPoints() >= node.getPointCost()) {
             PacketDistributor.sendToServer(new UnlockSkillPacket(node.getId()));
-            // Optimistic client update
             skills.unlockSkill(node.getId());
             skills.spendSkillPoints(node.getPointCost());
             calculateExcludedSkills();
         }
     }
 
-    // ---- Helpers -------------------------------------------------------
-
     private int[] screenPos(int gridX, int gridY) {
-        return new int[]{
-            (int)(panX + gridX * GRID_SPACING * zoom),
-            (int)(panY + gridY * GRID_SPACING * zoom)
-        };
+        return new int[]{ (int)(panX + gridX * GRID_SPACING * zoom), (int)(panY + gridY * GRID_SPACING * zoom) };
     }
 
     private static int brighten(int color, int amt) {
-        int a = (color >> 24) & 0xFF;
-        int r = Math.min(255, ((color >> 16) & 0xFF) + amt);
-        int g = Math.min(255, ((color >>  8) & 0xFF) + amt);
-        int b = Math.min(255,  (color        & 0xFF) + amt);
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        int a=(color>>24)&0xFF, r=Math.min(255,((color>>16)&0xFF)+amt),
+            g=Math.min(255,((color>>8)&0xFF)+amt), b=Math.min(255,(color&0xFF)+amt);
+        return (a<<24)|(r<<16)|(g<<8)|b;
     }
 
     private static char branchColorCode(SkillNode.SkillBranch branch) {
         return switch (branch) {
-            case CORE        -> 'f';
-            case OFFENSE     -> 'c';
-            case DEFENSE     -> '9';
-            case UTILITY     -> 'a';
-            case ELEMENTAL_A -> '6';
-            case ELEMENTAL_B -> 'b';
-            case HYBRID      -> 'e';
-            case SPECIALIST  -> 'd';
-            case FORBIDDEN   -> '4';
-            case ASCENDED    -> 'e';
-            case SYNERGY_AD  -> '5';
-            case SYNERGY_AU  -> '2';
-            case SYNERGY_DU  -> '3';
+            case CORE -> 'f'; case OFFENSE -> 'c'; case DEFENSE -> '9'; case UTILITY -> 'a';
+            case ELEMENTAL_A -> '6'; case ELEMENTAL_B -> 'b'; case HYBRID -> 'e';
+            case SPECIALIST -> 'd'; case FORBIDDEN -> '4'; case ASCENDED -> 'e';
+            case SYNERGY_AD -> '5'; case SYNERGY_AU -> '2'; case SYNERGY_DU -> '3';
         };
     }
 
-    @Override
-    public void onClose() {
-        minecraft.setScreen(parent);
-    }
-
-    @Override
-    public boolean isPauseScreen() { return true; }
+    @Override public void onClose() { minecraft.setScreen(parent); }
+    @Override public boolean isPauseScreen() { return true; }
 }

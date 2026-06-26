@@ -1,29 +1,29 @@
 package com.gugas749.abyssorigins.api;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 public abstract class OriginPassive {
 
-    private final String id;
-    private final String displayName;
-    private final String description;
+    private final String    id;
+    private final Component displayName;
+    private final Component description;
 
-    public OriginPassive(String id, String displayName, String description) {
-        this.id = id;
-        this.displayName = displayName;
-        this.description = description;
+    /**
+     * @param nameKey  Lang key for the passive name
+     * @param descKey  Lang key for the passive description
+     */
+    public OriginPassive(String id, String nameKey, String descKey) {
+        this.id          = id;
+        this.displayName = Component.translatable(nameKey);
+        this.description = Component.translatable(descKey);
     }
 
-    public String getId()          { return id; }
-    public String getDisplayName() { return displayName; }
-    public String getDescription() { return description; }
+    public String    getId()          { return id; }
+    public Component getDisplayName() { return displayName; }
+    public Component getDescription() { return description; }
 
-    /** Called every server tick while the player has this origin. */
     public abstract void onTick(Player player);
-
-    /** Called when the origin is assigned to the player. */
-    public void onEquip(Player player) {}
-
-    /** Called when the origin is removed from the player. */
+    public void onEquip(Player player)  {}
     public void onRemove(Player player) {}
 }

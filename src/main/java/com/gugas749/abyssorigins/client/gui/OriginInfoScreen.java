@@ -136,7 +136,7 @@ public class OriginInfoScreen extends Screen {
 
         gfx.fill(ix, iy, ix + iw, iy + 1, COLOR_PANEL_BORDER); iy += 8;
 
-        for (String line : wrapText(playerOrigin.getDescription(), iw, 4)) {
+        for (String line : wrapText(playerOrigin.getDescription().getString(), iw, 4)) {
             gfx.drawString(font, line, ix, iy, COLOR_TEXT_DIM, false); iy += 10;
         }
         iy += 6;
@@ -220,7 +220,7 @@ public class OriginInfoScreen extends Screen {
         gfx.drawString(font, ability.getDisplayName(), kbx + font.width(kb) + 10, cy, COLOR_TEXT_BRIGHT, false);
         cy += 14;
 
-        String desc = ability.getDescription();
+        String desc = ability.getDescription().getString();
         if (desc.length() > 45) desc = desc.substring(0, 42) + "...";
         gfx.drawString(font, desc, cx, cy, COLOR_TEXT_DIM, false);
         cy += 14;

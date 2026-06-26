@@ -1,18 +1,15 @@
 package com.gugas749.abyssorigins.skilltree.data;
 
+import net.minecraft.network.chat.Component;
+
 import java.util.*;
 
-/**
- * A single unlockable node in a skill tree.
- * Fully replaces the previous SkillNode — drop-in replacement.
- */
 public class SkillNode {
 
     // ---- Enums ----------------------------------------------------------
 
     public enum SkillBranch {
-        CORE,
-        OFFENSE, DEFENSE, UTILITY,
+        CORE, OFFENSE, DEFENSE, UTILITY,
         ELEMENTAL_A, ELEMENTAL_B,
         HYBRID, SPECIALIST,
         FORBIDDEN, ASCENDED,
@@ -20,19 +17,12 @@ public class SkillNode {
     }
 
     public enum SkillTier {
-        TIER_1(1, 0),
-        TIER_2(2, 5),
-        TIER_3(3, 15),
-        TIER_4(4, 25),
-        TIER_5(5, 40);
+        TIER_1(1, 0), TIER_2(2, 5), TIER_3(3, 15), TIER_4(4, 25), TIER_5(5, 40);
 
         private final int tier;
         private final int levelRequired;
 
-        SkillTier(int tier, int levelRequired) {
-            this.tier = tier;
-            this.levelRequired = levelRequired;
-        }
+        SkillTier(int tier, int levelRequired) { this.tier = tier; this.levelRequired = levelRequired; }
 
         public int getTier()          { return tier; }
         public int getLevelRequired() { return levelRequired; }
@@ -40,18 +30,18 @@ public class SkillNode {
 
     // ---- Fields ---------------------------------------------------------
 
-    private final String id;
-    private final String displayName;
-    private final String description;
-    private final String icon;
-    private final SkillTier tier;
+    private final String    id;
+    private final Component displayName;
+    private final Component description;
+    private final String    icon;
+    private final SkillTier  tier;
     private final SkillBranch branch;
-    private final int pointCost;
-    private final int gridX;
-    private final int gridY;
+    private final int       pointCost;
+    private final int       gridX;
+    private final int       gridY;
     private final List<String> prerequisites;
     private final List<String> exclusions;
-    private final String effectId;
+    private final String    effectId;
 
     private SkillNode(Builder b) {
         this.id           = b.id;
@@ -70,32 +60,28 @@ public class SkillNode {
 
     // ---- Accessors ------------------------------------------------------
 
-    public String getId()              { return id; }
-    public String getDisplayName()     { return displayName; }
-    public String getDescription()     { return description; }
-    public String getIcon()            { return icon; }
-    public SkillTier getTier()         { return tier; }
-    public SkillBranch getBranch()     { return branch; }
-    public int getPointCost()          { return pointCost; }
-    public int getGridX()              { return gridX; }
-    public int getGridY()              { return gridY; }
-    /** Alias for GUI compat */
-    public int getGridCol()            { return gridX; }
-    /** Alias for GUI compat */
-    public int getGridRow()            { return gridY; }
-    public List<String> getPrereqs()   { return prerequisites; }
+    public String    getId()            { return id; }
+    public Component getDisplayName()   { return displayName; }
+    public Component getDescription()   { return description; }
+    public String    getIcon()          { return icon; }
+    public SkillTier  getTier()          { return tier; }
+    public SkillBranch getBranch()       { return branch; }
+    public int       getPointCost()     { return pointCost; }
+    public int       getGridX()         { return gridX; }
+    public int       getGridY()         { return gridY; }
+    public int       getGridCol()       { return gridX; }
+    public int       getGridRow()       { return gridY; }
+    public List<String> getPrereqs()    { return prerequisites; }
     public List<String> getPrerequisites() { return prerequisites; }
-    public List<String> getExclusions(){ return exclusions; }
-    public String getEffectId()        { return effectId; }
+    public List<String> getExclusions() { return exclusions; }
+    public String    getEffectId()      { return effectId; }
 
     // ---- Logic ----------------------------------------------------------
 
-    public boolean canUnlock(Set<String> unlockedSkills, Set<String> excludedSkills, int playerLevel) {
+    public boolean canUnlock(Set<String> unlocked, Set<String> excluded, int playerLevel) {
         if (playerLevel < tier.getLevelRequired()) return false;
-        if (excludedSkills.contains(id)) return false;
-        for (String prereq : prerequisites) {
-            if (!unlockedSkills.contains(prereq)) return false;
-        }
+        if (excluded.contains(id)) return false;
+        for (String req : prerequisites) if (!unlocked.contains(req)) return false;
         return true;
     }
 
@@ -133,28 +119,35 @@ public class SkillNode {
 
     public static class Builder {
         private final String id;
-        private String displayName   = "Unnamed Skill";
-        private String description   = "";
-        private String icon          = "\u2605"; // ★
-        private SkillTier tier       = SkillTier.TIER_1;
-        private SkillBranch branch   = SkillBranch.CORE;
-        private int pointCost        = 1;
-        private int gridX            = 0;
-        private int gridY            = 0;
+        private Component displayName   = Component.literal("Unnamed");
+        private Component description   = Component.literal("");
+        private String    icon          = "\u2605";
+        private SkillTier  tier          = SkillTier.TIER_1;
+        private SkillBranch branch       = SkillBranch.CORE;
+        private int       pointCost     = 1;
+        private int       gridX         = 0;
+        private int       gridY         = 0;
         private final List<String> prerequisites = new ArrayList<>();
         private final List<String> exclusions    = new ArrayList<>();
-        private String effectId      = "";
+        private String    effectId      = "";
 
         public Builder(String id)                          { this.id = id; }
-        public Builder name(String n)                      { this.displayName = n;   return this; }
-        public Builder desc(String d)                      { this.description = d;   return this; }
+
+        /** Pass a lang key — will be wrapped in Component.translatable(). */
+        public Builder name(String langKey)                { this.displayName = Component.translatable(langKey); return this; }
+        /** Pass a lang key — will be wrapped in Component.translatable(). */
+        public Builder desc(String langKey)                { this.description = Component.translatable(langKey); return this; }
+        /** Pass a Component directly (e.g. Component.literal for hardcoded text). */
+        public Builder nameComponent(Component c)          { this.displayName = c; return this; }
+        public Builder descComponent(Component c)          { this.description = c; return this; }
+
         public Builder icon(String i)                      { this.icon = i;          return this; }
         public Builder tier(SkillTier t)                   { this.tier = t;          return this; }
         public Builder branch(SkillBranch b)               { this.branch = b;        return this; }
         public Builder cost(int c)                         { this.pointCost = c;     return this; }
         public Builder pos(int x, int y)                   { this.gridX = x; this.gridY = y; return this; }
         public Builder requires(String... ids)             { prerequisites.addAll(Arrays.asList(ids)); return this; }
-        public Builder excludes(String... ids)             { exclusions.addAll(Arrays.asList(ids)); return this; }
+        public Builder excludes(String... ids)             { exclusions.addAll(Arrays.asList(ids));    return this; }
         public Builder effect(String e)                    { this.effectId = e;      return this; }
         public SkillNode build()                           { return new SkillNode(this); }
     }
