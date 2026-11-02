@@ -15,6 +15,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+/**
+ * A vampire's food. It is a genuine food item (nutrition, always edible) so that
+ * auto-feeding mods — e.g. Sophisticated Backpacks' Feeding Upgrade — recognise it.
+ * For vampires the hunger bar mirrors their blood (see VampireHungerPassive), so a
+ * feeder sees the deficit and feeds hearts; the heart then restores 40 blood.
+ */
 public class HumanHeartItem extends Item {
 
     private static final float BLOOD_RESTORE = 40f;
@@ -23,8 +29,9 @@ public class HumanHeartItem extends Item {
         super(new Properties()
             .stacksTo(16)
             .food(new FoodProperties.Builder()
-                .nutrition(0)
-                .saturationModifier(0f)
+                .nutrition(6)
+                .saturationModifier(0.3f)
+                .alwaysEdible()
                 .build())
         );
     }

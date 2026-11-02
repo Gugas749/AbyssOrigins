@@ -1,0 +1,292 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.abyssorigins.armor_icon.vanguard_chestplate",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 2,
+    "visible_bounds_height": 2,
+    "visible_bounds_offset": [
+     0,
+     1,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "armorBody",
+     "pivot": [
+      0.0,
+      5.75,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.0,
+        -6.25,
+        -1.6
+       ],
+       "size": [
+        8,
+        12,
+        4
+       ],
+       "uv": [
+        16,
+        16
+       ],
+       "inflate": 1.0
+      }
+     ]
+    },
+    {
+     "name": "armorRightArm",
+     "pivot": [
+      -5.0,
+      3.75,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -8.0,
+        -6.25,
+        -1.6
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        40,
+        16
+       ],
+       "inflate": 1.0
+      }
+     ]
+    },
+    {
+     "name": "armorLeftArm",
+     "pivot": [
+      5.0,
+      3.75,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        4.0,
+        -6.25,
+        -1.6
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        40,
+        16
+       ],
+       "inflate": 1.0,
+       "mirror": true
+      }
+     ]
+    },
+    {
+     "name": "chest_x4",
+     "parent": "armorRightArm",
+     "pivot": [
+      -7.0,
+      5.75,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -9.5,
+        4.25,
+        -2.6
+       ],
+       "size": [
+        5,
+        3,
+        6
+       ],
+       "uv": [
+        64,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_x5",
+     "parent": "armorRightArm",
+     "pivot": [
+      -9.2,
+      4.75,
+      0.2
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -9.7,
+        4.25,
+        -2.8
+       ],
+       "size": [
+        1,
+        1,
+        6
+       ],
+       "uv": [
+        86,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_x6",
+     "parent": "armorLeftArm",
+     "pivot": [
+      7.0,
+      5.75,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        4.5,
+        4.25,
+        -2.6
+       ],
+       "size": [
+        5,
+        3,
+        6
+       ],
+       "uv": [
+        100,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_x7",
+     "parent": "armorLeftArm",
+     "pivot": [
+      9.2,
+      4.75,
+      0.2
+     ],
+     "cubes": [
+      {
+       "origin": [
+        8.7,
+        4.25,
+        -2.8
+       ],
+       "size": [
+        1,
+        1,
+        6
+       ],
+       "uv": [
+        64,
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_x8",
+     "parent": "armorBody",
+     "pivot": [
+      0.0,
+      6.25,
+      0.4
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        5.25,
+        -2.6
+       ],
+       "size": [
+        9,
+        2,
+        6
+       ],
+       "uv": [
+        78,
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_x9",
+     "parent": "armorBody",
+     "pivot": [
+      0.0,
+      1.75,
+      -2.5
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -2.0,
+        -0.25,
+        -3.0
+       ],
+       "size": [
+        4,
+        4,
+        1
+       ],
+       "uv": [
+        108,
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "name": "chest_chest_gem",
+     "parent": "armorBody",
+     "pivot": [
+      0.0,
+      1.75,
+      -2.9
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -1.0,
+        0.75,
+        -3.4
+       ],
+       "size": [
+        2,
+        2,
+        1
+       ],
+       "uv": [
+        118,
+        22
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

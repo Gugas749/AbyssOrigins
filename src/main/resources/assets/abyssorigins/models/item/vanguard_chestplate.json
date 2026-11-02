@@ -1,0 +1,145 @@
+{
+ "parent": "builtin/entity",
+ "gui_light": "front",
+ "textures": {
+  "particle": "abyssorigins:item/vanguard_chestplate"
+ },
+ "display": {
+  "gui": {
+   "rotation": [
+    22,
+    205,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.773,
+    0.773,
+    0.773
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.734,
+    0.734,
+    0.734
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.387,
+    0.387,
+    0.387
+   ]
+  },
+  "thirdperson_righthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.309,
+    0.309,
+    0.309
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.309,
+    0.309,
+    0.309
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.348,
+    0.348,
+    0.348
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.348,
+    0.348,
+    0.348
+   ]
+  },
+  "head": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.618,
+    0.618,
+    0.618
+   ]
+  }
+ }
+}

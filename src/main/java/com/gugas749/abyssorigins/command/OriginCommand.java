@@ -7,6 +7,8 @@ import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.event.XpEventHandler;
 import com.gugas749.abyssorigins.network.ModPackets;
+import com.gugas749.abyssorigins.power.Assignments;
+import com.gugas749.abyssorigins.skilltree.SkillService;
 import com.gugas749.abyssorigins.skilltree.data.PlayerSkillData;
 import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
 import com.mojang.brigadier.CommandDispatcher;
@@ -40,7 +42,8 @@ public class OriginCommand {
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("origin", StringArgumentType.string())
                             .suggests((ctx, builder) -> {
-                                AbyssOriginsAPI.getAllOrigins().forEach(o -> builder.suggest(o.getId().getPath()));
+                                AbyssOriginsAPI.getAllOrigins().stream().filter(o -> !o.isHidden())
+                                    .forEach(o -> builder.suggest(o.getId().getPath()));
                                 return builder.buildFuture();
                             })
                             .executes(OriginCommand::setOrigin))))
@@ -64,8 +67,15 @@ public class OriginCommand {
                     .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                             .executes(OriginCommand::addSkillPoints))))
+                .then(Commands.literal("respec")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .executes(OriginCommand::respec)))
                 // ---- Specialization subcommand ----
                 .then(SpecializationCommand.build())
+                // ---- Abilities: grant / revoke access (hidden Eminence powers included) ----
+                .then(AbilityCommand.build())
+                // ---- Staff profile GUI (AbyssCore ADMIN) ----
+                .then(ProfileCommand.build())
         );
     }
 
@@ -78,10 +88,7 @@ public class OriginCommand {
                 : ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, originArg);
             Origin origin = AbyssOriginsAPI.getOrigin(id);
             if (origin == null) { ctx.getSource().sendFailure(Component.literal("Unknown origin: " + originArg)); return 0; }
-            AbyssOriginsAPI.setPlayerOrigin(player, origin);
-            player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(origin.getId());
-            XpEventHandler.grantStartingPoints(player);
-            ModPackets.syncAll(player);
+            Assignments.setOrigin(player, origin);
             ctx.getSource().sendSuccess(() -> Component.literal("Set " + player.getName().getString() + "'s origin to " + origin.getDisplayName().getString()).withStyle(ChatFormatting.GREEN), true);
             player.sendSystemMessage(Component.translatable("abyssorigins.message.origin_set", origin.getDisplayName()));
             return 1;
@@ -91,9 +98,7 @@ public class OriginCommand {
     private static int resetOrigin(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-            AbyssOriginsAPI.setPlayerOrigin(player, null);
-            player.getData(OriginAttachments.PLAYER_ORIGIN.get()).setOriginId(null);
-            ModPackets.syncAll(player);
+            Assignments.setOrigin(player, null);
             ctx.getSource().sendSuccess(() -> Component.literal("Cleared " + player.getName().getString() + "'s origin.").withStyle(ChatFormatting.YELLOW), true);
             player.sendSystemMessage(Component.translatable("abyssorigins.message.origin_cleared"));
             return 1;
@@ -118,7 +123,7 @@ public class OriginCommand {
 
     private static int listOrigins(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSuccess(() -> Component.literal("=== Available Origins ===").withStyle(ChatFormatting.GOLD), false);
-        AbyssOriginsAPI.getAllOrigins().forEach(o -> ctx.getSource().sendSuccess(() ->
+        AbyssOriginsAPI.getAllOrigins().stream().filter(o -> !o.isHidden()).forEach(o -> ctx.getSource().sendSuccess(() ->
             Component.literal("  - " + o.getDisplayName().getString() + " \u00a77(" + o.getId().getPath() + ") [" + o.getImpactLevel() + "]").withStyle(ChatFormatting.YELLOW), false));
         return 1;
     }
@@ -127,10 +132,7 @@ public class OriginCommand {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
             int level = IntegerArgumentType.getInteger(ctx, "level");
-            PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
-            data.setOriginLevel(level);
-            data.setOriginXp(XpEventHandler.xpRequiredToReach(level));
-            ModPackets.syncPlayer(player);
+            XpEventHandler.setOriginLevel(player, level);
             ctx.getSource().sendSuccess(() -> Component.literal("Set " + player.getName().getString() + "'s level to " + level), true);
             return 1;
         } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
@@ -143,6 +145,16 @@ public class OriginCommand {
             XpEventHandler.grantXp(player, amount);
             PlayerOriginData data = player.getData(OriginAttachments.PLAYER_ORIGIN.get());
             ctx.getSource().sendSuccess(() -> Component.literal("Added " + amount + " XP to " + player.getName().getString() + " (now level " + data.getOriginLevel() + ")"), true);
+            return 1;
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
+    }
+
+    private static int respec(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+            int refunded = SkillService.respecOrigin(player);
+            player.sendSystemMessage(Component.translatable("abyssorigins.message.respec", String.valueOf(refunded)));
+            ctx.getSource().sendSuccess(() -> Component.literal("Refunded " + refunded + " origin SP to " + player.getName().getString()), true);
             return 1;
         } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }

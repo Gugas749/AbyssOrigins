@@ -19,10 +19,9 @@ import java.util.List;
 public record SyncSpecializationPacket(
     String specId,            // empty = none
     int    specLevel,
+    int    specXp,
     int    skillPoints,
-    List<String> unlockedSkills,
-    int    abilityCooldown,
-    int    abilityMaxCooldown
+    List<String> unlockedSkills
 ) implements CustomPacketPayload {
 
     public static final Type<SyncSpecializationPacket> TYPE =
@@ -32,21 +31,21 @@ public record SyncSpecializationPacket(
         StreamCodec.of(
             (buf, p) -> {
                 buf.writeUtf(p.specId);
-                buf.writeInt(p.specLevel);
-                buf.writeInt(p.skillPoints);
-                buf.writeInt(p.unlockedSkills.size());
+                buf.writeVarInt(p.specLevel);
+                buf.writeVarInt(p.specXp);
+                buf.writeVarInt(p.skillPoints);
+                buf.writeVarInt(p.unlockedSkills.size());
                 p.unlockedSkills.forEach(buf::writeUtf);
-                buf.writeInt(p.abilityCooldown);
-                buf.writeInt(p.abilityMaxCooldown);
             },
             buf -> {
                 String id  = buf.readUtf();
-                int lvl    = buf.readInt();
-                int pts    = buf.readInt();
-                int n      = buf.readInt();
+                int lvl    = buf.readVarInt();
+                int xp     = buf.readVarInt();
+                int pts    = buf.readVarInt();
+                int n      = buf.readVarInt();
                 List<String> skills = new ArrayList<>(n);
                 for (int i = 0; i < n; i++) skills.add(buf.readUtf());
-                return new SyncSpecializationPacket(id, lvl, pts, skills, buf.readInt(), buf.readInt());
+                return new SyncSpecializationPacket(id, lvl, xp, pts, skills);
             }
         );
 
@@ -66,17 +65,18 @@ public record SyncSpecializationPacket(
                 mc.player.getData(SpecializationAttachments.PLAYER_SPEC.get());
 
             data.setSpecLevel(pkt.specLevel);
-            data.addSkillPoints(pkt.skillPoints - data.getSkillPoints());
-            data.setAbilityCooldown(pkt.abilityCooldown);
+            data.setSpecXp(pkt.specXp);
+            data.setSkillPoints(pkt.skillPoints);
+
+            // REPLACE the unlocked set — the old handler only ever added, so respecs never showed.
+            data.clearSkills();
+            pkt.unlockedSkills.forEach(data::unlockSkill);
 
             if (!pkt.specId.isEmpty()) {
                 ResourceLocation id = ResourceLocation.parse(pkt.specId);
                 data.setSpecId(id);
-                // Rebuild unlocked skills
-                pkt.unlockedSkills.forEach(data::unlockSkill);
                 var spec = SpecializationRegistry.get(id).orElse(null);
-                ClientSpecializationData.update(spec, pkt.specLevel, pkt.skillPoints,
-                    pkt.unlockedSkills, pkt.abilityCooldown, pkt.abilityMaxCooldown);
+                ClientSpecializationData.update(spec, pkt.specLevel, pkt.specXp, pkt.skillPoints, pkt.unlockedSkills);
             } else {
                 data.setSpecId(null);
                 ClientSpecializationData.clear();

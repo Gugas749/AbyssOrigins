@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "A A",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:phantom_membrane"
+    },
+    "A": {
+      "item": "minecraft:ink_sac"
+    }
+  },
+  "result": {
+    "id": "abyssorigins:duskweave_boots",
+    "count": 1
+  }
+}

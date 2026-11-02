@@ -1,51 +1,47 @@
 package com.gugas749.abyssorigins.client.gui;
 
 import com.gugas749.abyssorigins.Abyssorigins;
-import com.gugas749.abyssorigins.api.ImpactLevel;
-import com.gugas749.abyssorigins.api.Origin;
-import com.gugas749.abyssorigins.api.OriginAbility;
-import com.gugas749.abyssorigins.api.OriginPassive;
+import com.gugas749.abyssorigins.api.*;
+import com.gugas749.abyssorigins.client.ClientAbilityData;
 import com.gugas749.abyssorigins.client.ClientOriginData;
+import com.gugas749.abyssorigins.client.ClientSpecializationData;
+import com.gugas749.abyssorigins.client.ClientTimers;
 import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
-import com.gugas749.abyssorigins.network.packet.ActivateAbilityPacket;
-import net.minecraft.client.Minecraft;
+import com.gugas749.abyssorigins.client.input.KeyBindings;
+import com.gugas749.abyssorigins.event.XpEventHandler;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
+
 /**
- * Comprehensive Origin & Ability Dashboard.
- * Ported from VeilOrigins' AbilityBarScreen, adapted for AbyssOrigins API.
+ * The Codex — origin & class dashboard.
+ * Left: who you are (origin, traits, resource). Middle: what you can do (abilities,
+ * passives). Right: your class, its resonance with your origin, and progression.
  */
 public class OriginInfoScreen extends Screen {
 
-    private static final int PANEL_PADDING = 12;
-    private static final int SECTION_GAP   = 8;
+    private Origin origin;
+    private Specialization spec;
+    private long openedAt;
 
-    private static final int COLOR_BG           = 0xEE0a0a12;
-    private static final int COLOR_PANEL        = 0xDD12121f;
-    private static final int COLOR_PANEL_BORDER = 0xFF2a2a45;
-    private static final int COLOR_PANEL_HEADER = 0xFF1a1a2a;
-    private static final int COLOR_TEXT         = 0xFFe8e8f0;
-    private static final int COLOR_TEXT_DIM     = 0xFF888899;
-    private static final int COLOR_TEXT_BRIGHT  = 0xFFFFFFFF;
-    private static final int COLOR_POSITIVE     = 0xFF55dd55;
-    private static final int COLOR_NEGATIVE     = 0xFFdd5555;
-    private static final int COLOR_WARNING      = 0xFFddaa55;
-    private static final int COLOR_XP           = 0xFF55ddaa;
-    private static final int COLOR_COOLDOWN     = 0xFFff6666;
-    private static final int COLOR_READY        = 0xFF66ff66;
-
-    private Origin          playerOrigin;
-    private List<OriginAbility> abilities;
-    private List<OriginPassive> passives;
-    private int hoveredAbility = -1;
-    private float animProgress = 0;
-    private int originColor;
-    private String resourceName;
+    private record Card(Ability ability, SlotGroup group, int slot, int x, int y, int w, int h) {}
+    private final List<Card> cards = new ArrayList<>();
+    private int[] treeButton = new int[4];
+    private int[] abilitiesButton = new int[4];
+    private List<FormattedCharSequence> tooltip = null;
 
     public OriginInfoScreen() {
         super(Component.translatable("gui.abyssorigins.origin_info"));
@@ -54,402 +50,307 @@ public class OriginInfoScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) { onClose(); return; }
-
-        playerOrigin = ClientOriginData.getOrigin();
-        if (playerOrigin == null) {
-            // Fallback to API cache
-            playerOrigin = com.gugas749.abyssorigins.api.AbyssOriginsAPI.getPlayerOrigin(mc.player);
-        }
-        if (playerOrigin == null) { onClose(); return; }
-
-        abilities    = playerOrigin.getAbilities();
-        passives     = playerOrigin.getPassives();
-        originColor  = getOriginThemeColor();
-        resourceName = getResourceName();
-        animProgress = 0;
+        if (minecraft == null || minecraft.player == null) { onClose(); return; }
+        origin = ClientOriginData.getOrigin();
+        if (origin == null) origin = AbyssOriginsAPI.getPlayerOrigin(minecraft.player);
+        if (origin == null) { onClose(); return; }
+        spec = ClientSpecializationData.getSpec();
+        openedAt = System.currentTimeMillis();
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        if (animProgress < 1.0f) animProgress = Math.min(1.0f, animProgress + 0.08f);
-    }
+    public void renderBackground(@NotNull GuiGraphics g, int mx, int my, float pt) {}
 
     @Override
-    public void renderBackground(GuiGraphics gfx, int mx, int my, float pt) {
-        // custom — no blur
+    public void render(@NotNull GuiGraphics g, int mx, int my, float pt) {
+        if (origin == null) return;
+        cards.clear();
+        tooltip = null;
+        long now = System.currentTimeMillis();
+        float fade = easeOut((now - openedAt) / 350f);
+        int accent = origin.getThemeColor();
+
+        backdrop(g, width, height, accent, fade);
+
+        // Title
+        centered(g, font, Component.translatable("gui.abyssorigins.codex").withStyle(ChatFormatting.ITALIC), width / 2, 6, alpha(TEXT_FAINT, fade));
+        MutableComponent title = origin.getDisplayName().copy();
+        if (spec != null) title.append(Component.literal("  ◆  ").withColor(TEXT_FAINT & 0xFFFFFF)).append(spec.getDisplayName());
+        float ts = 1.35f;
+        scaledText(g, font, title, width / 2f - font.width(title) * ts / 2f, 17, ts, alpha(lighten(accent, 0.3f), fade), true);
+
+        int cw = Math.min(width - 20, 780), x0 = (width - cw) / 2, top = 36, bottom = height - 16;
+        int gap = 8;
+        int w1 = (int) (cw * 0.32f), w2 = (int) (cw * 0.37f), w3 = cw - w1 - w2 - gap * 2;
+        int h = bottom - top;
+
+        column(g, 0, now, fade, x0, top, w1, h, accent, () -> drawOrigin(g, x0, top, w1, h, fade));
+        column(g, 1, now, fade, x0 + w1 + gap, top, w2, h, accent, () -> drawPowers(g, x0 + w1 + gap, top, w2, h, mx, my, fade));
+        int c3 = x0 + w1 + w2 + gap * 2;
+        column(g, 2, now, fade, c3, top, w3, h, spec != null ? spec.getThemeColor() : accent, () -> drawClass(g, c3, top, w3, h, mx, my, fade));
+
+        centered(g, font, Component.translatable("gui.abyssorigins.codex.hint"), width / 2, height - 11, alpha(TEXT_FAINT, fade));
+        super.render(g, mx, my, pt);
+        if (tooltip != null) g.renderTooltip(font, tooltip, mx, my);
     }
 
-    @Override
-    public void render(GuiGraphics gfx, int mouseX, int mouseY, float pt) {
-        if (playerOrigin == null) return;
-
-        gfx.fill(0, 0, width, height, COLOR_BG);
-
-        int contentWidth = Math.min(width - 40, 900);
-        int contentX     = (width - contentWidth) / 2;
-        int contentY     = 25 + (int)((1f - animProgress) * 30);
-
-        int leftW  = (int)(contentWidth * 0.35f) - SECTION_GAP;
-        int leftX  = contentX;
-        int centW  = (int)(contentWidth * 0.40f) - SECTION_GAP;
-        int centX  = leftX + leftW + SECTION_GAP;
-        int rightW = contentWidth - leftW - centW - SECTION_GAP * 2;
-        int rightX = centX + centW + SECTION_GAP;
-
-        hoveredAbility = -1;
-
-        renderOriginPanel    (gfx, leftX,  contentY,       leftW);
-        renderStatsPanel     (gfx, leftX,  contentY + 195, leftW);
-        renderAbilitiesPanel (gfx, centX,  contentY,       centW, mouseX, mouseY);
-        renderPassivesPanel  (gfx, rightX, contentY,       rightW);
-        renderProgressionPanel(gfx, rightX, contentY + 180, rightW);
-        renderTitleBar       (gfx);
-        renderInstructions   (gfx);
-
-        super.render(gfx, mouseX, mouseY, pt);
+    /** Staggered fade/slide-in per column, clipped to its panel. */
+    private void column(GuiGraphics g, int index, long now, float fade, int x, int y, int w, int h, int accent, Runnable body) {
+        float f = easeOut((now - openedAt - index * 90L) / 380f) * fade;
+        if (f <= 0.01f) return;
+        int dy = (int) ((1 - f) * 12);
+        g.pose().pushPose();
+        g.pose().translate(0, dy, 0);
+        panel(g, x, y, w, h, accent, f);
+        g.enableScissor(x + 1, y + 1 + dy, x + w - 1, y + h - 1 + dy);
+        body.run();
+        g.disableScissor();
+        g.pose().popPose();
     }
 
-    // ---- Panels -------------------------------------------------------
+    // ---- Left: origin --------------------------------------------------------
 
-    private void renderTitleBar(GuiGraphics gfx) {
-        gfx.fill(0, 0, width, 22, 0xDD000008);
-        gfx.fill(0, 21, width, 22, originColor);
-        String title = "\u2694 " + playerOrigin.getDisplayName().getString() + " Dashboard";
-        gfx.drawString(font, title, (width - font.width(title)) / 2, 7, COLOR_TEXT_BRIGHT, true);
-        gfx.drawString(font, "[ESC] Close", 10, 7, COLOR_TEXT_DIM, false);
-    }
+    private void drawOrigin(GuiGraphics g, int x, int y, int w, int h, float fade) {
+        int accent = origin.getThemeColor();
+        int cx = x + w / 2, iy = y + 10;
 
-    private void renderOriginPanel(GuiGraphics gfx, int x, int y, int w) {
-        drawPanel(gfx, x, y, w, 185, "ORIGIN INFO");
-        int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
+        glow(g, cx, iy + 18, 34, accent, (0.5f + 0.2f * pulse(3f)) * fade);
+        diamondRing(g, cx, iy + 18, 17, 1.6f, alpha(accent, fade), alpha(0xFF0B0816, fade));
+        scaledText(g, font, Component.literal(origin.getSigil()), cx - font.width(origin.getSigil()) * 0.8f, iy + 12, 1.6f, alpha(accent, fade), true);
+        iy += 42;
 
-        gfx.fill(ix, iy, ix + 4, iy + 16, originColor);
-        gfx.drawString(font, playerOrigin.getDisplayName().getString(), ix + 10, iy + 4, COLOR_TEXT_BRIGHT, true);
-        iy += 22;
-
-        gfx.drawString(font, "Impact: " + getImpactStars(playerOrigin.getImpactLevel()),
-            ix, iy, getImpactColor(playerOrigin.getImpactLevel()), false);
+        float ns = 1.3f;
+        scaledText(g, font, origin.getDisplayName(), cx - font.width(origin.getDisplayName()) * ns / 2, iy, ns, alpha(TEXT, fade), true);
         iy += 14;
+        int impact = origin.getImpactLevel().ordinal();
+        int ic = impact == 0 ? GOOD : impact == 1 ? GOLD : BAD;
+        for (int i = 0; i < 3; i++) diamond(g, cx - 10 + i * 10, iy + 3, 3, alpha(i <= impact ? ic : EDGE, fade));
+        iy += 12;
 
-        gfx.fill(ix, iy, ix + iw, iy + 1, COLOR_PANEL_BORDER); iy += 8;
+        iy = wrapped(g, font, origin.getDescription(), x + 8, iy, w - 16, alpha(TEXT_DIM, fade), 6) + 6;
 
-        for (String line : wrapText(playerOrigin.getDescription().getString(), iw, 4)) {
-            gfx.drawString(font, line, ix, iy, COLOR_TEXT_DIM, false); iy += 10;
-        }
-        iy += 6;
-
-        gfx.fill(ix, iy, ix + iw, iy + 1, COLOR_PANEL_BORDER); iy += 8;
-        gfx.drawString(font, resourceName, ix, iy, originColor, false); iy += 12;
-
-        float resource = ClientOriginData.getResourceBar();
-        drawResourceBar(gfx, ix, iy, iw, 12, resource, originColor); iy += 18;
-
-        String rt = String.format("%.0f / 100", resource);
-        gfx.drawString(font, rt, ix + (iw - font.width(rt)) / 2, iy, COLOR_TEXT, false);
-    }
-
-    private void renderStatsPanel(GuiGraphics gfx, int x, int y, int w) {
-        int h = Math.min(height - y - 50, 150);
-        drawPanel(gfx, x, y, w, h, "MODIFIERS");
-        int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
-
-        renderStatRow(gfx, ix, iy, iw, "\u2665 Health", playerOrigin.getHealthModifier()); iy += 18;
-        renderStatRow(gfx, ix, iy, iw, "\u26A1 Speed",  playerOrigin.getSpeedModifier());  iy += 18;
-        renderStatRow(gfx, ix, iy, iw, "\u2694 Damage", playerOrigin.getDamageModifier()); iy += 22;
-
-        gfx.fill(ix, iy, ix + iw, iy + 1, COLOR_PANEL_BORDER); iy += 8;
-        gfx.drawString(font, "Abilities: " + abilities.size(), ix, iy, COLOR_TEXT_DIM, false); iy += 12;
-        gfx.drawString(font, "Passives:  " + passives.size(),  ix, iy, COLOR_TEXT_DIM, false);
-    }
-
-    private void renderStatRow(GuiGraphics gfx, int x, int y, int w, String label, float value) {
-        gfx.drawString(font, label, x, y, COLOR_TEXT, false);
-        String vs; int vc;
-        if      (value > 1f) { vs = String.format("+%.0f%%", (value-1)*100); vc = COLOR_POSITIVE; }
-        else if (value < 1f) { vs = String.format("%.0f%%",  (value-1)*100); vc = COLOR_NEGATIVE; }
-        else                 { vs = "\u00b10%";                               vc = COLOR_TEXT_DIM; }
-        gfx.drawString(font, vs, x + w - font.width(vs), y, vc, false);
-    }
-
-    private void renderAbilitiesPanel(GuiGraphics gfx, int x, int y, int w, int mouseX, int mouseY) {
-        int h = height - y - 50;
-        drawPanel(gfx, x, y, w, h, "ABILITIES (" + abilities.size() + ")");
-        int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
-
-        if (abilities.isEmpty()) {
-            gfx.drawString(font, "No abilities available", ix, iy, COLOR_TEXT_DIM, false);
-            return;
+        if (!origin.getTraits().isEmpty()) {
+            iy += header(g, font, x + 8, iy, w - 16, Component.translatable("gui.abyssorigins.traits"), accent, fade);
+            for (Origin.Trait t : origin.getTraits()) {
+                g.drawString(font, t.positive() ? "+" : "−", x + 9, iy, alpha(t.positive() ? GOOD : BAD, fade), false);
+                iy = wrapped(g, font, t.text(), x + 18, iy, w - 26, alpha(t.positive() ? TEXT : mix(TEXT, BAD, 0.35f), fade), 3) + 2;
+            }
+            iy += 4;
         }
 
-        int slotH = 58, slotGap = 6;
-        for (int i = 0; i < abilities.size(); i++) {
-            int sy = iy + i * (slotH + slotGap);
-            if (sy + slotH > y + h - 10) break;
-            boolean hovered = mouseX >= ix && mouseX <= ix + iw && mouseY >= sy && mouseY <= sy + slotH;
-            if (hovered) hoveredAbility = i;
-            renderAbilitySlot(gfx, abilities.get(i), i, ix, sy, iw, slotH, hovered);
+        ResourceType rt = origin.getResourceType();
+        if (rt != null && iy < y + h - 30) {
+            iy += header(g, font, x + 8, iy, w - 16, rt.getDisplayName(), rt.getBarColor(), fade);
+            float v = ClientOriginData.getResourceBar();
+            bar(g, x + 9, iy + 2, w - 18, 6, v / 100f, rt.getBarColor(), true);
+            String num = Math.round(v) + " / " + rt.getMaxAmount();
+            g.drawString(font, num, x + w - 9 - font.width(num), iy + 11, alpha(TEXT_DIM, fade), false);
         }
     }
 
-    private void renderAbilitySlot(GuiGraphics gfx, OriginAbility ability, int index, int x, int y, int w, int h, boolean hovered) {
-        int cd    = ClientOriginData.getAbilityCooldown(index);
-        int maxCd = ClientOriginData.getAbilityMaxCooldown(index);
-        boolean onCd = cd > 0;
+    // ---- Middle: abilities + passives ------------------------------------------
 
-        gfx.fill(x, y, x + w, y + h, hovered ? 0xFF1f1f35 : 0xFF15152a);
-        gfx.fill(x, y, x + 3, y + h, onCd ? COLOR_COOLDOWN : COLOR_READY);
-        drawBorder(gfx, x, y, w, h, hovered ? originColor : COLOR_PANEL_BORDER, 1);
+    private void drawPowers(GuiGraphics g, int x, int y, int w, int h, int mx, int my, float fade) {
+        int iy = y + 8;
+        int hy = iy;
+        iy += header(g, font, x + 8, iy, w - 16, Component.translatable("gui.abyssorigins.abilities"), origin.getThemeColor(), fade) + 2;
 
-        if (onCd && maxCd > 0) {
-            int ow = (int)(w * ((float)cd / maxCd));
-            gfx.fill(x + w - ow, y + 1, x + w - 1, y + h - 1, 0x44000000);
+        // "Manage" link to the Abilities tab, on the header line
+        Component manage = Component.translatable("gui.abyssorigins.manage_abilities", KeyBindings.ABILITIES.getTranslatedKeyMessage().getString());
+        int lw = font.width(manage) + 6, lx = x + w - 8 - lw;
+        boolean lh = inside(mx, my, lx, hy - 2, lw, 12);
+        g.fill(lx, hy - 2, lx + lw, hy + 10, alpha(lh ? withAlpha(origin.getThemeColor(), 70) : 0xE00F0C1D, fade));
+        border(g, lx, hy - 2, lw, 12, alpha(lh ? lighten(origin.getThemeColor(), 0.3f) : EDGE, fade));
+        g.drawString(font, manage, lx + 3, hy, alpha(lh ? 0xFFFFFFFF : GOLD, fade), false);
+        abilitiesButton = new int[]{ lx, hy - 2, lw, 12 };
+
+        // The bound loadouts, in slot order (empty slots are left to the Abilities tab)
+        List<Card> bound = new ArrayList<>();
+        for (SlotGroup group : SlotGroup.values()) {
+            if (group == SlotGroup.CLASS && spec == null) continue;
+            for (int i = 0; i < group.size(); i++) {
+                Ability a = ClientAbilityData.ability(group, i);
+                if (a != null) bound.add(new Card(a, group, i, 0, 0, 0, 0));
+            }
         }
+        boolean compact = bound.size() > 4;          // a full loadout: name + meta only
+        for (Card c : bound)
+            iy = abilityCard(g, c.ability(), c.group(), c.slot(), x + 8, iy, w - 16, mx, my, fade, compact,
+                ClientAbilityData.cooldown(c.ability().getId()), ClientAbilityData.cooldownMax(c.ability().getId())) + (compact ? 3 : 4);
 
-        int cx = x + 10, cy = y + 6;
-        gfx.drawString(font, getAbilityIcon(ability.getId()), cx, cy, COLOR_TEXT_BRIGHT, true);
-
-        String kb = "[" + getKeybindHint(index) + "]";
-        int kbx = cx + 20;
-        gfx.fill(kbx, cy - 1, kbx + font.width(kb) + 4, cy + 10, 0xAA000000);
-        gfx.drawString(font, kb, kbx + 2, cy, 0xFFffff88, false);
-
-        gfx.drawString(font, ability.getDisplayName().getString(), kbx + font.width(kb) + 10, cy, COLOR_TEXT_BRIGHT, false);
-        cy += 14;
-
-        String desc = ability.getDescription().getString();
-        if (desc.length() > 45) desc = desc.substring(0, 42) + "...";
-        gfx.drawString(font, desc, cx, cy, COLOR_TEXT_DIM, false);
-        cy += 14;
-
-        gfx.drawString(font, "Cost: " + ability.getResourceCost(), cx, cy,
-            ability.getResourceCost() > 0 ? originColor : COLOR_TEXT_DIM, false);
-        gfx.drawString(font, "CD: " + (ability.getBaseCooldownTicks() / 20) + "s", cx + 70, cy, COLOR_TEXT_DIM, false);
-
-        String status = onCd ? formatCooldown(cd) : "READY";
-        int sc = onCd ? COLOR_COOLDOWN : COLOR_READY;
-        gfx.drawString(font, status, x + w - font.width(status) - 8, cy, sc, true);
+        iy += 4;
+        iy += header(g, font, x + 8, iy, w - 16, Component.translatable("gui.abyssorigins.passives"), origin.getThemeColor(), fade) + 2;
+        for (OriginPassive p : origin.getPassives()) {
+            if (p.isHidden()) continue;
+            iy = passiveRow(g, p.getDisplayName(), p.getDescription(), origin.getThemeColor(), x + 8, iy, w - 16, mx, my, fade);
+        }
+        if (spec != null)
+            for (SpecializationPassive p : spec.getPassives())
+                iy = passiveRow(g, p.getDisplayName(), p.getDescription(), spec.getThemeColor(), x + 8, iy, w - 16, mx, my, fade);
     }
 
-    private void renderPassivesPanel(GuiGraphics gfx, int x, int y, int w) {
-        drawPanel(gfx, x, y, w, 170, "PASSIVES (" + passives.size() + ")");
-        int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
+    private int abilityCard(GuiGraphics g, Ability a, SlotGroup group, int slot, int x, int y, int w,
+                            int mx, int my, float fade, boolean compact, int cd, int maxCd) {
+        boolean classAbility = group == SlotGroup.CLASS;
+        int h = compact ? 24 : 34;
+        boolean hover = inside(mx, my, x, y, w, h);
+        boolean active = ClientTimers.isActive(a.getId());
+        int color = a.getColor();
 
-        if (passives.isEmpty()) {
-            gfx.drawString(font, "No passives", ix, iy, COLOR_TEXT_DIM, false);
-            return;
+        if (active) glow(g, x + 14, y + h / 2f, 24, color, 0.5f * fade);
+        g.fillGradient(x, y, x + w, y + h, alpha(hover ? 0xF0201A3A : 0xE0150F28, fade), alpha(0xE00B0816, fade));
+        border(g, x, y, w, h, alpha(active ? color : hover ? mix(EDGE, color, 0.6f) : EDGE, fade));
+
+        diamondRing(g, x + 14, y + h / 2f, 10, 1.2f, alpha(cd > 0 ? EDGE : color, fade), alpha(0xFF0B0816, fade));
+        centered(g, font, a.getIcon(), x + 14, y + h / 2 - 4, alpha(cd > 0 ? TEXT_FAINT : color, fade));
+
+        g.drawString(font, a.getDisplayName(), x + 30, y + 4, alpha(TEXT, fade), false);
+        String key = KeyBindings.label(group, slot, 6);
+        int kw = font.width(key) + 6;
+        g.fill(x + w - kw - 4, y + 3, x + w - 4, y + 13, alpha(0xC0080611, fade));
+        border(g, x + w - kw - 4, y + 3, kw, 10, alpha(EDGE, fade));
+        g.drawString(font, key, x + w - kw - 1, y + 4, alpha(GOLD, fade), false);
+
+        List<FormattedCharSequence> desc = font.split(a.getDescription(), w - 36);
+        if (!compact && !desc.isEmpty()) g.drawString(font, desc.get(0), x + 30, y + 14, alpha(TEXT_DIM, fade), false);
+
+        MutableComponent meta = Component.empty();
+        if (a.getResourceCost() > 0 && origin.getResourceType() != null)
+            meta.append(Component.literal(a.getResourceCost() + " ")).append(origin.getResourceType().getDisplayName()).append("  ·  ");
+        meta.append(Component.translatable("gui.abyssorigins.cooldown_secs", a.getBaseCooldownTicks() / 20));
+        if (classAbility) meta.append(Component.literal("  ·  ")).append(Component.translatable("gui.abyssorigins.class_power"));
+        g.drawString(font, meta, x + 30, y + (compact ? 14 : 24), alpha(TEXT_FAINT, fade), false);
+
+        if (cd > 0) {
+            g.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, alpha(0xFF09070F, fade));
+            g.fill(x + 1, y + h - 2, x + 1 + (int) ((w - 2) * (1f - cd / (float) maxCd)), y + h - 1, alpha(color, fade));
         }
+        if (hover) tooltip = font.split(a.getDescription(), 220);
+        cards.add(new Card(a, group, slot, x, y, w, h));
+        return y + h;
+    }
 
-        for (int i = 0; i < Math.min(passives.size(), 6); i++) {
-            OriginPassive p = passives.get(i);
-            // Skip internal passives (bat form timer etc.)
-            if (p.getId().equals("vampire_bat_form_tick")) continue;
+    private int passiveRow(GuiGraphics g, Component name, Component desc, int color, int x, int y, int w,
+                           int mx, int my, float fade) {
+        boolean hover = inside(mx, my, x, y - 1, w, 11);
+        if (hover) g.fill(x, y - 1, x + w, y + 10, alpha(0x30FFFFFF, fade));
+        diamond(g, x + 3, y + 4, 2.5f, alpha(color, fade));
+        g.drawString(font, name, x + 10, y, alpha(hover ? TEXT : TEXT_DIM, fade), false);
+        if (hover) tooltip = font.split(desc, 220);
+        return y + 11;
+    }
 
-            gfx.fill(ix, iy, ix + iw, iy + 18, 0x44000000);
-            String icon = getPassiveIcon(p.getId());
-            gfx.drawString(font, icon + " " + p.getDisplayName().getString(), ix + 4, iy + 5, COLOR_TEXT, false);
+    // ---- Right: class, resonance, progression -----------------------------------
 
+    private void drawClass(GuiGraphics g, int x, int y, int w, int h, int mx, int my, float fade) {
+        int iy = y + 8, ix = x + 8, iw = w - 16;
+
+        if (spec != null) {
+            int sc = spec.getThemeColor();
+            iy += header(g, font, ix, iy, iw, Component.translatable("gui.abyssorigins.class"), sc, fade) + 2;
+            diamondRing(g, ix + 9, iy + 9, 9, 1.2f, alpha(sc, fade), alpha(0xFF0B0816, fade));
+            centered(g, font, spec.getSigil(), ix + 9, iy + 5, alpha(sc, fade));
+            g.drawString(font, spec.getDisplayName(), ix + 22, iy + 1, alpha(lighten(sc, 0.3f), fade), true);
+            g.drawString(font, Component.translatable("gui.abyssorigins.level", Math.max(1, ClientSpecializationData.getSpecLevel())),
+                ix + 22, iy + 11, alpha(TEXT_DIM, fade), false);
             iy += 22;
+            bar(g, ix, iy, iw, 3, ClientSpecializationData.getXpProgress(), sc, true);
+            iy += 8;
+            iy = wrapped(g, font, spec.getDescription(), ix, iy, iw, alpha(TEXT_DIM, fade), 4) + 6;
+
+            Resonance res = spec.getResonance(origin.getPath()).orElse(null);
+            if (res != null) {
+                int bh = 14 + Math.min(4, font.split(res.description(), iw - 10).size()) * 10;
+                glow(g, ix + iw / 2f, iy + bh / 2f, iw * 0.55f, GOLD, 0.25f * fade);
+                g.fill(ix, iy, ix + iw, iy + bh, alpha(0x60140F06, fade));
+                border(g, ix, iy, iw, bh, alpha(mix(GOLD, 0xFFFFFFFF, 0.3f * pulse(2f)), fade));
+                g.drawString(font, Component.literal("✦ ").append(res.name()), ix + 5, iy + 3, alpha(GOLD, fade), true);
+                wrapped(g, font, res.description(), ix + 5, iy + 14, iw - 10, alpha(TEXT, fade), 4);
+                iy += bh + 6;
+            } else if (!spec.getResonances().isEmpty()) {
+                MutableComponent list = Component.translatable("gui.abyssorigins.resonates_with");
+                boolean first = true;
+                for (Resonance r : spec.getResonances()) {
+                    Origin o = AbyssOriginsAPI.getOrigin(ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, r.originPath()));
+                    list.append(first ? " " : ", ").append(o != null ? o.getDisplayName() : Component.literal(r.originPath()));
+                    first = false;
+                }
+                iy = wrapped(g, font, list, ix, iy, iw, alpha(TEXT_FAINT, fade), 3) + 6;
+            }
+        } else {
+            iy += header(g, font, ix, iy, iw, Component.translatable("gui.abyssorigins.class"), TEXT_FAINT, fade) + 2;
+            iy = wrapped(g, font, Component.translatable("gui.abyssorigins.no_class"), ix, iy, iw, alpha(TEXT_FAINT, fade), 4) + 8;
         }
 
-        int extra = (int) passives.stream().filter(p -> !p.getId().equals("vampire_bat_form_tick")).count() - 6;
+        // Progression
+        iy += header(g, font, ix, iy, iw, Component.translatable("gui.abyssorigins.progression"), origin.getThemeColor(), fade) + 2;
+        g.drawString(font, Component.translatable("gui.abyssorigins.origin_level", ClientOriginData.getLevel()), ix, iy, alpha(GOLD, fade), true);
+        iy += 11;
+        bar(g, ix, iy, iw, 4, ClientOriginData.getXpProgress(), origin.getThemeColor(), true);
+        iy += 7;
+        String xp = ClientOriginData.getXpIntoLevel() + " / " + XpEventHandler.xpForLevel(ClientOriginData.getLevel()) + " XP";
+        g.drawString(font, xp, ix, iy, alpha(TEXT_FAINT, fade), false);
+        iy += 13;
+        int op = ClientOriginData.getSkillPoints(), cp = spec != null ? ClientSpecializationData.getSkillPoints() : 0;
+        Component pts = Component.translatable("gui.abyssorigins.points_split", op, cp);
+        g.drawString(font, pts, ix, iy, alpha(op + cp > 0 ? mix(GOLD, 0xFFFFF4C8, pulse(1.5f)) : TEXT_DIM, fade), false);
 
-        if (extra > 0)
-            gfx.drawString(font, "+" + extra + " more...", ix, iy, COLOR_TEXT_DIM, false);
+        // Skill tree button
+        treeButton = button(g, ix, y + h - 26, iw, mx, my, fade,
+            Component.translatable("gui.abyssorigins.open_tree", KeyBindings.SKILL_TREE.getTranslatedKeyMessage().getString()));
     }
 
-    private void renderProgressionPanel(GuiGraphics gfx, int x, int y, int w) {
-        int h = Math.min(height - y - 50, 165);
-        drawPanel(gfx, x, y, w, h, "PROGRESSION");
-        int ix = x + PANEL_PADDING, iy = y + 28, iw = w - PANEL_PADDING * 2;
-
-        int   level       = ClientOriginData.getLevel();
-        int   xp          = ClientOriginData.getXp();
-        int   skillPoints = ClientOriginData.getSkillPoints();
-        float xpProg      = ClientOriginData.getXpProgress();
-        int   xpNeeded    = ClientOriginData.getXpForNextLevel();
-
-        String levelStr = "LVL " + level;
-        gfx.drawString(font, levelStr, ix, iy, 0xFFffcc00, true); iy += 16;
-
-        gfx.drawString(font, "Experience", ix, iy, COLOR_TEXT_DIM, false); iy += 10;
-        drawProgressBar(gfx, ix, iy, iw, 10, xpProg, COLOR_XP); iy += 14;
-
-        String xpText = (xp % 100) + " / " + xpNeeded + " XP";
-        gfx.drawString(font, xpText, ix, iy, COLOR_TEXT_DIM, false); iy += 18;
-
-        gfx.fill(ix, iy, ix + iw, iy + 1, COLOR_PANEL_BORDER); iy += 8;
-        gfx.drawString(font, "Skill Points", ix, iy, COLOR_TEXT_DIM, false); iy += 12;
-
-        String spStr = String.valueOf(skillPoints);
-        int spColor = skillPoints > 0 ? COLOR_POSITIVE : COLOR_TEXT_DIM;
-        gfx.drawString(font, spStr, ix, iy, spColor, true);
-        if (skillPoints > 0)
-            gfx.drawString(font, " available", ix + font.width(spStr), iy, COLOR_TEXT_DIM, false);
-        iy += 18;
-
-        int unlocked = ClientOriginData.getUnlockedSkills().size();
-        gfx.drawString(font, "Skills: " + unlocked + " unlocked", ix, iy, COLOR_TEXT_DIM, false);
+    private int[] button(GuiGraphics g, int x, int y, int w, int mx, int my, float fade, Component label) {
+        int accent = origin.getThemeColor();
+        boolean hover = inside(mx, my, x, y, w, 18);
+        g.fill(x, y, x + w, y + 18, alpha(hover ? withAlpha(accent, 70) : 0x40000000, fade));
+        border(g, x, y, w, 18, alpha(hover ? lighten(accent, 0.3f) : mix(EDGE, accent, 0.5f), fade));
+        centered(g, font, label, x + w / 2, y + 5, alpha(hover ? 0xFFFFFFFF : TEXT, fade));
+        return new int[]{ x, y, w, 18 };
     }
 
-    private void renderInstructions(GuiGraphics gfx) {
-        String s = "Click ability or press keybind to activate  \u2022  [K] Skill Tree  \u2022  [ESC] Close";
-        gfx.fill(0, height - 25, width, height, 0xCC000008);
-        gfx.drawString(font, s, (width - font.width(s)) / 2, height - 17, COLOR_TEXT_DIM, false);
-    }
-
-    // ---- Drawing helpers -----------------------------------------------
-
-    private void drawPanel(GuiGraphics gfx, int x, int y, int w, int h, String title) {
-        gfx.fill(x, y, x + w, y + h, COLOR_PANEL);
-        gfx.fill(x, y, x + w, y + 22, COLOR_PANEL_HEADER);
-        gfx.fill(x, y + 21, x + w, y + 22, originColor);
-        gfx.drawString(font, title, x + 8, y + 7, COLOR_TEXT, false);
-        drawBorder(gfx, x, y, w, h, COLOR_PANEL_BORDER, 1);
-    }
-
-    private void drawBorder(GuiGraphics gfx, int x, int y, int w, int h, int color, int t) {
-        gfx.fill(x, y, x + w, y + t, color);
-        gfx.fill(x, y + h - t, x + w, y + h, color);
-        gfx.fill(x, y, x + t, y + h, color);
-        gfx.fill(x + w - t, y, x + w, y + h, color);
-    }
-
-    private void drawResourceBar(GuiGraphics gfx, int x, int y, int w, int h, float value, int color) {
-        gfx.fill(x, y, x + w, y + h, 0xFF111118);
-        int fw = (int)(w * (value / 100f));
-        if (fw > 0) {
-            gfx.fill(x, y, x + fw, y + h, color);
-            gfx.fill(x, y, x + fw, y + 2, brighten(color, 40));
-        }
-        drawBorder(gfx, x, y, w, h, 0xFF333344, 1);
-    }
-
-    private void drawProgressBar(GuiGraphics gfx, int x, int y, int w, int h, float progress, int color) {
-        gfx.fill(x, y, x + w, y + h, 0xFF111118);
-        int fw = (int)(w * progress);
-        if (fw > 0) gfx.fill(x, y, x + fw, y + h, color);
-        drawBorder(gfx, x, y, w, h, 0xFF333344, 1);
-    }
-
-    // ---- Input ---------------------------------------------------------
+    // ---- Input -------------------------------------------------------------------
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        if (button == 0 && hoveredAbility >= 0 && hoveredAbility < abilities.size()) {
-            activateAbility(hoveredAbility);
-            return true;
+        if (button == 0) {
+            if (inside(mx, my, treeButton[0], treeButton[1], treeButton[2], treeButton[3])) { openTree(); return true; }
+            if (inside(mx, my, abilitiesButton[0], abilitiesButton[1], abilitiesButton[2], abilitiesButton[3])) { openAbilities(); return true; }
+            for (Card c : cards) if (inside(mx, my, c.x, c.y, c.w, c.h)) { activate(c.group, c.slot); return true; }
         }
         return super.mouseClicked(mx, my, button);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scan, int mods) {
-        if (keyCode == 82 && !abilities.isEmpty()) { activateAbility(0); return true; } // R
-        if (keyCode == 86 && abilities.size() > 1) { activateAbility(1); return true; } // V
-        if (keyCode == 75) { // K — open skill tree
-            Minecraft.getInstance().setScreen(new SkillTreeScreen(this));
-            return true;
+        for (SlotGroup group : SlotGroup.values()) {
+            KeyMapping[] keys = KeyBindings.forGroup(group);
+            for (int i = 0; i < keys.length; i++)
+                if (keys[i].matches(keyCode, scan)) { activate(group, i); return true; }
         }
-        if (keyCode == 256) { onClose(); return true; }
+        if (KeyBindings.SKILL_TREE.matches(keyCode, scan))     { openTree(); return true; }
+        if (KeyBindings.ABILITIES.matches(keyCode, scan))      { openAbilities(); return true; }
+        if (KeyBindings.ORIGIN_INFO.matches(keyCode, scan))    { onClose(); return true; }
         return super.keyPressed(keyCode, scan, mods);
     }
 
-    private void activateAbility(int index) {
-        if (index < 0 || index >= abilities.size()) return;
-        int cd = ClientOriginData.getAbilityCooldown(index);
-        if (cd > 0) {
-            Minecraft.getInstance().player.displayClientMessage(
-                Component.literal("Ability on cooldown: " + formatCooldown(cd))
-                    .withStyle(s -> s.withColor(0xFF5555)), true);
-            return;
-        }
-        PacketDistributor.sendToServer(new ActivateAbilityPacket(index));
+    private void openTree() {
+        if (minecraft == null) return;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2f));
+        minecraft.setScreen(new SkillTreeScreen(this));
+    }
+
+    private void openAbilities() {
+        if (minecraft == null) return;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2f));
+        minecraft.setScreen(new AbilitiesScreen(this, SlotGroup.ORIGIN));
+    }
+
+    private void activate(SlotGroup group, int slot) {
+        if (group == SlotGroup.CLASS && spec == null) return;
+        if (ClientAbilityData.slot(group, slot).isEmpty()) return;
+        ClientAbilityData.activate(group, slot);
         onClose();
-    }
-
-    // ---- Helpers -------------------------------------------------------
-
-    private int brighten(int color, int amt) {
-        int a = (color>>24)&0xFF, r = Math.min(255,((color>>16)&0xFF)+amt),
-            g = Math.min(255,((color>>8)&0xFF)+amt), b = Math.min(255,(color&0xFF)+amt);
-        return (a<<24)|(r<<16)|(g<<8)|b;
-    }
-
-    private List<String> wrapText(String text, int maxPx, int maxLines) {
-        List<String> lines = new java.util.ArrayList<>();
-        String[] words = text.split(" ");
-        StringBuilder cur = new StringBuilder();
-        for (String w : words) {
-            String test = cur.length() == 0 ? w : cur + " " + w;
-            if (font.width(test) <= maxPx) { if (cur.length()>0) cur.append(' '); cur.append(w); }
-            else { if (cur.length()>0) lines.add(cur.toString()); cur = new StringBuilder(w); }
-        }
-        if (cur.length() > 0) lines.add(cur.toString());
-        if (lines.size() > maxLines) {
-            lines = lines.subList(0, maxLines);
-            lines.set(maxLines - 1, lines.get(maxLines - 1) + "...");
-        }
-        return lines;
-    }
-
-    private String getImpactStars(ImpactLevel level) {
-        return switch (level) { case LOW -> "\u2605\u2606\u2606"; case MEDIUM -> "\u2605\u2605\u2606"; case HIGH -> "\u2605\u2605\u2605"; };
-    }
-
-    private int getImpactColor(ImpactLevel level) {
-        return switch (level) { case LOW -> COLOR_POSITIVE; case MEDIUM -> COLOR_WARNING; case HIGH -> COLOR_NEGATIVE; };
-    }
-
-    private int getOriginThemeColor() {
-        if (playerOrigin == null) return 0xFF5566aa;
-        String id = playerOrigin.getId().toString().toLowerCase();
-        if (id.contains("vampire") || id.contains("blood")) return 0xFFcc3333;
-        if (id.contains("human"))                           return 0xFFffaa44;
-        if (id.contains("wolf")   || id.contains("were"))  return 0xFFbb8844;
-        if (id.contains("necro"))                           return 0xFF7788aa;
-        if (id.contains("shadow") || id.contains("umbra")) return 0xFF9955cc;
-        return 0xFFffaa44;
-    }
-
-    private String getResourceName() {
-        if (playerOrigin == null) return "Resource";
-        if (playerOrigin.getResourceType() != null)
-            return playerOrigin.getResourceType().getDisplayName().getString();
-        return "None";
-    }
-
-    private String getAbilityIcon(String id) {
-        id = id.toLowerCase();
-        if (id.contains("blood") || id.contains("drain"))  return "\uD83E\uDE78";
-        if (id.contains("bat")   || id.contains("fly"))    return "\uD83E\uDD87";
-        if (id.contains("fire")  || id.contains("flame"))  return "\uD83D\uDD25";
-        if (id.contains("dash")  || id.contains("speed"))  return "\uD83D\uDCA8";
-        if (id.contains("heal")  || id.contains("regen"))  return "\uD83D\uDC9A";
-        if (id.contains("adapt"))                           return "\u26A1";
-        return "\u2694";
-    }
-
-    private String getPassiveIcon(String id) {
-        id = id.toLowerCase();
-        if (id.contains("regen")  || id.contains("heal"))  return "\uD83D\uDC9A";
-        if (id.contains("night")  || id.contains("dark"))  return "\uD83C\uDF19";
-        if (id.contains("sun")    || id.contains("fire"))  return "\u2600";
-        if (id.contains("hunger") || id.contains("blood")) return "\uD83E\uDE78";
-        if (id.contains("resist") || id.contains("armor")) return "\uD83D\uDEE1";
-        if (id.contains("speed")  || id.contains("swift")) return "\uD83D\uDCA8";
-        return "\u25C6";
-    }
-
-    private String getKeybindHint(int index) {
-        return switch (index) { case 0 -> "R"; case 1 -> "V"; default -> String.valueOf(index+1); };
-    }
-
-    private String formatCooldown(int ticks) {
-        int s = ticks / 20;
-        return s >= 60 ? String.format("%dm%ds", s/60, s%60) : s + "s";
     }
 
     @Override

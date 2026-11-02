@@ -1,0 +1,145 @@
+{
+ "parent": "builtin/entity",
+ "gui_light": "front",
+ "textures": {
+  "particle": "abyssorigins:item/nocturne_chestplate"
+ },
+ "display": {
+  "gui": {
+   "rotation": [
+    22,
+    205,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.556,
+    0.556,
+    0.556
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.528,
+    0.528,
+    0.528
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.278,
+    0.278,
+    0.278
+   ]
+  },
+  "thirdperson_righthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.222,
+    0.222,
+    0.222
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.222,
+    0.222,
+    0.222
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.25,
+    0.25,
+    0.25
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.25,
+    0.25,
+    0.25
+   ]
+  },
+  "head": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.445,
+    0.445,
+    0.445
+   ]
+  }
+ }
+}

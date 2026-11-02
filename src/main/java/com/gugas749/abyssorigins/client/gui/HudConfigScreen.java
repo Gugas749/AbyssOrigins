@@ -170,27 +170,18 @@ public class HudConfigScreen extends Screen {
 
     @Override
     public void render(@NotNull GuiGraphics gfx, int mx, int my, float pt) {
-        // Background
-        gfx.fill(0, 0, this.width, this.height, 0x88000000);
+        AbyssTheme.backdrop(gfx, this.width, this.height, AbyssTheme.MIST, 1f);
+        int cx = this.width / 2;
+        AbyssTheme.panel(gfx, cx - 215, 40, 430, this.height - 70, AbyssTheme.MIST, 1f);
 
         // Widgets on top
         super.render(gfx, mx, my, pt);
 
-        int cx = this.width / 2;
-
-        // Title
-        gfx.drawCenteredString(font,
-            Component.translatable("gui.abyssorigins.hud_config"), cx, 15, 0xFFFFFF);
-
-        // Subtitle
-        gfx.drawCenteredString(font,
-            Component.literal("Toggle HUD elements on or off").withStyle(ChatFormatting.GRAY),
-            cx, 28, 0xFFFFFF);
-
-        // Hint at bottom
-        gfx.drawCenteredString(font,
-            Component.literal("Changes are saved automatically").withStyle(ChatFormatting.DARK_GRAY),
-            cx, this.height - 42, 0xFFFFFF);
+        AbyssTheme.scaledText(gfx, font, Component.translatable("gui.abyssorigins.hud_config"),
+            cx - font.width(Component.translatable("gui.abyssorigins.hud_config")) * 1.3f / 2f, 12, 1.3f,
+            AbyssTheme.lighten(AbyssTheme.MIST, 0.3f), true);
+        AbyssTheme.centered(gfx, font, Component.translatable("gui.abyssorigins.hud_config.subtitle"), cx, 28, AbyssTheme.TEXT_DIM);
+        AbyssTheme.centered(gfx, font, Component.translatable("gui.abyssorigins.hud_config.saved"), cx, this.height - 42, AbyssTheme.TEXT_FAINT);
     }
 
     // ---- Close -----------------------------------------------------------

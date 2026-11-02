@@ -5,6 +5,8 @@ import com.gugas749.abyssorigins.api.Specialization;
 import com.gugas749.abyssorigins.data.PlayerSpecializationData;
 import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.network.ModPackets;
+import com.gugas749.abyssorigins.power.Assignments;
+import com.gugas749.abyssorigins.skilltree.SkillService;
 import com.gugas749.abyssorigins.registry.SpecializationRegistry;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -26,6 +28,7 @@ import net.minecraft.server.level.ServerPlayer;
  * /abyssorigins specialization remove <player>
  * /abyssorigins specialization addlevel <player> <amount>      <- called by FTB Quests
  * /abyssorigins specialization addskillpoints <player> <amount>
+ * /abyssorigins specialization respec <player>
  * /abyssorigins specialization info <player>
  * /abyssorigins specialization list
  */
@@ -53,6 +56,9 @@ public class SpecializationCommand {
                 .then(Commands.argument("player", EntityArgument.player())
                     .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                         .executes(SpecializationCommand::addSkillPoints))))
+            .then(Commands.literal("respec")
+                .then(Commands.argument("player", EntityArgument.player())
+                    .executes(SpecializationCommand::respec)))
             .then(Commands.literal("info")
                 .then(Commands.argument("player", EntityArgument.player())
                     .executes(SpecializationCommand::info)))
@@ -76,27 +82,7 @@ public class SpecializationCommand {
                 return 0;
             }
 
-            PlayerSpecializationData data =
-                player.getData(SpecializationAttachments.PLAYER_SPEC.get());
-
-            // Remove old spec passives if any
-            if (data.hasSpec()) {
-                SpecializationRegistry.get(data.getSpecId()).ifPresent(old ->
-                    old.getPassives().forEach(p -> p.onRemove(player)));
-            }
-
-            data.setSpecId(id);
-            if (data.getSpecLevel() == 0) data.setSpecLevel(1);
-
-            // Apply new spec passives
-            spec.getPassives().forEach(p -> p.onEquip(player));
-
-            // Grant starting skill points if none
-            if (data.getSkillPoints() == 0 && data.getUnlockedSkills().isEmpty()) {
-                data.addSkillPoints(2);
-            }
-
-            ModPackets.syncSpecialization(player);
+            Assignments.setClass(player, spec);
 
             ctx.getSource().sendSuccess(() -> Component.literal(
                 "Set " + player.getName().getString() + "'s specialization to "
@@ -114,16 +100,7 @@ public class SpecializationCommand {
     private static int removeSpec(CommandContext<CommandSourceStack> ctx) {
         try {
             ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-            PlayerSpecializationData data =
-                player.getData(SpecializationAttachments.PLAYER_SPEC.get());
-
-            if (data.hasSpec()) {
-                SpecializationRegistry.get(data.getSpecId()).ifPresent(spec ->
-                    spec.getPassives().forEach(p -> p.onRemove(player)));
-            }
-
-            data.setSpecId(null);
-            ModPackets.syncSpecialization(player);
+            Assignments.setClass(player, null);
 
             ctx.getSource().sendSuccess(() -> Component.literal(
                 "Cleared " + player.getName().getString() + "'s specialization.")
@@ -147,8 +124,10 @@ public class SpecializationCommand {
 
             int oldLevel = data.getSpecLevel();
             data.addSpecLevel(amount);
+            // Keep class XP consistent with the new level so XP gains continue from here
+            data.setSpecXp(Math.max(data.getSpecXp(), com.gugas749.abyssorigins.event.XpEventHandler.xpRequiredToReach(data.getSpecLevel())));
             // Each level grants 1 skill point
-            data.addSkillPoints(amount);
+            data.addSkillPoints(data.getSpecLevel() - oldLevel);
 
             ModPackets.syncSpecialization(player);
 
@@ -161,6 +140,20 @@ public class SpecializationCommand {
                 "abyssorigins.message.spec_level_up",
                 String.valueOf(newLevel),
                 String.valueOf(amount)));
+            return 1;
+        } catch (Exception e) {
+            ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int respec(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+            int refunded = SkillService.respecClass(player);
+            player.sendSystemMessage(Component.translatable("abyssorigins.message.respec", String.valueOf(refunded)));
+            ctx.getSource().sendSuccess(() -> Component.literal(
+                "Refunded " + refunded + " class SP to " + player.getName().getString()), true);
             return 1;
         } catch (Exception e) {
             ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage()));

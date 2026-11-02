@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "P P",
+    "PAP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:nether_brick"
+    },
+    "A": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "id": "abyssorigins:infernal_chestplate",
+    "count": 1
+  }
+}

@@ -1,160 +1,77 @@
 package com.gugas749.abyssorigins.specialization.occultist;
 
-import com.gugas749.abyssorigins.Abyssorigins;
-import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
-import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.api.SpecializationAbility;
-import com.gugas749.abyssorigins.client.ClientSpecializationData;
-import com.gugas749.abyssorigins.data.PlayerSpecializationData;
-import com.gugas749.abyssorigins.data.SpecializationAttachments;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
+import com.gugas749.abyssorigins.api.Sustained;
+import com.gugas749.abyssorigins.effect.ModEffects;
+import com.gugas749.abyssorigins.power.AbilityStates;
+import com.gugas749.abyssorigins.power.Fx;
+import com.gugas749.abyssorigins.power.Skills;
+import com.gugas749.abyssorigins.vfx.Palette;
+import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abyssorigins.vfx.VfxType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
 
 /**
- * Occult Vision ability.
+ * Occult Vision (toggle).
  *
- * When active (toggle):
- *  - Applies Darkness + Night Vision to the caster (darkness = screen darkening)
- *  - Renders a glowing aura outline around all visible players
- *  - Aura color = origin colour:
- *      Vampire   → red     (0xFF, 0x22, 0x22)
- *      Human     → grey    (0xAA, 0xAA, 0xAA)
- *      Occultist → purple  (0x99, 0x22, 0xCC)
- *      Unknown   → white   (0xFF, 0xFF, 0xFF)
+ * BUG FIX: the old version applied the vanilla Glowing effect to every player on the
+ * server. Glowing is a shared entity flag, so *everyone* saw everyone outlined, and the
+ * revealed players could see that they were glowing.
  *
- * Visual implementation: we use Glowing mob effect which renders the vanilla
- * "glowing" white outline. For colored auras per-origin we override the
- * outline color via the team color API (each "origin team" gets its color).
- * This is the cleanest approach that doesn't require custom shaders.
- *
- * For a more elaborate colored glow a shader mixin would be needed — that's
- * marked as a future improvement and documented below.
+ * Now the server only records that the vision is active (AbilityStates → synced to the
+ * caster alone). The outlines are drawn purely client-side by RevealClient + the
+ * Minecraft/Entity mixins, so only the Occultist sees them, coloured by origin.
  */
-@EventBusSubscriber(modid = Abyssorigins.MODID, value = Dist.CLIENT)
-public class OccultVisionAbility extends SpecializationAbility {
+public class OccultVisionAbility extends SpecializationAbility implements Sustained {
 
-    private static final String NBT_ACTIVE = "abyssorigins_occult_vision_active";
-    private static final int    DURATION   = 600; // 30 seconds per activation
+    public static final String ID = "occult_vision";
 
     public OccultVisionAbility() {
-        super("occult_vision",
+        super(ID,
             "abyssorigins.ability.occult_vision.name",
             "abyssorigins.ability.occult_vision.desc",
-            30, 0);
+            30);
+        icon("◉"); color(0xFFB35CFF);
     }
 
     @Override
-    public void activate(Player player, Level level) {
-        if (level.isClientSide()) return;
+    public boolean activate(ServerPlayer player) {
+        int duration = Skills.has(player, "occ_ascended_occultist") ? AbilityStates.INDEFINITE
+                     : Skills.has(player, "occ_veil_sight") ? 900 : 600;
 
-        // Toggle off
-        if (player.getPersistentData().contains(NBT_ACTIVE)) {
-            endVision(player);
-            return;
-        }
+        if (Skills.has(player, "occ_phantom_step"))
+            player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, false, false));
 
-        player.getPersistentData().putInt(NBT_ACTIVE, DURATION);
+        var level = player.serverLevel();
+        Vfx.of(VfxType.SIGIL).at(player.position()).scale(3f).extra(5).colors(Palette.OCCULT, Palette.OCCULT_HI).duration(44).send(level);
+        Vfx.burst(level, player.getEyePosition().add(player.getLookAngle().scale(1.4)), 0.6f, Palette.OCCULT, Palette.OCCULT_HI);
+        Fx.sound(level, player.position(), SoundEvents.ILLUSIONER_CAST_SPELL, 0.8f, 0.7f);
+        Fx.sound(level, player.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 0.6f, 0.5f);
 
-        // Darkness for screen darkening (very brief so it doesn't disorient)
-        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, DURATION + 20, 0, false, false));
-        // Night vision so dark areas are still visible
-        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, DURATION + 40, 0, false, false));
-
-        // Apply Glowing to all nearby players — this is what makes outlines visible
-        double range = 64.0;
-        level.players().forEach(target -> {
-            if (target != player) {
-                target.addEffect(new MobEffectInstance(
-                    MobEffects.GLOWING, DURATION + 20, 0, false, false));
-            }
-        });
-
-        player.displayClientMessage(
-            Component.translatable("abyssorigins.message.occult_vision_activated"), true);
-    }
-
-    /**
-     * Called every tick from OccultistPassive.onTick to countdown and maintain effects.
-     */
-    public static void tick(Player player, Level level) {
-        if (level.isClientSide()) return;
-        if (!player.getPersistentData().contains(NBT_ACTIVE)) return;
-
-        int remaining = player.getPersistentData().getInt(NBT_ACTIVE) - 1;
-
-        if (remaining <= 0) {
-            endVision(player);
-            return;
-        }
-
-        player.getPersistentData().putInt(NBT_ACTIVE, remaining);
-
-        // Re-apply glowing to nearby players each second to catch newcomers
-        if (player.tickCount % 20 == 0) {
-            double range = 64.0;
-            level.players().forEach(target -> {
-                if (target != player) {
-                    target.addEffect(new MobEffectInstance(
-                        MobEffects.GLOWING, 40, 0, false, false));
-                }
-            });
-        }
-    }
-
-    private static void endVision(Player player) {
-        player.getPersistentData().remove(NBT_ACTIVE);
-        player.removeEffect(MobEffects.DARKNESS);
-        player.displayClientMessage(
-            Component.translatable("abyssorigins.message.occult_vision_ended"), true);
+        player.displayClientMessage(Component.translatable("abyssorigins.message.occult_vision_activated"), true);
+        AbilityStates.start(player, ID, duration, this);
+        return true;
     }
 
     @Override
-    public boolean canActivate(Player player) { return true; }
-
-    public static boolean isActive(Player player) {
-        return player.getPersistentData().contains(NBT_ACTIVE);
+    public void tickActive(ServerPlayer player, int remaining) {
+        // Hex Mark: hostile creatures within your sight are cursed every 5 seconds
+        if (Skills.has(player, "occ_hex_mark") && player.tickCount % 100 == 0) {
+            for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class,
+                    player.getBoundingBox().inflate(16), e -> e instanceof Enemy && e.isAlive()))
+                e.addEffect(new MobEffectInstance(ModEffects.HEXED, 100, 0), player);
+        }
     }
 
-    // ---- Client-side: screen darkening overlay -------------------------
-
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiLayerEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (!ClientSpecializationData.hasSpec()) return;
-        if (!"occultist".equals(ClientSpecializationData.getSpec().getId().getPath())) return;
-
-        // Check if vision is active client-side
-        if (!mc.player.getPersistentData().contains(NBT_ACTIVE)) return;
-
-        // Dark vignette overlay — center is clear, edges are very dark purple
-        int sw = mc.getWindow().getGuiScaledWidth();
-        int sh = mc.getWindow().getGuiScaledHeight();
-        var gfx = event.getGuiGraphics();
-
-        // Draw a darkening frame (not full-screen — keeps center visible)
-        int vw = sw / 4;
-        int vh = sh / 4;
-        int darkColor = 0xCC0A000F; // very dark purple-black
-
-        gfx.fill(0,      0,      sw,      vh,      darkColor); // top
-        gfx.fill(0,      sh-vh,  sw,      sh,      darkColor); // bottom
-        gfx.fill(0,      0,      vw,      sh,      darkColor); // left
-        gfx.fill(sw-vw,  0,      sw,      sh,      darkColor); // right
-
-        // Occult vision active indicator
-        gfx.drawCenteredString(mc.font,
-            Component.translatable("abyssorigins.message.occult_vision_indicator"),
-            sw / 2, 4, 0xAA7744CC);
+    @Override
+    public void onEnd(ServerPlayer player) {
+        player.displayClientMessage(Component.translatable("abyssorigins.message.occult_vision_ended"), true);
+        Fx.sound(player.level(), player.position(), SoundEvents.ILLUSIONER_MIRROR_MOVE, 0.5f, 0.5f);
     }
 }

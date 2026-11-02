@@ -30,6 +30,7 @@ public class PlayerSkillData {
 
     public boolean hasSkill(String skillId)    { return unlockedSkills.contains(skillId); }
     public void    unlockSkill(String skillId) { if (!hasSkill(skillId)) unlockedSkills.add(skillId); }
+    public void    clearSkills()               { unlockedSkills.clear(); }
 
     public List<String>      getUnlockedSkills()    { return Collections.unmodifiableList(unlockedSkills); }
     /** Returns as Set — used by SkillNode.canUnlock() */

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "PAP",
+    "P P",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:obsidian"
+    },
+    "A": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "result": {
+    "id": "abyssorigins:abyssal_leggings",
+    "count": 1
+  }
+}

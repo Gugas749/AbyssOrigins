@@ -1,6 +1,7 @@
 package com.gugas749.abyssorigins.api;
 
 import com.gugas749.abyssorigins.Abyssorigins;
+import com.gugas749.abyssorigins.registry.AbilityRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
@@ -25,6 +26,7 @@ public class AbyssOriginsAPI {
 
     public static void registerOrigin(Origin origin) {
         ORIGINS.put(origin.getId(), origin);
+        AbilityRegistry.invalidate();
         Abyssorigins.LOGGER.info("[AbyssOrigins] Registered origin: {}", origin.getId());
     }
 

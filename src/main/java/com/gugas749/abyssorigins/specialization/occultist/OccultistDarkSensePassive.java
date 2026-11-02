@@ -5,6 +5,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
+/** Dark Sense: permanent night vision. (Occult Vision timing now lives in AbilityStates.) */
 public class OccultistDarkSensePassive extends SpecializationPassive {
 
     public OccultistDarkSensePassive() {
@@ -15,26 +16,16 @@ public class OccultistDarkSensePassive extends SpecializationPassive {
 
     @Override
     public void onTick(Player player) {
-        if (player.level().isClientSide()) return;
+        if (player.level().isClientSide() || player.tickCount % 20 != 0) return;
 
-        // Maintain occult vision timer
-        OccultVisionAbility.tick(player, player.level());
-
-        // Permanent night vision (dimmer than vampire — no speed bonus)
         var nightVision = player.getEffect(MobEffects.NIGHT_VISION);
-        if (nightVision == null || nightVision.getDuration() < 200) {
-            player.addEffect(new MobEffectInstance(
-                    MobEffects.NIGHT_VISION, 500, 0, false, false));
+        if (nightVision == null || nightVision.getDuration() < 220) {
+            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 500, 0, false, false));
         }
     }
 
     @Override
     public void onRemove(Player player) {
         player.removeEffect(MobEffects.NIGHT_VISION);
-        // Force-end vision if active
-        if (player.getPersistentData().contains("abyssorigins_occult_vision_active")) {
-            player.getPersistentData().remove("abyssorigins_occult_vision_active");
-            player.removeEffect(MobEffects.DARKNESS);
-        }
     }
 }

@@ -77,3 +77,17 @@ side = "BOTH"
 # stop your mod loading on the server for example.
 #[features."${mod_id}"]
 #openGLVersion="[3.2,)"
+
+[[dependencies."${mod_id}"]]
+modId = "abysscore"
+type = "required"
+versionRange = "${abysscore_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "geckolib"
+type = "required"
+versionRange = "${geckolib_version_range}"
+ordering = "AFTER"
+side = "BOTH"

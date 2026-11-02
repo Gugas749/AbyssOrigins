@@ -1,0 +1,130 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.abyssorigins.armor_icon.choir_boots",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 2,
+    "visible_bounds_height": 2,
+    "visible_bounds_offset": [
+     0,
+     1,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "armorRightBoot",
+     "pivot": [
+      -2.0,
+      6.0,
+      0.0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.0,
+        -6.0,
+        -2.0
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        0,
+        16
+       ],
+       "inflate": 1.0
+      }
+     ]
+    },
+    {
+     "name": "armorLeftBoot",
+     "pivot": [
+      2.0,
+      6.0,
+      0.0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        0.0,
+        -6.0,
+        -2.0
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        0,
+        16
+       ],
+       "inflate": 1.0,
+       "mirror": true
+      }
+     ]
+    },
+    {
+     "name": "feet_x17",
+     "parent": "armorRightBoot",
+     "pivot": [
+      -5.3,
+      -3.0,
+      0.5
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -5.8,
+        -4.0,
+        -1.0
+       ],
+       "size": [
+        1,
+        2,
+        3
+       ],
+       "uv": [
+        88,
+        41
+       ]
+      }
+     ]
+    },
+    {
+     "name": "feet_x18",
+     "parent": "armorLeftBoot",
+     "pivot": [
+      5.3,
+      -3.0,
+      0.5
+     ],
+     "cubes": [
+      {
+       "origin": [
+        4.8,
+        -4.0,
+        -1.0
+       ],
+       "size": [
+        1,
+        2,
+        3
+       ],
+       "uv": [
+        96,
+        41
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

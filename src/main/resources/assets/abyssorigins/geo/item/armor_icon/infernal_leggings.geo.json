@@ -1,0 +1,184 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.abyssorigins.armor_icon.infernal_leggings",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 2,
+    "visible_bounds_height": 2,
+    "visible_bounds_offset": [
+     0,
+     1,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "armorRightLeg",
+     "pivot": [
+      -2.0,
+      6.0,
+      0.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.0,
+        -6.0,
+        -1.75
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        0,
+        48
+       ],
+       "inflate": 0.5
+      }
+     ]
+    },
+    {
+     "name": "armorLeftLeg",
+     "pivot": [
+      2.0,
+      6.0,
+      0.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        0.0,
+        -6.0,
+        -1.75
+       ],
+       "size": [
+        4,
+        12,
+        4
+       ],
+       "uv": [
+        0,
+        48
+       ],
+       "inflate": 0.5,
+       "mirror": true
+      }
+     ]
+    },
+    {
+     "name": "legs_x16",
+     "parent": "armorRightLeg",
+     "pivot": [
+      -2.0,
+      5.0,
+      -2.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        3.5,
+        -2.75
+       ],
+       "size": [
+        5,
+        3,
+        1
+       ],
+       "uv": [
+        88,
+        16
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_x17",
+     "parent": "armorRightLeg",
+     "pivot": [
+      -2.0,
+      1.0,
+      -2.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        0.0,
+        -2.75
+       ],
+       "size": [
+        5,
+        2,
+        1
+       ],
+       "uv": [
+        100,
+        16
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_x18",
+     "parent": "armorLeftLeg",
+     "pivot": [
+      2.0,
+      5.0,
+      -2.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -0.5,
+        3.5,
+        -2.75
+       ],
+       "size": [
+        5,
+        3,
+        1
+       ],
+       "uv": [
+        112,
+        16
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_x19",
+     "parent": "armorLeftLeg",
+     "pivot": [
+      2.0,
+      1.0,
+      -2.25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -0.5,
+        0.0,
+        -2.75
+       ],
+       "size": [
+        5,
+        2,
+        1
+       ],
+       "uv": [
+        64,
+        20
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -8,6 +8,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -16,16 +18,20 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
+/**
+ * Human Hearts drop from humans: villagers, wandering traders, illagers and witches.
+ * 8% base chance, +3% per Looting level.
+ */
 @EventBusSubscriber(modid = Abyssorigins.MODID)
 public class VillagerHeartDropHandler {
 
-    private static final float BASE_CHANCE             = 0.05f;  // 5%
-    private static final float LOOTING_BONUS_PER_LEVEL = 0.025f; // +2.5% per level
+    private static final float BASE_CHANCE             = 0.08f;  // 8%
+    private static final float LOOTING_BONUS_PER_LEVEL = 0.03f;  // +3% per level
 
     @SubscribeEvent
     public static void onLivingDrops(LivingDropsEvent event) {
-        if (!(event.getEntity() instanceof Villager)
-                && !(event.getEntity() instanceof WanderingTrader)) return;
+        var e = event.getEntity();
+        if (!(e instanceof Villager || e instanceof WanderingTrader || e instanceof AbstractIllager || e instanceof Witch)) return;
 
         int lootingLevel = 0;
         if (event.getSource().getEntity() instanceof LivingEntity killer) {

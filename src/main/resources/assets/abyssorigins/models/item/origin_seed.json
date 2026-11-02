@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "abyssorigins:item/origin_seed",
+    "layer1": "abyssorigins:item/origin_seed_overlay"
+  }
+}

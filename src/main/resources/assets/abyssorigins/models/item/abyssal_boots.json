@@ -1,0 +1,145 @@
+{
+ "parent": "builtin/entity",
+ "gui_light": "front",
+ "textures": {
+  "particle": "abyssorigins:item/abyssal_boots"
+ },
+ "display": {
+  "gui": {
+   "rotation": [
+    22,
+    205,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1.071,
+    1.071,
+    1.071
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1.017,
+    1.017,
+    1.017
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.535,
+    0.535,
+    0.535
+   ]
+  },
+  "thirdperson_righthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.428,
+    0.428,
+    0.428
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.428,
+    0.428,
+    0.428
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.482,
+    0.482,
+    0.482
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.482,
+    0.482,
+    0.482
+   ]
+  },
+  "head": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.857,
+    0.857,
+    0.857
+   ]
+  }
+ }
+}

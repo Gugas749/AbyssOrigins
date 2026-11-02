@@ -5,10 +5,12 @@ import com.gugas749.abyssorigins.api.Specialization;
 import com.gugas749.abyssorigins.data.PlayerSpecializationData;
 import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.network.ModPackets;
+import com.gugas749.abyssorigins.power.Loadouts;
 import com.gugas749.abyssorigins.registry.SpecializationRegistry;
-import net.minecraft.resources.ResourceLocation;
+import com.gugas749.abyssorigins.skilltree.registry.SkillEffectHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -19,7 +21,8 @@ public class SpecializationEventHandler {
 
     private static final int SYNC_INTERVAL = 20;
 
-    @SubscribeEvent
+    /** Runs after OriginEventHandler (HIGH) so stats can be rebuilt with both layers known. */
+    @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
@@ -40,7 +43,11 @@ public class SpecializationEventHandler {
             }
         }
 
-        ModPackets.syncSpecialization(player);
+        Loadouts.ensure(player);   // lays out loadouts for saves from before slots existed
+        SkillEffectHandler.refresh(player);
+        ModPackets.syncAll(player);
+        ModPackets.sendAllIdentities(player);
+        ModPackets.broadcastIdentity(player);
     }
 
     @SubscribeEvent
@@ -72,9 +79,6 @@ public class SpecializationEventHandler {
 
         Specialization spec = SpecializationRegistry.get(data.getSpecId()).orElse(null);
         if (spec == null) return;
-
-        // Tick cooldown
-        data.tickAbilityCooldown();
 
         // Tick passives
         spec.getPassives().forEach(passive -> {

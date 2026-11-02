@@ -1,18 +1,20 @@
 package com.gugas749.abyssorigins.specialization.occultist;
 
 import com.gugas749.abyssorigins.Abyssorigins;
+import com.gugas749.abyssorigins.api.ClassTraitPassive;
+import com.gugas749.abyssorigins.api.Resonance;
 import com.gugas749.abyssorigins.api.Specialization;
 import com.gugas749.abyssorigins.specialization.occultist.skills.OccultistSkillTree;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Occultist Specialization.
+ * Occultist — the seer. Reveals what hides (including invisible Shades and Vampires),
+ * curses targets with Hexbolt, and sustains through forbidden rites.
  *
- * Available to ALL origins — any player can become an occultist via RP.
- * Assigned exclusively by OPs: /abyssorigins specialization set <player> occultist
+ * Available to ALL origins. Assigned by OPs: /abyssorigins specialization set <player> occultist
  *
- * To add a new specialization in the future, copy this class, change the ID,
- * write your passives/abilities/skill tree, and add one line to SpecializationRegistry.
+ * To add a new class, copy this class, change the ID, write passives/abilities/hooks/
+ * skill tree, and add one line to SpecializationRegistry.
  */
 public class OccultistSpecialization extends Specialization {
 
@@ -23,18 +25,20 @@ public class OccultistSpecialization extends Specialization {
             "abyssorigins.spec.occultist.description"
         );
 
-        setThemeColor(0xFF9922CC); // purple
+        setThemeColor(0xFFB35CFF);
+        setSigil("‡");
 
-        // Available to all origins — no restriction
-        // allowedOrigins("vampire") <- would restrict to vampires only if needed
-
-        // Passives
         addPassive(new OccultistDarkSensePassive());
+        addPassive(ClassTraitPassive.of("occultist_whispers"));
 
-        // Abilities — bound to F key (spec ability slot)
+        // F / G
         addAbility(new OccultVisionAbility());
+        addAbility(new HexboltAbility());
 
-        // Skill tree — built inline, no separate registration needed
+        addResonance(Resonance.of("voidborn", "abyssorigins.resonance.occultist_voidborn.name", "abyssorigins.resonance.occultist_voidborn.desc"));
+        addResonance(Resonance.of("vampire",  "abyssorigins.resonance.occultist_vampire.name",  "abyssorigins.resonance.occultist_vampire.desc"));
+
+        setHooks(new OccultistHooks());
         setSkillTree(OccultistSkillTree.build(getId()));
     }
 }
