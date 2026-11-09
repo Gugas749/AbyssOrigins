@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/shadowfang"
+  "particle": "abyssorigins:item/weapon/shadowfang"
  },
  "display": {
   "thirdperson_righthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.45,
-    0.45,
-    0.45
+    0.546,
+    0.546,
+    0.546
    ]
   },
   "gui": {
@@ -97,14 +97,14 @@
     0
    ],
    "translation": [
-    0.799,
-    1.3584,
-    0.0
+    -1.343,
+    -0.393,
+    0
    ],
    "scale": [
-    1.13,
-    1.13,
-    1.13
+    0.911,
+    0.911,
+    0.911
    ]
   },
   "head": {
@@ -131,14 +131,14 @@
     0
    ],
    "translation": [
-    -0.799,
-    1.3584,
-    0.0
+    1.343,
+    -0.393,
+    0
    ],
    "scale": [
-    1.13,
-    1.13,
-    1.13
+    0.911,
+    0.911,
+    0.911
    ]
   }
  }

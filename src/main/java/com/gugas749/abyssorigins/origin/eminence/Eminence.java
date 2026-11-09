@@ -45,10 +45,14 @@ public final class Eminence {
         return originSkills.contains(skillId);
     }
 
-    /** Every origin power the crown may bind: its own first, then each origin's in registration order. */
+    /**
+     * Every origin power the crown may bind: its own first, then each origin's in registration order.
+     * Hidden powers are not origin powers — the crown only holds them when granted, like anyone else.
+     */
     public static Map<String, OriginAbility> bindable() {
         Map<String, OriginAbility> map = new LinkedHashMap<>();
-        List<AbilityRegistry.Entry> origin = AbilityRegistry.all().stream().filter(e -> e.group() == SlotGroup.ORIGIN).toList();
+        List<AbilityRegistry.Entry> origin = AbilityRegistry.all().stream()
+            .filter(e -> e.group() == SlotGroup.ORIGIN && !e.grantOnly() && e.ability() instanceof OriginAbility).toList();
         origin.stream().filter(e -> PATH.equals(e.owner().getPath()))
             .forEach(e -> map.put(e.id(), (OriginAbility) e.ability()));
         origin.forEach(e -> map.putIfAbsent(e.id(), (OriginAbility) e.ability()));

@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/duskweave_helmet"
+  "particle": "abyssorigins:item/armor/duskweave"
  },
  "display": {
   "gui": {
@@ -17,9 +17,9 @@
     0
    ],
    "scale": [
-    1.087,
-    1.087,
-    1.087
+    1.0,
+    1.0,
+    1.0
    ]
   },
   "fixed": {
@@ -34,9 +34,9 @@
     0
    ],
    "scale": [
-    1.033,
-    1.033,
-    1.033
+    0.95,
+    0.95,
+    0.95
    ]
   },
   "ground": {
@@ -51,9 +51,9 @@
     0
    ],
    "scale": [
-    0.543,
-    0.543,
-    0.543
+    0.5,
+    0.5,
+    0.5
    ]
   },
   "thirdperson_righthand": {
@@ -68,9 +68,9 @@
     0
    ],
    "scale": [
-    0.435,
-    0.435,
-    0.435
+    0.4,
+    0.4,
+    0.4
    ]
   },
   "thirdperson_lefthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.435,
-    0.435,
-    0.435
+    0.4,
+    0.4,
+    0.4
    ]
   },
   "firstperson_righthand": {
@@ -102,9 +102,9 @@
     0
    ],
    "scale": [
-    0.489,
-    0.489,
-    0.489
+    0.45,
+    0.45,
+    0.45
    ]
   },
   "firstperson_lefthand": {
@@ -119,9 +119,9 @@
     0
    ],
    "scale": [
-    0.489,
-    0.489,
-    0.489
+    0.45,
+    0.45,
+    0.45
    ]
   },
   "head": {
@@ -136,9 +136,9 @@
     0
    ],
    "scale": [
-    0.87,
-    0.87,
-    0.87
+    0.8,
+    0.8,
+    0.8
    ]
   }
  }

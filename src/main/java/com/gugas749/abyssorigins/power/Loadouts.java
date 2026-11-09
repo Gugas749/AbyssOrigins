@@ -1,7 +1,7 @@
 package com.gugas749.abyssorigins.power;
 
+import com.gugas749.abyssorigins.hiddenpower.HiddenPowers;
 import com.gugas749.abyssorigins.api.*;
-import com.gugas749.abyssorigins.data.EminenceData;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerAbilityData;
 import com.gugas749.abyssorigins.network.ModPackets;
@@ -22,14 +22,15 @@ import java.util.*;
  *
  * A player <b>knows</b> an ability of a group when it is in their origin's / class's default
  * kit, inherited (the Eminence knows every origin power), taught by an unlocked skill node,
- * or granted directly. Known abilities can be bound into that group's slots; only bound
- * abilities can be activated. The known-set maths is pure so the client (Abilities tab,
+ * or granted directly. Hidden powers ({@link HiddenPowers}) are known only through a direct grant —
+ * no kit or skill node can teach one. Known abilities can be bound into that group's slots; only
+ * bound abilities can be activated. The known-set maths is pure so the client (Abilities tab,
  * staff profile) and the server agree; every mutation below is server-only and re-validated.
  */
 public final class Loadouts {
 
     /** Why a player knows an ability — shown as a badge in the UI. */
-    public enum Source { DEFAULT, INHERITED, SKILL, GRANTED }
+    public enum Source { DEFAULT, INHERITED, SKILL, GRANTED, HIDDEN }
 
     private Loadouts() {}
 
@@ -57,7 +58,7 @@ public final class Loadouts {
         }
         for (String id : granted) {
             AbilityRegistry.Entry e = AbilityRegistry.get(id);
-            if (e != null && e.group() == group) out.putIfAbsent(id, Source.GRANTED);
+            if (e != null && e.group() == group) out.putIfAbsent(id, e.grantOnly() ? Source.HIDDEN : Source.GRANTED);
         }
         return out;
     }
@@ -67,7 +68,7 @@ public final class Loadouts {
             SkillNode n = tree.getSkill(nodeId);
             if (n == null || !n.grantsAbility()) continue;
             AbilityRegistry.Entry e = AbilityRegistry.get(n.getGrantedAbility());
-            if (e != null && e.group() == group) out.putIfAbsent(e.id(), Source.SKILL);
+            if (e != null && !e.grantOnly() && e.group() == group) out.putIfAbsent(e.id(), Source.SKILL);
         }
     }
 
@@ -88,14 +89,10 @@ public final class Loadouts {
         return id.isEmpty() ? null : AbilityRegistry.ability(id);
     }
 
-    /**
-     * Whether {@code id} may sit in {@code slot}: it must belong to the group, and the
-     * class-specific slots only take powers owned by the player's current class.
-     */
-    public static boolean fits(SlotGroup group, int slot, String id, Specialization spec) {
+    /** Whether {@code id} may sit in {@code slot} of {@code group}: it must belong to that loadout. */
+    public static boolean fits(SlotGroup group, int slot, String id) {
         AbilityRegistry.Entry e = AbilityRegistry.get(id);
-        if (e == null || e.group() != group || !group.valid(slot)) return false;
-        return !group.isSpecific(slot) || (spec != null && spec.getId().equals(e.owner()));
+        return e != null && e.group() == group && group.valid(slot);
     }
 
     // ---- Mutations (server) -----------------------------------------------------------------
@@ -115,41 +112,28 @@ public final class Loadouts {
         d.clearCooldowns(AbilityRegistry.all().stream().filter(e -> e.group() == group).map(AbilityRegistry.Entry::id).toList());
         d.setLoadoutOwner(group, ownerKey(p, group));
 
+        List<? extends Ability> kit;
         if (group == SlotGroup.ORIGIN) {
             Origin origin = AbyssOriginsAPI.getPlayerOrigin(p);
-            if (origin == null) return;
-            if (Eminence.is(origin) && migrateEminence(p, d)) return;
-            List<OriginAbility> kit = origin.getAbilities();
-            for (int i = 0; i < Math.min(group.general(), kit.size()); i++) d.bind(group, i, kit.get(i).getId());
+            kit = origin == null ? List.of() : origin.getAbilities();
         } else {
             Specialization spec = Skills.specOf(p);
-            if (spec == null) return;
-            List<SpecializationAbility> kit = spec.getAbilities();
-            for (int i = 0; i < Math.min(group.general(), kit.size()); i++) d.bind(group, i, kit.get(i).getId());
+            kit = spec == null ? List.of() : spec.getAbilities();
         }
-    }
-
-    /** Carries an Eminence's bindings from the old sovereign data over once. */
-    private static boolean migrateEminence(ServerPlayer p, PlayerAbilityData d) {
-        EminenceData legacy = p.getData(OriginAttachments.EMINENCE.get());
-        if (!legacy.isInitialised()) return false;
-        List<String> old = legacy.bindings();
-        for (int i = 0; i < Math.min(SlotGroup.ORIGIN.size(), old.size()); i++)
-            if (AbilityRegistry.exists(old.get(i))) d.bind(SlotGroup.ORIGIN, i, old.get(i));
-        p.removeData(OriginAttachments.EMINENCE.get());
-        return true;
+        for (int i = 0; i < Math.min(group.size(), kit.size()); i++) d.bind(group, i, kit.get(i).getId());
+        // Hidden (staff-granted) powers survive a re-seed: put them back into whatever slots are left
+        if (group == SlotGroup.ORIGIN) d.granted().stream().filter(HiddenPowers::isHidden).forEach(id -> autoBind(p, id));
     }
 
     /** Unbinds anything the player no longer knows or that no longer fits its slot. */
     public static boolean prune(ServerPlayer p) {
         PlayerAbilityData d = data(p);
-        Specialization spec = Skills.specOf(p);
         boolean changed = false;
         for (SlotGroup g : SlotGroup.values()) {
             Map<String, Source> known = known(p, g);
             for (int i = 0; i < g.size(); i++) {
                 String id = d.slot(g, i);
-                if (id.isEmpty() || (known.containsKey(id) && fits(g, i, id, spec))) continue;
+                if (id.isEmpty() || (known.containsKey(id) && fits(g, i, id))) continue;
                 d.bind(g, i, "");
                 changed = true;
             }
@@ -160,7 +144,7 @@ public final class Loadouts {
     /** Player-requested binding (Abilities tab). Empty id unbinds. */
     public static boolean bind(ServerPlayer p, SlotGroup group, int slot, String id) {
         if (!group.valid(slot)) return false;
-        if (!id.isEmpty() && (!knows(p, group, id) || !fits(group, slot, id, Skills.specOf(p)))) return false;
+        if (!id.isEmpty() && (!knows(p, group, id) || !fits(group, slot, id))) return false;
         data(p).bind(group, slot, id);
         ModPackets.syncAbilities(p);
         return true;
@@ -187,13 +171,13 @@ public final class Loadouts {
         return true;
     }
 
-    /** Places a newly known ability into the first empty general slot, if it isn't bound yet. */
+    /** Places a newly known ability into the first empty slot of its loadout, if it isn't bound yet. */
     public static void autoBind(ServerPlayer p, String id) {
         AbilityRegistry.Entry e = AbilityRegistry.get(id);
         if (e == null || !knows(p, e.group(), id)) return;
         PlayerAbilityData d = data(p);
         if (d.slotOf(e.group(), id) >= 0) return;
-        for (int i = 0; i < e.group().general(); i++)
+        for (int i = 0; i < e.group().size(); i++)
             if (d.slot(e.group(), i).isEmpty()) { d.bind(e.group(), i, id); return; }
     }
 

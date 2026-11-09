@@ -49,12 +49,12 @@ public final class ClientAbilityData {
 
     /**
      * How many slots of a group the HUD shows: every slot up to the last bound one, and enough
-     * empty general slots to hint that known-but-unbound powers are waiting to be slotted.
+     * empty slots to hint that known-but-unbound powers are waiting to be slotted.
      */
     public static int visibleSlots(SlotGroup g) {
         int last = -1;
         for (int i = 0; i < g.size(); i++) if (!slot(g, i).isEmpty()) last = i;
-        int known = Math.min(g.general(), known(g).size());
+        int known = Math.min(g.size(), known(g).size());
         return Math.max(last + 1, known);
     }
 

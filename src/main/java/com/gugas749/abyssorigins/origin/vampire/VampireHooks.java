@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.origin.vampire;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.api.Ability;
 import com.gugas749.abyssorigins.api.OriginAbility;
 import com.gugas749.abyssorigins.api.PowerHooks;
@@ -115,7 +116,7 @@ public class VampireHooks implements PowerHooks {
         var level = player.serverLevel();
 
         // Blood Lord: victims burst, bleeding everything nearby
-        if (Skills.has(player, "vamp_blood_lord") && VampireBlood.hasBlood(victim)) {
+        if (AuraToggles.active(player, "vamp_blood_lord") && VampireBlood.hasBlood(victim)) {
             for (LivingEntity e : Targeting.enemiesAround(player, victim.position(), 4)) {
                 if (e == victim) continue;
                 e.hurt(Targeting.spell(player), 4f);

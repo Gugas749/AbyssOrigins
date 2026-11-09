@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.origin.demon;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.item.gear.Gear;
 import com.gugas749.abyssorigins.api.Ability;
 import com.gugas749.abyssorigins.api.PowerHooks;
@@ -60,7 +61,7 @@ public class DemonHooks implements PowerHooks {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 0, false, false, true));
 
         // Archfiend: a burning aura while wrathful
-        if (Skills.has(player, "demon_archfiend") && wrath >= 50f) {
+        if (AuraToggles.active(player, "demon_archfiend") && wrath >= 50f) {
             for (LivingEntity e : Targeting.enemiesAround(player, player.position(), 2.5)) {
                 e.igniteForSeconds(2);
                 e.hurt(Targeting.spell(player), 1f);
@@ -69,7 +70,7 @@ public class DemonHooks implements PowerHooks {
         }
 
         // Ember Heart: peak wrath erupts on its own
-        if (Skills.has(player, "demon_ember_heart") && wrath >= 95f
+        if (AuraToggles.active(player, "demon_ember_heart") && wrath >= 95f
                 && PowerState.tryTrigger(player, "demon_ember_heart", 600)) {
             DemonAbilities.HellfireNova.erupt(player, 0.75f);
         }

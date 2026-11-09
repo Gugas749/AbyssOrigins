@@ -39,8 +39,4 @@ public class SpecializationRegistry {
     public static Collection<Specialization> getAll() {
         return Collections.unmodifiableCollection(SPECS.values());
     }
-
-    public static boolean isRegistered(ResourceLocation id) {
-        return SPECS.containsKey(id);
-    }
 }

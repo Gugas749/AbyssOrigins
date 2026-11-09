@@ -50,9 +50,7 @@ public class SkillTree {
     public Component             getDisplayName()  { return displayName; }
 
     public Collection<SkillNode> getNodes()        { return Collections.unmodifiableCollection(nodes.values()); }
-    public Collection<SkillNode> getAllSkills()     { return getNodes(); }
 
-    public Optional<SkillNode>   getNode(String id){ return Optional.ofNullable(nodes.get(id)); }
     public SkillNode             getSkill(String id){ return nodes.get(id); }
 
     public List<SkillConnection> getConnections()  { return Collections.unmodifiableList(connections); }

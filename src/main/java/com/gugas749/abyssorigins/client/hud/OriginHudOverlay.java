@@ -5,6 +5,7 @@ import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.ClientAbilityData;
 import com.gugas749.abyssorigins.client.ClientTimers;
+import com.gugas749.abyssorigins.client.gui.HudLayoutScreen;
 import com.gugas749.abyssorigins.client.input.KeyBindings;
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import net.minecraft.client.DeltaTracker;
@@ -20,14 +21,16 @@ import java.util.List;
 import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 
 /**
- * Abyss HUD: a compact identity plate (origin sigil, level, XP thread, class line,
- * resource) and an ability bar (origin slots | class slots) with cooldown sweeps, ready
- * flashes, sustained-ability timers and key hints. Empty slots show a faint "+" when the
- * player knows a power that could fill them (bind it in the Abilities tab).
+ * Abyss HUD: a compact identity plate (origin sigil, level, XP thread, class line), the
+ * origin's resource bar, and an ability bar (origin slots | class slots) with cooldown
+ * sweeps, ready flashes, sustained-ability timers and key hints. Empty slots show a faint
+ * "+" when the player knows a power that could fill them (bind it in the Abilities tab).
+ *
+ * Each of the three is a {@link HudElement} the player can place with {@link HudLayoutScreen}.
  */
 public class OriginHudOverlay implements LayeredDraw.Layer {
 
-    private static final int SLOT = 22, SLOT_GAP = 4, GROUP_GAP = 8;
+    private static final int PLATE_WIDTH = 136, SLOT = 22, SLOT_GAP = 4, GROUP_GAP = 8;
 
     /** Per-slot memory for "just became ready" flashes: [cooldown last frame, flash start ms]. */
     private static final long[][] SLOT_MEMORY = new long[SlotGroup.ORIGIN.size() + SlotGroup.CLASS.size()][2];
@@ -39,29 +42,65 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
     public void render(GuiGraphics gfx, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui) return;
+        if (mc.screen instanceof HudLayoutScreen) return;   // the editor draws the HUD itself, over its fog
 
-        Origin origin = ClientOriginData.getOrigin();
-        if (origin == null) origin = AbyssOriginsAPI.getPlayerOrigin(mc.player);
+        Origin origin = currentOrigin();
         if (origin == null) return;
 
-        int sw = mc.getWindow().getGuiScaledWidth();
-        int sh = mc.getWindow().getGuiScaledHeight();
+        for (HudElement element : HudElement.values()) {
+            if (!element.isVisible() || !element.appliesTo(origin)) continue;
+            drawElement(gfx, element, origin, element.box(origin, false), ClientOriginData.getResourceBar(), false);
+        }
+    }
 
-        if (AbyssOriginsConfig.showOriginHud)         renderPlate(gfx, mc.font, sw, sh, origin);
-        if (AbyssOriginsConfig.showAbilityIndicators) renderAbilityBar(gfx, mc.font, sw, sh, origin);
+    /** The local player's origin, or null without one. */
+    public static Origin currentOrigin() {
+        Minecraft mc = Minecraft.getInstance();
+        Origin origin = ClientOriginData.getOrigin();
+        return origin != null || mc.player == null ? origin : AbyssOriginsAPI.getPlayerOrigin(mc.player);
+    }
+
+    /**
+     * Draws one element at its box, at its scale.
+     * @param resource the resource value the bar should show, 0..100
+     * @param preview  true in the layout editor, where an empty ability bar still needs something to grab
+     */
+    public static void drawElement(GuiGraphics g, HudElement element, Origin origin, HudElement.Box box, float resource, boolean preview) {
+        Font font = Minecraft.getInstance().font;
+        g.pose().pushPose();
+        g.pose().translate(box.x(), box.y(), 0);
+        g.pose().scale(element.layout().scale, element.layout().scale, 1f);
+        switch (element) {
+            case PLATE -> renderPlate(g, font, origin);
+            case RESOURCE -> ResourceBarRenderer.draw(g, font, BarStyle.current(origin), origin.getResourceType(),
+                origin.getThemeColor(), resource, AbyssOriginsConfig.showResourceValue);
+            case ABILITIES -> renderAbilityBar(g, font, origin, preview);
+        }
+        g.pose().popPose();
+    }
+
+    /** Unscaled size as {width, height}. */
+    public static int[] size(HudElement element, Origin origin, boolean preview) {
+        Font font = Minecraft.getInstance().font;
+        return switch (element) {
+            case PLATE -> new int[]{PLATE_WIDTH, plateHeight()};
+            case RESOURCE -> ResourceBarRenderer.size(BarStyle.current(origin), font, AbyssOriginsConfig.showResourceValue);
+            case ABILITIES -> abilityBarSize(abilitySlots(origin, preview), origin);
+        };
     }
 
     // ---- Identity plate -------------------------------------------------------
 
-    private static void renderPlate(GuiGraphics g, Font font, int sw, int sh, Origin origin) {
-        Specialization spec = ClientSpecializationData.getSpec();
-        ResourceType res = origin.getResourceType();
-        boolean showRes = res != null && !"blood".equals(res.getId()) && AbyssOriginsConfig.showResourceBar;
+    private static int plateHeight() {
+        return 26 + (ClientSpecializationData.getSpec() != null ? 11 : 0) + (AbyssOriginsConfig.showXpBar ? 0 : -4);
+    }
 
-        int w = 136;
-        int h = 26 + (spec != null ? 11 : 0) + (showRes ? 12 : 0) + (AbyssOriginsConfig.showXpBar ? 0 : -4);
-        int[] p = cornerPos(AbyssOriginsConfig.originInfoPosition, sw, sh, w, h, 4, 4);
-        int x = p[0], y = p[1];
+    private static void renderPlate(GuiGraphics g, Font font, Origin origin) {
+        Specialization spec = ClientSpecializationData.getSpec();
+
+        int w = PLATE_WIDTH;
+        int h = plateHeight();
+        int x = 0, y = 0;
         int accent = origin.getThemeColor();
 
         panel(g, x, y, w, h, accent, 1f);
@@ -97,38 +136,46 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
             g.drawString(font, spec.getDisplayName(), tx + 8, ly, mix(sc, TEXT, 0.4f), false);
             String sl = "Lv " + Math.max(1, ClientSpecializationData.getSpecLevel());
             g.drawString(font, sl, x + w - 5 - font.width(sl), ly, TEXT_DIM, false);
-            ly += 11;
-        }
-
-        if (showRes) {
-            float v = ClientOriginData.getResourceBar();
-            bar(g, x + 6, ly + 2, w - 34, 5, v / 100f, res.getBarColor(), true);
-            String num = String.valueOf(Math.round(v));
-            g.drawString(font, num, x + w - 5 - font.width(num), ly, res.getBarColor(), true);
         }
     }
 
     // ---- Ability bar ----------------------------------------------------------
 
-    private static void renderAbilityBar(GuiGraphics g, Font font, int sw, int sh, Origin origin) {
+    private static List<Slot> abilitySlots(Origin origin, boolean preview) {
         List<Slot> slots = new ArrayList<>();
         addGroup(slots, SlotGroup.ORIGIN, origin.getThemeColor());
-        int originCount = slots.size();
         Specialization spec = ClientSpecializationData.getSpec();
         if (spec != null) addGroup(slots, SlotGroup.CLASS, spec.getThemeColor());
-        if (slots.isEmpty()) return;
+        if (slots.isEmpty() && preview) {   // nothing unlocked yet, but the bar can still be placed
+            for (int i = 0; i < SlotGroup.ORIGIN.size(); i++) {
+                slots.add(new Slot(null, SlotGroup.ORIGIN, i, 0, 1, origin.getThemeColor()));
+            }
+        }
+        return slots;
+    }
 
+    private static int originSlotCount(List<Slot> slots) {
+        return (int) slots.stream().filter(s -> s.group == SlotGroup.ORIGIN).count();
+    }
+
+    private static int[] abilityBarSize(List<Slot> slots, Origin origin) {
+        if (slots.isEmpty()) return new int[]{0, 0};
+        int originCount = originSlotCount(slots);
+        int w = slots.size() * SLOT + (slots.size() - 1) * SLOT_GAP + (originCount > 0 && originCount < slots.size() ? GROUP_GAP : 0);
+        return new int[]{w, SLOT + (AbyssOriginsConfig.showKeybindHints ? 11 : 0) + 4};
+    }
+
+    private static void renderAbilityBar(GuiGraphics g, Font font, Origin origin, boolean preview) {
+        List<Slot> slots = abilitySlots(origin, preview);
+        int originCount = originSlotCount(slots);
         boolean hints = AbyssOriginsConfig.showKeybindHints;
-        int totalW = slots.size() * SLOT + (slots.size() - 1) * SLOT_GAP + (originCount > 0 && originCount < slots.size() ? GROUP_GAP : 0);
-        int totalH = SLOT + (hints ? 11 : 0) + 4;
-        int[] p = cornerPos(AbyssOriginsConfig.abilityIndicatorsPosition, sw, sh, totalW, totalH, 6, 6);
 
         float resource = ClientOriginData.getResourceBar();
-        int x = p[0];
+        int x = 0;
         for (int i = 0; i < slots.size(); i++) {
             if (i == originCount && originCount > 0) x += GROUP_GAP;
             Slot s = slots.get(i);
-            renderSlot(g, font, s, (s.group == SlotGroup.CLASS ? SlotGroup.ORIGIN.size() : 0) + s.index, x, p[1], resource, hints);
+            renderSlot(g, font, s, (s.group == SlotGroup.CLASS ? SlotGroup.ORIGIN.size() : 0) + s.index, x, 0, resource, hints);
             x += SLOT + SLOT_GAP;
         }
     }
@@ -218,17 +265,5 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
 
     private static String keyName(Slot s) {
         return KeyBindings.label(s.group, s.index, 3);
-    }
-
-    // ---- Helpers -------------------------------------------------------------
-
-    /** Top-left corner for a box anchored to a config corner. */
-    static int[] cornerPos(AbyssOriginsConfig.HudPosition pos, int sw, int sh, int w, int h, int insetX, int insetY) {
-        return switch (pos) {
-            case TOP_LEFT     -> new int[]{ insetX,          insetY };
-            case TOP_RIGHT    -> new int[]{ sw - w - insetX, insetY };
-            case BOTTOM_LEFT  -> new int[]{ insetX,          sh - h - insetY };
-            case BOTTOM_RIGHT -> new int[]{ sw - w - insetX, sh - h - insetY };
-        };
     }
 }

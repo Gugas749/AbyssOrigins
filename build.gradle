@@ -108,8 +108,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 dependencies {
-    // AbyssCore (publish it with `./gradlew publishToMavenLocal` in the AbyssCore project) + GeckoLib for gear models
-    implementation "com.gugas749:AbyssCore:${abysscore_version}"
+    implementation "com.gugas749:abysscore-neoforge-1.21.1:${abysscore_version}"
     implementation "curse.maven:geckolib-${geckolib_id}:${geckolib_version}"
 }
 

@@ -16,7 +16,6 @@ import com.gugas749.abyssorigins.skilltree.data.SkillNode;
 import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import com.gugas749.abyssorigins.skilltree.registry.SkillEffectHandler;
 import com.gugas749.abyssorigins.skilltree.registry.SkillTreeRegistry;
-import com.gugas749.abyssorigins.vfx.Palette;
 import com.gugas749.abyssorigins.vfx.Vfx;
 import com.gugas749.abyssorigins.vfx.VfxType;
 import net.minecraft.network.chat.Component;

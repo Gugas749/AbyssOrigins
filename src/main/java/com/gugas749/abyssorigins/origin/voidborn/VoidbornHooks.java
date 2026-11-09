@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.origin.voidborn;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.item.gear.Gear;
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.PowerHooks;
@@ -48,7 +49,7 @@ public class VoidbornHooks implements PowerHooks {
         if (Gear.fullSet(player, "voidborn")) extra += 0.5f;           // Abyssal Carapace
         if (extra > 0) Skills.addResource(player, extra);
 
-        if (Skills.has(player, "void_entropy_field")) {
+        if (AuraToggles.active(player, "void_entropy_field")) {
             for (LivingEntity e : Targeting.enemiesAround(player, player.position(), 4)) {
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0), player);
                 e.addEffect(new MobEffectInstance(ModEffects.SUNDERED, 30, 0), player);

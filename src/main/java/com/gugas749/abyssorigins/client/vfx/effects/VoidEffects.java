@@ -2,6 +2,7 @@ package com.gugas749.abyssorigins.client.vfx.effects;
 
 import com.gugas749.abyssorigins.client.vfx.VfxCanvas;
 import com.gugas749.abyssorigins.client.vfx.VfxInstance;
+import com.gugas749.abyssorigins.vfx.Vfx;
 import com.gugas749.abyssorigins.vfx.VfxSpec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -124,11 +125,49 @@ public final class VoidEffects {
 
     // ---- Rift ---------------------------------------------------------------------------
 
-    /** A vertical portal slit — tears open, swallows light, and seals itself. */
+    /**
+     * A vertical portal slit — tears open, swallows light, and seals itself. With {@link Vfx#SUSTAIN}
+     * it tears open just as fast but stays open for the whole duration (extra = 1: already open),
+     * sealing over the last {@link #SEAL} ticks, as soon as it is stopped, or when the server's
+     * re-broadcasts stop arriving for {@link #ORPHANED} ticks (it was closed out of earshot).
+     */
     public static final class Rift extends VfxInstance {
+        /** Opening / sealing time of a sustained rift: the same speed as the 40-tick one-shot. */
+        private static final float TEAR = 0.22f * 40, SEAL = 0.45f * 40;
+        private static final int ORPHANED = 60;
+        private final boolean sustain, preOpened;
+        private int sealing = -1, lastHeard = 0;
+
         public Rift(VfxSpec s) {
             super(s, s.duration());
-            spawnSparks(s.pos(), 14, 0.2, Vec3.ZERO, s.color(), s.color2(), 16, 0.0);
+            sustain = s.has(Vfx.SUSTAIN);
+            preOpened = sustain && s.extra() == 1f;
+            if (!preOpened) spawnSparks(s.pos(), 14, 0.2, Vec3.ZERO, s.color(), s.color2(), 16, 0.0);
+        }
+
+        @Override
+        public boolean release() {
+            if (!sustain) return false;
+            if (sealing < 0) sealing = age;
+            return true;
+        }
+
+        @Override
+        public void refresh() { lastHeard = age; }
+
+        @Override
+        public boolean tick() {
+            if (sustain && sealing < 0 && age - lastHeard > ORPHANED) sealing = age;
+            if (sealing >= 0 && age - sealing >= SEAL && age < lifetime) age = lifetime - 1;
+            return super.tick();
+        }
+
+        private float openness(float t, float pt) {
+            if (!sustain) return envelope(t, 0.22f, 0.45f);
+            float a = age + pt;
+            float in = preOpened ? 1f : smooth(a / TEAR);
+            float out = sealing >= 0 ? smooth(1f - (a - sealing) / SEAL) : smooth((lifetime - a) / SEAL);
+            return Math.min(in, out);
         }
 
         @Override
@@ -136,7 +175,7 @@ public final class VoidEffects {
             Vec3 ctr = spec.pos();
             Vec3 facing = VfxCanvas.horizontal(spec.dir());
             Vec3 right = new Vec3(-facing.z, 0, facing.x);
-            float open = envelope(t, 0.22f, 0.45f);
+            float open = openness(t, pt);
             float sec = seconds(pt);
             double h = (spec.scale() > 0 ? spec.scale() : 2.2) / 2;
             double rx = 0.55 * open, ry = h * (0.45 + 0.55 * open);

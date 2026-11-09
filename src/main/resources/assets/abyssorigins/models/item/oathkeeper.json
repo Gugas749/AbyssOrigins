@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/oathkeeper"
+  "particle": "abyssorigins:item/weapon/oathkeeper"
  },
  "display": {
   "thirdperson_righthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.45,
-    0.45,
-    0.45
+    0.443,
+    0.443,
+    0.443
    ]
   },
   "gui": {
@@ -97,14 +97,14 @@
     0
    ],
    "translation": [
-    -0.8098,
-    -0.8098,
-    0.0
+    0.542,
+    -0.681,
+    0
    ],
    "scale": [
-    0.818,
-    0.818,
-    0.818
+    0.73,
+    0.73,
+    0.73
    ]
   },
   "head": {
@@ -131,14 +131,14 @@
     0
    ],
    "translation": [
-    0.8098,
-    -0.8098,
-    0.0
+    -0.542,
+    -0.681,
+    0
    ],
    "scale": [
-    0.818,
-    0.818,
-    0.818
+    0.73,
+    0.73,
+    0.73
    ]
   }
  }

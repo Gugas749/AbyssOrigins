@@ -39,6 +39,15 @@ public abstract class VfxInstance {
 
     protected void onTick() {}
 
+    /**
+     * Asked to stop (a STOP spec matched it). Return true to play out a closing animation and end on
+     * its own; false (the default) removes it at once.
+     */
+    public boolean release() { return false; }
+
+    /** The server re-sent this (SUSTAIN) effect while it is showing — it is still wanted. */
+    public void refresh() {}
+
     public final void render(VfxCanvas c, float pt) {
         float t = (age + pt) / lifetime;
         if (t <= 1f) draw(c, t, pt);
@@ -92,7 +101,6 @@ public abstract class VfxInstance {
     // ---- Easing ------------------------------------------------------------------
 
     public static float easeOut(float t)  { t = Mth.clamp(t, 0f, 1f); float u = 1 - t; return 1 - u * u * u; }
-    public static float easeIn(float t)   { t = Mth.clamp(t, 0f, 1f); return t * t; }
     public static float smooth(float t)   { t = Mth.clamp(t, 0f, 1f); return t * t * (3 - 2 * t); }
     /** 0 → 1 → 0 envelope with configurable attack/release fractions. */
     public static float envelope(float t, float in, float out) {

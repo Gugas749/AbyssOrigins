@@ -25,7 +25,16 @@ public final class Vfx {
     public static final int VERTICAL = 1 << 2;
     /** Mirror / reverse direction (SLASH spin, HELIX). */
     public static final int REVERSE  = 1 << 3;
-    /** Not an effect: removes active effects of this type attached to {@code follow}. */
+    /**
+     * Long-lived (RIFT): opens and closes at its normal speed, but holds open for the whole duration.
+     * Re-sending one that is already showing is ignored, so it can be re-broadcast for late arrivals;
+     * with extra = 1 it appears already open.
+     */
+    public static final int SUSTAIN  = 1 << 4;
+    /**
+     * Not an effect: removes active effects of this type attached to {@code follow} — or, for an
+     * effect that follows nothing, standing at {@code pos}. A SUSTAIN effect plays its closing animation.
+     */
     public static final int STOP     = 1 << 30;
 
     private static final double RANGE = 96;

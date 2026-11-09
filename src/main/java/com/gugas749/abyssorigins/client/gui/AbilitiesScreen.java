@@ -6,6 +6,9 @@ import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
 import com.gugas749.abyssorigins.client.input.KeyBindings;
+import com.gugas749.abyssorigins.network.packet.TogglePassivePacket;
+import com.gugas749.abyssorigins.origin.eminence.Eminence;
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.power.Loadouts;
 import com.gugas749.abyssorigins.registry.AbilityRegistry;
 import com.gugas749.abyssorigins.skilltree.registry.SkillTreeRegistry;
@@ -19,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -30,16 +34,19 @@ import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
  * The Abilities tab: every power the player knows, and the slots they are bound to.
  *
  * Two loadouts with the same layout for every Origin and Class — Origin (five slots) and
- * Class (five slots plus three class-specific ones). Pick a slot, then a power; right-click
+ * Class (three slots). Pick a slot, then a power; right-click
  * a slot to clear it. Powers are grouped by the origin / class they come from, with a badge
  * for how they were learned (granted, skill, inherited). The server re-validates every bind.
+ * Above the powers, the loadout's area passives (auras, eruptions...) can be switched on and off.
  */
 public class AbilitiesScreen extends Screen {
 
-    private static final int SLOT = 30, SLOT_GAP = 8, GROUP_GAP = 18, HEADER_H = 18, ROW_H = 24;
+    private static final int SLOT = 30, SLOT_GAP = 8, HEADER_H = 18, ROW_H = 24;
 
-    private record Row(AbilityRegistry.Entry entry, Loadouts.Source source, Component header, int color, String sigil, int y, int h) {
-        boolean isHeader() { return entry == null; }
+    private record Row(AbilityRegistry.Entry entry, Loadouts.Source source, AuraToggles.Entry toggle,
+                       Component header, int color, String sigil, int y, int h) {
+        boolean isHeader() { return entry == null && toggle == null; }
+        boolean isToggle() { return toggle != null; }
     }
 
     private final Screen parent;
@@ -68,7 +75,7 @@ public class AbilitiesScreen extends Screen {
 
     private void selectFirstEmpty() {
         selected = 0;
-        for (int i = 0; i < group.general(); i++)
+        for (int i = 0; i < group.size(); i++)
             if (ClientAbilityData.slot(group, i).isEmpty()) { selected = i; return; }
     }
 
@@ -106,9 +113,8 @@ public class AbilitiesScreen extends Screen {
     private int slotsY()   { return panelTop() + 30; }
 
     private int slotX(int i) {
-        int total = group.size() * SLOT + (group.size() - 1) * SLOT_GAP + (group.specific() > 0 ? GROUP_GAP - SLOT_GAP : 0);
-        int x = width / 2 - total / 2 + i * (SLOT + SLOT_GAP);
-        return group.isSpecific(i) ? x + GROUP_GAP - SLOT_GAP : x;
+        int total = group.size() * SLOT + (group.size() - 1) * SLOT_GAP;
+        return width / 2 - total / 2 + i * (SLOT + SLOT_GAP);
     }
 
     private int listTop()    { return slotsY() + SLOT + 40; }
@@ -124,16 +130,32 @@ public class AbilitiesScreen extends Screen {
             if (entry != null) byOwner.computeIfAbsent(entry.owner(), k -> new ArrayList<>()).add(e);
         }
         int y = 0;
+        // Area passive switches first: short, and easy to miss below a long power list
+        List<AuraToggles.Entry> toggles = AuraToggles.ALL.stream().filter(t -> t.group() == group && ownsSkill(t.skill())).toList();
+        if (!toggles.isEmpty()) {
+            rows.add(new Row(null, null, null, Component.translatable("gui.abyssorigins.abilities.passives"), MIST, "◎", y, HEADER_H));
+            y += HEADER_H;
+            for (AuraToggles.Entry t : toggles) {
+                rows.add(new Row(null, null, t, null, 0, "", y, ROW_H));
+                y += ROW_H;
+            }
+        }
         for (List<Map.Entry<String, Loadouts.Source>> list : byOwner.values()) {
             AbilityRegistry.Entry first = AbilityRegistry.get(list.get(0).getKey());
-            rows.add(new Row(null, null, first.ownerName(), first.ownerColor(), first.ownerSigil(), y, HEADER_H));
+            rows.add(new Row(null, null, null, first.ownerName(), first.ownerColor(), first.ownerSigil(), y, HEADER_H));
             y += HEADER_H;
             for (Map.Entry<String, Loadouts.Source> e : list) {
-                rows.add(new Row(AbilityRegistry.get(e.getKey()), e.getValue(), null, 0, "", y, ROW_H));
+                rows.add(new Row(AbilityRegistry.get(e.getKey()), e.getValue(), null, null, 0, "", y, ROW_H));
                 y += ROW_H;
             }
         }
         contentH = y + 4;
+    }
+
+    /** Client view of Skills.has: the Eminence holds every origin-tree skill. */
+    private static boolean ownsSkill(String id) {
+        if (ClientSpecializationData.hasSkill(id) || ClientOriginData.hasSkill(id)) return true;
+        return Eminence.is(ClientOriginData.getOrigin()) && SkillTreeRegistry.getAllTrees().stream().anyMatch(t -> t.getSkill(id) != null);
     }
 
     // ---- Render -------------------------------------------------------------------------------
@@ -165,10 +187,6 @@ public class AbilitiesScreen extends Screen {
         g.drawString(font, hint, px + pw - 8 - font.width(hint), top + 8, alpha(TEXT_FAINT, fade), false);
 
         for (int i = 0; i < group.size(); i++) drawSlot(g, i, mx, my, fade, accent);
-        if (group.specific() > 0) {
-            int sx = slotX(group.general()), ex = slotX(group.size() - 1) + SLOT;
-            centered(g, font, Component.translatable("gui.abyssorigins.abilities.specific"), (sx + ex) / 2, slotsY() + SLOT + 13, alpha(TEXT_FAINT, fade));
-        }
         centered(g, font, Component.translatable("gui.abyssorigins.abilities.instructions"), width / 2, slotsY() + SLOT + 26, alpha(TEXT_FAINT, fade));
 
         // Known powers
@@ -181,6 +199,7 @@ public class AbilitiesScreen extends Screen {
             int y = lt + r.y - (int) scroll;
             if (y + r.h < lt || y > lb) continue;
             if (r.isHeader()) drawOwnerHeader(g, r, px + 10, y, pw - 20, fade);
+            else if (r.isToggle()) drawToggle(g, r, px + 10, y, pw - 20, mx, my, lt, lb, fade);
             else drawPower(g, r, px + 10, y, pw - 20, mx, my, lt, lb, fade);
         }
         g.disableScissor();
@@ -235,13 +254,13 @@ public class AbilitiesScreen extends Screen {
 
     private void drawSlot(GuiGraphics g, int i, int mx, int my, float fade, int accent) {
         int x = slotX(i), y = slotsY();
-        boolean hover = inside(mx, my, x, y, SLOT, SLOT), sel = i == selected, specific = group.isSpecific(i);
+        boolean hover = inside(mx, my, x, y, SLOT, SLOT), sel = i == selected;
         Ability a = ClientAbilityData.ability(group, i);
         int color = a != null ? a.getColor() : 0xFF5E5880;
 
         if (sel) glow(g, x + SLOT / 2f, y + SLOT / 2f, SLOT * 1.05f, accent, 0.55f + 0.3f * pulse(1.6f));
-        g.fillGradient(x, y, x + SLOT, y + SLOT, alpha(specific ? 0xF0281A30 : 0xF0201830, fade), alpha(0xF00A0814, fade));
-        border(g, x, y, SLOT, SLOT, alpha(sel ? accent : hover ? lighten(EDGE, 0.4f) : specific ? mix(EDGE, accent, 0.35f) : EDGE, fade));
+        g.fillGradient(x, y, x + SLOT, y + SLOT, alpha(0xF0201830, fade), alpha(0xF00A0814, fade));
+        border(g, x, y, SLOT, SLOT, alpha(sel ? accent : hover ? lighten(EDGE, 0.4f) : EDGE, fade));
         g.drawString(font, String.valueOf(i + 1), x + 3, y + 2, alpha(sel ? accent : TEXT_FAINT, fade), false);
 
         if (a != null) {
@@ -253,7 +272,7 @@ public class AbilitiesScreen extends Screen {
                 g.fill(x + 1, y + 1, x + SLOT - 1, y + 1 + ch, 0xA0050409);
             }
         } else {
-            centered(g, font, specific ? ownerSigil() : "+", x + SLOT / 2, y + SLOT / 2 - 3,
+            centered(g, font, "+", x + SLOT / 2, y + SLOT / 2 - 3,
                 alpha(TEXT_FAINT, (0.5f + 0.5f * pulse(2f)) * fade));
         }
         centered(g, font, KeyBindings.label(group, i, 4), x + SLOT / 2, y + SLOT + 3, alpha(sel ? accent : TEXT_DIM, fade));
@@ -265,7 +284,7 @@ public class AbilitiesScreen extends Screen {
                 tip.addAll(font.split(a.getDescription(), 220));
                 tip.add(Component.translatable("gui.abyssorigins.abilities.unbind").withStyle(ChatFormatting.DARK_GRAY).getVisualOrderText());
             } else {
-                tip.add(Component.translatable(specific ? "gui.abyssorigins.abilities.empty_specific" : "gui.abyssorigins.abilities.empty",
+                tip.add(Component.translatable("gui.abyssorigins.abilities.empty",
                     ownerName()).withStyle(ChatFormatting.GRAY).getVisualOrderText());
             }
             tooltip = tip;
@@ -282,7 +301,7 @@ public class AbilitiesScreen extends Screen {
     private void drawPower(GuiGraphics g, Row r, int x, int y, int w, int mx, int my, int lt, int lb, float fade) {
         Ability a = r.entry.ability();
         boolean hover = my >= lt && my <= lb && inside(mx, my, x, y + 1, w, ROW_H - 2);
-        boolean fits = Loadouts.fits(group, selected, a.getId(), ClientSpecializationData.getSpec());
+        boolean fits = Loadouts.fits(group, selected, a.getId());
         int bound = ClientAbilityData.data().slotOf(group, a.getId());
         int accent = a.getColor();
         float dim = fits ? 1f : 0.45f;
@@ -324,6 +343,39 @@ public class AbilitiesScreen extends Screen {
         }
     }
 
+    private void drawToggle(GuiGraphics g, Row r, int x, int y, int w, int mx, int my, int lt, int lb, float fade) {
+        AuraToggles.Entry t = r.toggle;
+        boolean on = ClientAbilityData.data().isPassiveOn(t.skill());
+        boolean hover = my >= lt && my <= lb && inside(mx, my, x, y + 1, w, ROW_H - 2);
+        int c = on ? GOOD : TEXT_FAINT;
+        float dim = on ? 1f : 0.6f;
+
+        g.fillGradient(x, y + 1, x + w, y + ROW_H - 1,
+            alpha(hover ? 0xD0261E3A : 0x80141024, fade), alpha(hover ? 0xD0181228 : 0x800C0A18, fade));
+        if (on) g.fill(x, y + 1, x + 2, y + ROW_H - 1, alpha(GOOD, fade));
+
+        diamond(g, x + 13, y + ROW_H / 2f, 8, alpha(darken(MIST, 0.35f), fade * dim));
+        centered(g, font, "◎", x + 13, y + ROW_H / 2 - 4, alpha(MIST, fade * dim));
+        g.drawString(font, t.name(), x + 28, y + 4, alpha(hover ? TEXT : lighten(TEXT_DIM, 0.2f), fade * dim), false);
+        g.drawString(font, Component.translatable("gui.abyssorigins.abilities.passive_area"), x + 28, y + 14, alpha(TEXT_FAINT, fade * dim), false);
+
+        // ON / OFF switch
+        Component state = Component.translatable(on ? "gui.abyssorigins.abilities.on" : "gui.abyssorigins.abilities.off");
+        int sw = Math.max(30, font.width(state) + 10), sx = x + w - 8 - sw;
+        g.fill(sx, y + 6, sx + sw, y + 17, alpha(withAlpha(c, on ? 50 : 25), fade));
+        border(g, sx, y + 6, sw, 11, alpha(c, (hover ? 1f : 0.75f) * fade));
+        centered(g, font, state, sx + sw / 2, y + 8, alpha(on ? GOOD : TEXT_DIM, fade));
+
+        if (hover) {
+            List<FormattedCharSequence> tip = new ArrayList<>();
+            tip.add(t.name().copy().withStyle(ChatFormatting.LIGHT_PURPLE).getVisualOrderText());
+            tip.addAll(font.split(t.description(), 230));
+            tip.add(Component.translatable(on ? "gui.abyssorigins.abilities.turn_off" : "gui.abyssorigins.abilities.turn_on")
+                .withStyle(on ? ChatFormatting.GOLD : ChatFormatting.GREEN).getVisualOrderText());
+            tooltip = tip;
+        }
+    }
+
     // ---- Input ----------------------------------------------------------------------------------
 
     @Override
@@ -352,8 +404,14 @@ public class AbilitiesScreen extends Screen {
                 if (r.isHeader()) continue;
                 int y = listTop() + r.y - (int) scroll;
                 if (!inside(mx, my, x, y + 1, w, ROW_H - 2)) continue;
+                if (r.isToggle()) {
+                    boolean on = ClientAbilityData.data().isPassiveOn(r.toggle.skill());
+                    PacketDistributor.sendToServer(new TogglePassivePacket(r.toggle.skill(), !on));
+                    click(on ? 0.8f : 1.4f);
+                    return true;
+                }
                 String id = r.entry.id();
-                if (!Loadouts.fits(group, selected, id, ClientSpecializationData.getSpec())) return true;
+                if (!Loadouts.fits(group, selected, id)) return true;
                 ClientAbilityData.bind(group, selected, id);
                 if (minecraft != null)
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2f, 0.8f));

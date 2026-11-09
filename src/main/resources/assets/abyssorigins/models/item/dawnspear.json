@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/dawnspear"
+  "particle": "abyssorigins:item/weapon/dawnspear"
  },
  "display": {
   "thirdperson_righthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.45,
-    0.45,
-    0.45
+    0.345,
+    0.345,
+    0.345
    ]
   },
   "gui": {
@@ -97,14 +97,14 @@
     0
    ],
    "translation": [
-    -0.8502,
-    -0.8502,
-    0.0
+    0.852,
+    -0.929,
+    0
    ],
    "scale": [
-    0.668,
-    0.668,
-    0.668
+    0.571,
+    0.571,
+    0.571
    ]
   },
   "head": {
@@ -131,14 +131,14 @@
     0
    ],
    "translation": [
-    0.8502,
-    -0.8502,
-    0.0
+    -0.852,
+    -0.929,
+    0
    ],
    "scale": [
-    0.668,
-    0.668,
-    0.668
+    0.571,
+    0.571,
+    0.571
    ]
   }
  }

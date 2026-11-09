@@ -6,7 +6,6 @@ import com.gugas749.abyssorigins.effect.ModEffects;
 import com.gugas749.abyssorigins.power.*;
 import com.gugas749.abyssorigins.vfx.Palette;
 import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;

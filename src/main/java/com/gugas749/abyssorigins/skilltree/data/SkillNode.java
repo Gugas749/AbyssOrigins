@@ -51,7 +51,6 @@ public class SkillNode {
     private final List<String> anyPrerequisites;
     private final List<String> exclusions;
     private final List<StatBonus> stats;
-    private final String    effectId;
     private final String    grantedAbility;
 
     private SkillNode(Builder b) {
@@ -68,7 +67,6 @@ public class SkillNode {
         this.anyPrerequisites = Collections.unmodifiableList(b.anyPrerequisites);
         this.exclusions   = Collections.unmodifiableList(b.exclusions);
         this.stats        = Collections.unmodifiableList(b.stats);
-        this.effectId     = b.effectId;
         this.grantedAbility = b.grantedAbility;
     }
 
@@ -83,15 +81,12 @@ public class SkillNode {
     public int       getPointCost()     { return pointCost; }
     public int       getGridX()         { return gridX; }
     public int       getGridY()         { return gridY; }
-    public int       getGridCol()       { return gridX; }
-    public int       getGridRow()       { return gridY; }
     public List<String> getPrereqs()    { return prerequisites; }
     public List<String> getPrerequisites() { return prerequisites; }
     /** At least one of these must be unlocked (OR-gate). Empty = no OR requirement. */
     public List<String> getAnyPrerequisites() { return anyPrerequisites; }
     public List<String> getExclusions() { return exclusions; }
     public List<StatBonus> getStats()   { return stats; }
-    public String    getEffectId()      { return effectId; }
     /** Ability id this node teaches (it then appears in the Abilities tab), or "" for none. */
     public String    getGrantedAbility(){ return grantedAbility; }
     public boolean   grantsAbility()    { return !grantedAbility.isEmpty(); }
@@ -162,10 +157,9 @@ public class SkillNode {
         private final List<String> anyPrerequisites = new ArrayList<>();
         private final List<String> exclusions       = new ArrayList<>();
         private final List<StatBonus> stats         = new ArrayList<>();
-        private String    effectId      = "";
         private String    grantedAbility = "";
 
-        public Builder(String id)                          { this.id = id; this.effectId = id; }
+        public Builder(String id)                          { this.id = id; }
 
         /** Pass a lang key — will be wrapped in Component.translatable(). */
         public Builder name(String langKey)                { this.displayName = Component.translatable(langKey); return this; }
@@ -174,8 +168,6 @@ public class SkillNode {
         /** Shorthand for name(prefix + ".name").desc(prefix + ".desc"). */
         public Builder lang(String prefix)                 { return name(prefix + ".name").desc(prefix + ".desc"); }
         /** Pass a Component directly (e.g. Component.literal for hardcoded text). */
-        public Builder nameComponent(Component c)          { this.displayName = c; return this; }
-        public Builder descComponent(Component c)          { this.description = c; return this; }
 
         public Builder icon(String i)                      { this.icon = i;          return this; }
         public Builder tier(SkillTier t)                   { this.tier = t;          return this; }
@@ -186,7 +178,6 @@ public class SkillNode {
         /** OR-gate: at least one of the given nodes must be unlocked. */
         public Builder requiresAny(String... ids)          { anyPrerequisites.addAll(Arrays.asList(ids)); return this; }
         public Builder excludes(String... ids)             { exclusions.addAll(Arrays.asList(ids));    return this; }
-        public Builder effect(String e)                    { this.effectId = e;      return this; }
         /**
          * Unlocking this node teaches an ability (by id). Register the ability with the tree's
          * owner via addUnlockableAbility(), then the player binds it in the Abilities tab.

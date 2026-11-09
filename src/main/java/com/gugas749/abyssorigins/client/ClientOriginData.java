@@ -47,7 +47,6 @@ public class ClientOriginData {
 
     public static Origin  getOrigin()       { return currentOrigin; }
     public static int     getLevel()        { return level; }
-    public static int     getXp()           { return xp; }
     public static float   getResourceBar()  { return resourceBar; }
     public static int     getSkillPoints()  { return skillPoints; }
 
@@ -63,5 +62,4 @@ public class ClientOriginData {
 
     /** XP earned inside the current level. */
     public static int getXpIntoLevel()   { return xp - XpEventHandler.xpRequiredToReach(level); }
-    public static int getXpForNextLevel(){ return XpEventHandler.xpForLevel(level); }
 }

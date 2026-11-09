@@ -14,7 +14,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/** One armor material per origin outfit. Textures: textures/models/armor/&lt;set&gt;_layer_1/2.png */
+/**
+ * One armor material per origin outfit. The armor is drawn by GeckoLib (see GearRenderers), so the
+ * material's layer only names the set — no vanilla textures/models/armor layer textures exist.
+ */
 public final class ModArmorMaterials {
 
     private static final DeferredRegister<ArmorMaterial> MATERIALS =

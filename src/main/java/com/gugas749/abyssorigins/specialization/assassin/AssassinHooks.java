@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.specialization.assassin;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.api.Ability;
 import com.gugas749.abyssorigins.api.PowerHooks;
 import com.gugas749.abyssorigins.effect.ModEffects;
@@ -73,7 +74,7 @@ public class AssassinHooks implements PowerHooks {
         }
 
         // Smoke Bomb: vanish when cornered (60s)
-        if (Skills.has(player, "assassin_smoke_bomb")
+        if (AuraToggles.active(player, "assassin_smoke_bomb")
                 && player.getHealth() - event.getAmount() < player.getMaxHealth() * 0.3f
                 && PowerState.tryTrigger(player, "assassin_smoke", 1200)) {
             for (LivingEntity e : Targeting.enemiesAround(player, player.position(), 4))

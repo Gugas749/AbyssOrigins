@@ -100,7 +100,7 @@ public final class AbilityCommand {
             for (int i = 0; i < g.size(); i++) {
                 String id = Loadouts.data(player).slot(g, i);
                 line.append(Component.literal((i == 0 ? "" : " | ") + (i + 1) + "=" + (id.isEmpty() ? "-" : id))
-                    .withStyle(g.isSpecific(i) ? ChatFormatting.AQUA : ChatFormatting.WHITE));
+                    .withStyle(ChatFormatting.WHITE));
             }
             src.sendSuccess(() -> line, false);
             Map<String, Loadouts.Source> known = Loadouts.known(player, g);

@@ -25,7 +25,7 @@ import java.util.List;
 public class ModPackets {
 
     public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar reg = event.registrar(Abyssorigins.MODID).versioned("3.0");
+        PayloadRegistrar reg = event.registrar(Abyssorigins.MODID).versioned("3.1");
 
         reg.playToClient(SyncOriginPacket.TYPE,         SyncOriginPacket.STREAM_CODEC,         SyncOriginPacket::handle);
         reg.playToClient(SyncSkillsPacket.TYPE,         SyncSkillsPacket.STREAM_CODEC,         SyncSkillsPacket::handle);
@@ -47,6 +47,7 @@ public class ModPackets {
         reg.playToServer(UnlockSkillPacket.TYPE,        UnlockSkillPacket.STREAM_CODEC,        UnlockSkillPacket::handle);
         reg.playToServer(UnlockSpecSkillPacket.TYPE,    UnlockSpecSkillPacket.STREAM_CODEC,    UnlockSpecSkillPacket::handle);
         reg.playToServer(BindAbilityPacket.TYPE,        BindAbilityPacket.STREAM_CODEC,        BindAbilityPacket::handle);
+        reg.playToServer(TogglePassivePacket.TYPE,      TogglePassivePacket.STREAM_CODEC,      TogglePassivePacket::handle);
         reg.playToServer(ProfileEditPacket.TYPE,        ProfileEditPacket.STREAM_CODEC,        ProfileEditPacket::handle);
         reg.playToServer(ChooseOriginPacket.TYPE,       ChooseOriginPacket.STREAM_CODEC,       ChooseOriginPacket::handle);
         reg.playToServer(PresenceChoicePacket.TYPE,     PresenceChoicePacket.STREAM_CODEC,     PresenceChoicePacket::handle);
@@ -82,13 +83,14 @@ public class ModPackets {
         ));
     }
 
-    /** Granted abilities, both loadouts and every running cooldown. */
+    /** Granted abilities, both loadouts, every running cooldown and the switched-off area passives. */
     public static void syncAbilities(ServerPlayer player) {
         PlayerAbilityData d = Loadouts.data(player);
         List<SyncAbilitiesPacket.Cooldown> cds = new ArrayList<>();
         d.cooldowns().forEach((id, ticks) -> cds.add(new SyncAbilitiesPacket.Cooldown(id, ticks, d.cooldownMax(id))));
         PacketDistributor.sendToPlayer(player, new SyncAbilitiesPacket(
-            List.copyOf(d.granted()), d.slots(SlotGroup.ORIGIN), d.slots(SlotGroup.CLASS), cds));
+            List.copyOf(d.granted()), d.slots(SlotGroup.ORIGIN), d.slots(SlotGroup.CLASS), cds,
+            List.copyOf(d.passivesOff())));
     }
 
     public static void syncAll(ServerPlayer player) {

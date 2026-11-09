@@ -30,6 +30,18 @@ public final class AbilityStates {
     /** Duration used for "until toggled off" states. */
     public static final int INDEFINITE = Integer.MAX_VALUE / 2;
 
+    /**
+     * A timed effect that lives outside this class (it must outlast death or logout, say) but is
+     * shown to its owner the same way: synced with these states, so the HUD and client visuals treat it alike.
+     */
+    @FunctionalInterface
+    public interface TimerSource { void collect(ServerPlayer player, List<SyncTimersPacket.Entry> out); }
+
+    private static final List<TimerSource> SOURCES = new ArrayList<>();
+
+    /** Call during common setup. */
+    public static void addTimerSource(TimerSource source) { SOURCES.add(source); }
+
     private AbilityStates() {}
 
     public static void start(ServerPlayer player, String id, int ticks, Sustained handler) {
@@ -99,6 +111,10 @@ public final class AbilityStates {
         Map<String, State> map = STATES.getOrDefault(player.getUUID(), Map.of());
         List<SyncTimersPacket.Entry> entries = new ArrayList<>();
         map.forEach((id, s) -> entries.add(new SyncTimersPacket.Entry(id, s.remaining, s.max)));
+        for (TimerSource source : SOURCES) {
+            try { source.collect(player, entries); }
+            catch (Exception ex) { Abyssorigins.LOGGER.error("Timer source error: {}", ex.getMessage()); }
+        }
         PacketDistributor.sendToPlayer(player, new SyncTimersPacket(entries));
     }
 }

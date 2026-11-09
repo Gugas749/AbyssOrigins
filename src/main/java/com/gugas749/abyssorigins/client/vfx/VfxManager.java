@@ -9,6 +9,7 @@ import com.gugas749.abyssorigins.vfx.VfxSpec;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
@@ -40,6 +41,7 @@ public final class VfxManager {
     };
 
     private static final List<VfxInstance> ACTIVE = new ArrayList<>();
+    private static ClientLevel lastLevel;
     private static MultiBufferSource.BufferSource buffers;
     private static boolean reportedError;
 
@@ -51,8 +53,18 @@ public final class VfxManager {
         if (spec.has(Vfx.STOP)) {
             boolean byColor = spec.extra() == 1f;
             ACTIVE.removeIf(i -> i.spec().type() == spec.type() && i.spec().follow() == spec.follow()
-                && (!byColor || i.spec().color() == spec.color()));
+                && (spec.follow() >= 0 || samePlace(i.spec(), spec))
+                && (!byColor || i.spec().color() == spec.color())
+                && !i.release());
             return;
+        }
+        // A sustained effect is re-broadcast for players who missed it; whoever already shows it just
+        // takes the copy as a heartbeat (a sustained effect that stops hearing it closes itself)
+        if (spec.has(Vfx.SUSTAIN)) {
+            boolean showing = false;
+            for (VfxInstance i : ACTIVE)
+                if (i.spec().type() == spec.type() && i.spec().has(Vfx.SUSTAIN) && samePlace(i.spec(), spec)) { i.refresh(); showing = true; }
+            if (showing) return;
         }
         if (ACTIVE.size() >= MAX_EFFECTS) return;
         VfxInstance inst = create(spec);
@@ -81,6 +93,8 @@ public final class VfxManager {
         };
     }
 
+    private static boolean samePlace(VfxSpec a, VfxSpec b) { return a.pos().distanceToSqr(b.pos()) < 1.0E-4; }
+
     public static void clear() { ACTIVE.clear(); }
 
     public static int count() { return ACTIVE.size(); }
@@ -90,7 +104,8 @@ public final class VfxManager {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) { ACTIVE.clear(); return; }
+        if (mc.level == null) { ACTIVE.clear(); lastLevel = null; return; }
+        if (mc.level != lastLevel) { ACTIVE.clear(); lastLevel = mc.level; }   // new dimension: effects belong to the old one
         if (mc.isPaused()) return;
         ACTIVE.removeIf(i -> !i.tick());
     }

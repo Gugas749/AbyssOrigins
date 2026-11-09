@@ -3,6 +3,7 @@ package com.gugas749.abyssorigins.client.gear;
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.item.gear.OriginArmorItem;
 import com.gugas749.abyssorigins.item.gear.OriginWeaponItem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +29,8 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
  *           animations/item/armor/SET.animation.json, textures/item/armor/SET(_glowmask).png
  *   icon:   geo/item/armor_icon/SET_PIECE.geo.json — uses the outfit's texture and animation
  * Every animation file must define a looping "idle" animation.
+ * The _glowmask texture is optional: without one the gear simply doesn't glow (GeckoLib's glow
+ * layer is only added when the mask exists — added without one, it renders the model black).
  */
 public final class GearRenderers {
 
@@ -47,7 +50,7 @@ public final class GearRenderers {
             public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
                 if (renderer == null) {
                     renderer = new GeoItemRenderer<>(new DefaultedItemGeoModel<OriginWeaponItem>(rl("weapon/" + id(item))));
-                    renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+                    if (hasGlowmask("weapon/" + id(item))) renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
                 }
                 return renderer;
             }
@@ -63,7 +66,7 @@ public final class GearRenderers {
             public <T extends LivingEntity> HumanoidModel<?> getGeoArmorRenderer(T entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<T> original) {
                 if (armor == null) {
                     armor = new GeoArmorRenderer<>(new DefaultedItemGeoModel<OriginArmorItem>(rl("armor/" + item.set().id)));
-                    armor.addRenderLayer(new AutoGlowingGeoLayer<>(armor));
+                    if (hasGlowmask("armor/" + item.set().id)) armor.addRenderLayer(new AutoGlowingGeoLayer<>(armor));
                 }
                 return armor;
             }
@@ -75,11 +78,17 @@ public final class GearRenderers {
                     icon = new GeoItemRenderer<>(new DefaultedItemGeoModel<OriginArmorItem>(
                             rl("armor_icon/" + item.set().id + "_" + item.getType().getName()))
                         .withAltTexture(shared).withAltAnimations(shared));
-                    icon.addRenderLayer(new AutoGlowingGeoLayer<>(icon));
+                    if (hasGlowmask("armor/" + item.set().id)) icon.addRenderLayer(new AutoGlowingGeoLayer<>(icon));
                 }
                 return icon;
             }
         };
+    }
+
+    /** True if textures/item/PATH_glowmask.png exists. */
+    private static boolean hasGlowmask(String path) {
+        return Minecraft.getInstance().getResourceManager()
+            .getResource(rl("textures/item/" + path + "_glowmask.png")).isPresent();
     }
 
     private static String id(OriginWeaponItem item) {

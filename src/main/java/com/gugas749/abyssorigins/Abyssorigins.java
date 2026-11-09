@@ -4,11 +4,13 @@ import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.effect.ModEffects;
+import com.gugas749.abyssorigins.hiddenpower.Portals;
 import com.gugas749.abyssorigins.item.ModCreativeTab;
 import com.gugas749.abyssorigins.item.ModDataComponents;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.item.gear.ModArmorMaterials;
 import com.gugas749.abyssorigins.network.ModPackets;
+import com.gugas749.abyssorigins.power.AbilityStates;
 import com.gugas749.abyssorigins.registry.OriginRegistry;
 import com.gugas749.abyssorigins.registry.SpecializationRegistry;
 import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
@@ -30,7 +32,8 @@ public class Abyssorigins {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Abyssorigins(IEventBus modEventBus, ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.CLIENT, AbyssOriginsConfig.CLIENT_SPEC);
+        AbyssOriginsConfig.migrateOldFile();
+        modContainer.registerConfig(ModConfig.Type.CLIENT, AbyssOriginsConfig.CLIENT_SPEC, AbyssOriginsConfig.CLIENT_FILE);
 
         OriginAttachments.register(modEventBus);
         SkillAttachments.register(modEventBus);
@@ -44,6 +47,8 @@ public class Abyssorigins {
         // Presence: kneeling dims the world (not to black); the awed hold glints gold at the edges
         AbyssScreenOverlay.bindEffect(ModEffects.KNEELING, AbyssOverlaySpec.tint(0x07040C, 0.34f).fade(20, 30));
         AbyssScreenOverlay.bindEffect(ModEffects.AWED, AbyssOverlaySpec.vignette(0xC89A2E, 0.45f).fade(10, 15));
+        // Punishment: a crucified player's sight closes in, blood-dark at the edges
+        AbyssScreenOverlay.bindEffect(ModEffects.CRUCIFIED, AbyssOverlaySpec.vignette(0x3A0000, 0.6f).fade(10, 20));
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerPackets);
@@ -55,6 +60,7 @@ public class Abyssorigins {
         event.enqueueWork(() -> {
             OriginRegistry.registerAll();
             SpecializationRegistry.registerAll();
+            AbilityStates.addTimerSource(Portals::timers);   // an open portal's time left, on its creator's HUD
         });
         LOGGER.info("[AbyssOrigins] Origins and classes registered.");
     }

@@ -4,6 +4,7 @@ import com.gugas749.abyssorigins.api.*;
 import com.gugas749.abyssorigins.data.PlayerAbilityData;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.effect.ModEffects;
+import com.gugas749.abyssorigins.hiddenpower.realm.PunishRealm;
 import com.gugas749.abyssorigins.network.ModPackets;
 import com.gugas749.abyssorigins.origin.eminence.PresenceEvents;
 import com.gugas749.abyssorigins.registry.AbilityRegistry;
@@ -29,13 +30,16 @@ public final class AbilityController {
 
     public static void activate(ServerPlayer player, SlotGroup group, int slot) {
         if (!group.valid(slot) || player.isSpectator()) return;
-        Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
-        if (group == SlotGroup.ORIGIN ? origin == null : Skills.specOf(player) == null) return;
-        if (restrained(player)) return;
-
         PlayerAbilityData data = Loadouts.data(player);
         String id = data.slot(group, slot);
         Ability ability = id.isEmpty() ? null : AbilityRegistry.ability(id);
+
+        // Origin / class powers need their origin / class; hidden powers answer to whoever holds the grant
+        Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
+        boolean hidden = ability instanceof HiddenAbility;
+        if (!hidden && (group == SlotGroup.ORIGIN ? origin == null : Skills.specOf(player) == null)) return;
+        if (restrained(player)) return;
+
         if (ability == null) {
             player.displayClientMessage(Component.translatable("abyssorigins.message.slot_unbound", slot + 1), true);
             return;
@@ -48,6 +52,7 @@ public final class AbilityController {
         }
 
         if (toggleOff(player, ability)) { ModPackets.syncAbilities(player); return; }
+        if (hidden && ((HiddenAbility) ability).recast(player)) { ModPackets.syncAbilities(player); return; }
         if (data.cooldown(id) > 0) { cooldownMessage(player, data.cooldown(id)); return; }
 
         // Powers are paid from the origin's resource; without one (Human, or no origin) they cost nothing.
@@ -64,13 +69,17 @@ public final class AbilityController {
 
         if (cost > 0) od.drainResource(cost);
         data.startCooldown(id, effectiveCooldown(player, ability));
-        Powers.forEach(player, h -> h.onAbilityUsed(player, ability));
+        if (!hidden) Powers.forEach(player, h -> h.onAbilityUsed(player, ability));
         if (cost > 0) ModPackets.syncPlayer(player);
         ModPackets.syncAbilities(player);
     }
 
-    /** Held by a Presence, kneeling, or under a Royal Decree: no powers answer. */
+    /** Held by a Presence, kneeling, under a Royal Decree, or crucified: no powers answer. */
     private static boolean restrained(ServerPlayer player) {
+        if (PunishRealm.isPunished(player)) {
+            player.displayClientMessage(Component.translatable("abyssorigins.message.crucified"), true);
+            return true;
+        }
         if (PresenceEvents.held(player)) {
             player.displayClientMessage(Component.translatable("abyssorigins.message.held"), true);
             return true;
@@ -84,6 +93,7 @@ public final class AbilityController {
 
     public static int effectiveCooldown(ServerPlayer player, Ability ability) {
         int base = ability.cooldownTicks(player);
+        if (ability instanceof HiddenAbility) return Math.max(20, base);   // outside progression: no hook discounts
         float mult = Math.max(MIN_COOLDOWN_FACTOR, Powers.product(player, h -> h.cooldownMultiplier(player, ability)));
         return Math.max(20, Math.round(base * mult));
     }
@@ -98,12 +108,6 @@ public final class AbilityController {
     public static void reduceClassCooldown(ServerPlayer player, int index, int ticks) {
         Specialization spec = Skills.specOf(player);
         if (spec != null) reduceKit(player, spec.getAbilities(), index, ticks);
-    }
-
-    /** Reduces the cooldown of the origin's {@code index}-th default power, wherever it is bound. */
-    public static void reduceOriginCooldown(ServerPlayer player, int index, int ticks) {
-        Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
-        if (origin != null) reduceKit(player, origin.getAbilities(), index, ticks);
     }
 
     private static void reduceKit(ServerPlayer player, List<? extends Ability> kit, int index, int ticks) {

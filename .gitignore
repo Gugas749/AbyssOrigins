@@ -2,3 +2,9 @@
 /.gradle/
 /build/
 /build/classes/java/main/
+/API.md
+/GEAR.md
+/PROMPT.md
+/run/
+/.claude/
+/.idea/

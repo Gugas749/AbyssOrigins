@@ -56,21 +56,9 @@ public final class VfxCanvas {
         return b[0].scale(Math.cos(angle)).add(b[1].scale(Math.sin(angle)));
     }
 
-    public static Vec3 rotateY(Vec3 v, double angle) {
-        double c = Math.cos(angle), s = Math.sin(angle);
-        return new Vec3(v.x * c - v.z * s, v.y, v.x * s + v.z * c);
-    }
-
     public static Vec3 horizontal(Vec3 v) {
         Vec3 h = new Vec3(v.x, 0, v.z);
         return h.lengthSqr() < 1.0E-6 ? new Vec3(0, 0, 1) : h.normalize();
-    }
-
-    public static int lerpColor(int a, int b, float t) {
-        int r = (int) Mth.lerp(t, (a >> 16) & 0xFF, (b >> 16) & 0xFF);
-        int g = (int) Mth.lerp(t, (a >> 8) & 0xFF, (b >> 8) & 0xFF);
-        int bl = (int) Mth.lerp(t, a & 0xFF, b & 0xFF);
-        return (r << 16) | (g << 8) | bl;
     }
 
     // ---- Primitives ------------------------------------------------------------------

@@ -119,8 +119,4 @@ public class SkillEffectHandler {
             doomed.forEach(inst::removeModifier);
         });
     }
-
-    /** @deprecated kept for addon compatibility — use {@link #refresh(ServerPlayer)}. */
-    @Deprecated
-    public static void removeAllSkillEffects(ServerPlayer player) { removeAll(player); }
 }

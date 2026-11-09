@@ -1,36 +1,31 @@
 package com.gugas749.abyssorigins.api;
 
 /**
- * The two ability loadouts every player has. Each group has a fixed number of slots,
- * the same for every Origin / Class, so new powers only ever need a slot — never a new key.
+ * The two ability loadouts every player has. Each group has a fixed number of slots, the same
+ * for every Origin / Class, so new powers only ever need a slot — never a new key.
  *
- *   ORIGIN — five general slots (R V Z B N by default) for any origin power the player knows.
- *   CLASS  — five general slots plus three class-specific slots, which only accept powers
- *            owned by the player's current class.
+ *   ORIGIN — 5 slots (R V Z B N by default) for any origin power the player knows. Hidden
+ *            powers ({@link HiddenAbility}) also live here, so they count against the same cap.
+ *   CLASS  — 3 slots (F G + one unbound) for the powers of the player's current class.
  *
- * Change the numbers here to grow a loadout; storage, sync, keys and UI all size from them.
+ * At most {@link #MAX_ACTIVE} powers can be active (bound) at once. Change the numbers here to
+ * resize a loadout; storage, sync, keys and UI all size from them.
  */
 public enum SlotGroup {
-    ORIGIN(5, 0),
-    CLASS(5, 3);
+    ORIGIN(5),
+    CLASS(3);
 
-    private final int general;
-    private final int specific;
+    /** Every slot of every loadout: the most powers a player can have bound at once. */
+    public static final int MAX_ACTIVE = ORIGIN.size + CLASS.size;
 
-    SlotGroup(int general, int specific) {
-        this.general  = general;
-        this.specific = specific;
-    }
+    private final int size;
 
-    /** Slots that accept any power of this group the player knows. */
-    public int general()  { return general; }
-    /** Trailing slots reserved for the owner's own powers (class-specific). */
-    public int specific() { return specific; }
-    public int size()     { return general + specific; }
+    SlotGroup(int size) { this.size = size; }
 
-    public boolean isSpecific(int slot) { return slot >= general && slot < size(); }
-    public boolean valid(int slot)      { return slot >= 0 && slot < size(); }
+    public int size()              { return size; }
+    public boolean valid(int slot) { return slot >= 0 && slot < size; }
 
+    /** Class powers go in the class loadout; origin and hidden powers in the origin loadout. */
     public static SlotGroup of(Ability ability) {
         return ability instanceof SpecializationAbility ? CLASS : ORIGIN;
     }

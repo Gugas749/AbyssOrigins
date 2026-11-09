@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/abyssal_boots"
+  "particle": "abyssorigins:item/armor/abyssal"
  },
  "display": {
   "gui": {
@@ -17,9 +17,9 @@
     0
    ],
    "scale": [
-    1.071,
-    1.071,
-    1.071
+    1.0,
+    1.0,
+    1.0
    ]
   },
   "fixed": {
@@ -34,9 +34,9 @@
     0
    ],
    "scale": [
-    1.017,
-    1.017,
-    1.017
+    0.95,
+    0.95,
+    0.95
    ]
   },
   "ground": {
@@ -51,9 +51,9 @@
     0
    ],
    "scale": [
-    0.535,
-    0.535,
-    0.535
+    0.5,
+    0.5,
+    0.5
    ]
   },
   "thirdperson_righthand": {
@@ -68,9 +68,9 @@
     0
    ],
    "scale": [
-    0.428,
-    0.428,
-    0.428
+    0.4,
+    0.4,
+    0.4
    ]
   },
   "thirdperson_lefthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.428,
-    0.428,
-    0.428
+    0.4,
+    0.4,
+    0.4
    ]
   },
   "firstperson_righthand": {
@@ -102,9 +102,9 @@
     0
    ],
    "scale": [
-    0.482,
-    0.482,
-    0.482
+    0.45,
+    0.45,
+    0.45
    ]
   },
   "firstperson_lefthand": {
@@ -119,9 +119,9 @@
     0
    ],
    "scale": [
-    0.482,
-    0.482,
-    0.482
+    0.45,
+    0.45,
+    0.45
    ]
   },
   "head": {
@@ -136,9 +136,9 @@
     0
    ],
    "scale": [
-    0.857,
-    0.857,
-    0.857
+    0.8,
+    0.8,
+    0.8
    ]
   }
  }

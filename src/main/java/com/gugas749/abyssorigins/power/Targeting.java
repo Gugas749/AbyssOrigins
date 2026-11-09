@@ -115,11 +115,14 @@ public final class Targeting {
 
     /** Point the caster is looking at (block hit or max range). */
     public static Vec3 lookPoint(ServerPlayer caster, double range) {
+        return lookBlock(caster, range).getLocation();               // a miss reports the end of the ray
+    }
+
+    /** The block the caster is looking at within {@code range}, with the face hit (MISS if none). */
+    public static BlockHitResult lookBlock(ServerPlayer caster, double range) {
         Vec3 eye = caster.getEyePosition();
         Vec3 end = eye.add(caster.getLookAngle().scale(range));
-        BlockHitResult hit = caster.level().clip(new ClipContext(eye, end,
-            ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
-        return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
+        return caster.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
     }
 
     // ---- Damage helpers -----------------------------------------------------

@@ -155,9 +155,18 @@ public class OriginRegistry {
         Origin eminence = create(Eminence.PATH, ImpactLevel.HIGH);
         eminence.setHidden(true)
                 .setThemeColor(0xFF000000 | Eminence.COLOR).setSigil("♛")
+                // Sovereign Body: the crown has no tree of its own, so its strength is innate.
+                // Health: (20 + 16) x 1.25 = 45 (22.5 hearts). Damage: (base + 2) x 1.30.
                 .setHealthModifier(1.25f)
-                .setDamageModifier(1.15f)
-                .setSpeedModifier(1.05f)
+                .setDamageModifier(1.30f)
+                .setSpeedModifier(1.10f)
+                .addStat(StatBonus.add(Attributes.MAX_HEALTH, 16))
+                .addStat(StatBonus.add(Attributes.ARMOR, 8))
+                .addStat(StatBonus.add(Attributes.ARMOR_TOUGHNESS, 4))
+                .addStat(StatBonus.add(Attributes.KNOCKBACK_RESISTANCE, 0.4))
+                .addStat(StatBonus.add(Attributes.ATTACK_DAMAGE, 2))
+                .addStat(StatBonus.percent(Attributes.ATTACK_SPEED, 0.15))
+                .addStat(StatBonus.add(Attributes.SAFE_FALL_DISTANCE, 4))
                 .setResourceType(ResourceType.dominion())
                 .addTrait(O + "eminence.trait.1", true)
                 .addTrait(O + "eminence.trait.2", true)

@@ -18,17 +18,15 @@ public class KeyBindings {
     private static final int UNBOUND = InputConstants.UNKNOWN.getValue();
 
     /**
-     * One key per slot, sized from SlotGroup. Names of the first two of each group are kept
-     * from before the slot system so existing rebinds survive. Class slots 3-8 start unbound.
+     * One key per slot, sized from SlotGroup. Names are kept from before the slot system so
+     * existing rebinds survive. The third class slot starts unbound.
      */
     public static final KeyMapping[] ORIGIN_SLOTS = {
         slot("ability1", GLFW.GLFW_KEY_R), slot("ability2", GLFW.GLFW_KEY_V), slot("ability3", GLFW.GLFW_KEY_Z),
         slot("ability4", GLFW.GLFW_KEY_B), slot("ability5", GLFW.GLFW_KEY_N)
     };
     public static final KeyMapping[] CLASS_SLOTS = {
-        slot("spec_ability", GLFW.GLFW_KEY_F), slot("spec_ability2", GLFW.GLFW_KEY_G), slot("spec_ability3", UNBOUND),
-        slot("spec_ability4", UNBOUND), slot("spec_ability5", UNBOUND), slot("spec_ability6", UNBOUND),
-        slot("spec_ability7", UNBOUND), slot("spec_ability8", UNBOUND)
+        slot("spec_ability", GLFW.GLFW_KEY_F), slot("spec_ability2", GLFW.GLFW_KEY_G), slot("spec_ability3", UNBOUND)
     };
 
     public static final KeyMapping ORIGIN_INFO  = new KeyMapping("key.abyssorigins.origin_info",  KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, CATEGORY);

@@ -5,8 +5,8 @@ import com.gugas749.abyssorigins.api.Ability;
 import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
 import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.api.PowerHooks;
-import com.gugas749.abyssorigins.network.ModPackets;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -20,6 +20,9 @@ import java.util.function.Consumer;
  * and the same skills (Tempered, Fallen Grace, Dusk Dweller...) lift the bloodlines' weaknesses.
  */
 public class EminenceHooks implements PowerHooks {
+
+    /** Flat share of incoming damage the Eminence shrugs off, after every bloodline's own reactions. */
+    private static final float SOVEREIGN_REDUCTION = 0.20f;
 
     private List<PowerHooks> subjects;
 
@@ -59,6 +62,9 @@ public class EminenceHooks implements PowerHooks {
             try { h.onHurt(player, event); }
             catch (Exception e) { Abyssorigins.LOGGER.error("[AbyssOrigins] Eminence relay failed in {}", h.getClass().getSimpleName(), e); }
         }
+        // Sovereign Body: every blow lands lighter on the crown (void and /kill still bite in full)
+        if (!event.isCanceled() && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))
+            event.setAmount(event.getAmount() * (1f - SOVEREIGN_REDUCTION));
     }
 
     @Override

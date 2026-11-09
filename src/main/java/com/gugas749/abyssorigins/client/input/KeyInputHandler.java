@@ -7,7 +7,7 @@ import com.gugas749.abyssorigins.client.ClientAbilityData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.ClientTimers;
 import com.gugas749.abyssorigins.client.gui.AbilitiesScreen;
-import com.gugas749.abyssorigins.client.gui.HudConfigScreen;
+import com.gugas749.abyssorigins.client.gui.HudLayoutScreen;
 import com.gugas749.abyssorigins.client.gui.OriginInfoScreen;
 import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
 import net.minecraft.client.KeyMapping;
@@ -56,6 +56,6 @@ public class KeyInputHandler {
             mc.setScreen(new AbilitiesScreen(null, SlotGroup.ORIGIN));
 
         if (KeyBindings.HUD_CONFIG.consumeClick())
-            mc.setScreen(new HudConfigScreen(null));
+            HudLayoutScreen.open();
     }
 }

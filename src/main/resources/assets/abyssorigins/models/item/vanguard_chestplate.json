@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/vanguard_chestplate"
+  "particle": "abyssorigins:item/armor/vanguard"
  },
  "display": {
   "gui": {
@@ -17,9 +17,9 @@
     0
    ],
    "scale": [
-    0.773,
-    0.773,
-    0.773
+    0.585,
+    0.585,
+    0.585
    ]
   },
   "fixed": {
@@ -34,9 +34,9 @@
     0
    ],
    "scale": [
-    0.734,
-    0.734,
-    0.734
+    0.556,
+    0.556,
+    0.556
    ]
   },
   "ground": {
@@ -51,9 +51,9 @@
     0
    ],
    "scale": [
-    0.387,
-    0.387,
-    0.387
+    0.292,
+    0.292,
+    0.292
    ]
   },
   "thirdperson_righthand": {
@@ -68,9 +68,9 @@
     0
    ],
    "scale": [
-    0.309,
-    0.309,
-    0.309
+    0.234,
+    0.234,
+    0.234
    ]
   },
   "thirdperson_lefthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.309,
-    0.309,
-    0.309
+    0.234,
+    0.234,
+    0.234
    ]
   },
   "firstperson_righthand": {
@@ -102,9 +102,9 @@
     0
    ],
    "scale": [
-    0.348,
-    0.348,
-    0.348
+    0.263,
+    0.263,
+    0.263
    ]
   },
   "firstperson_lefthand": {
@@ -119,9 +119,9 @@
     0
    ],
    "scale": [
-    0.348,
-    0.348,
-    0.348
+    0.263,
+    0.263,
+    0.263
    ]
   },
   "head": {
@@ -136,9 +136,9 @@
     0
    ],
    "scale": [
-    0.618,
-    0.618,
-    0.618
+    0.468,
+    0.468,
+    0.468
    ]
   }
  }

@@ -16,6 +16,7 @@ import java.util.*;
  *  *_loadout      — which origin / class the slots were laid out for, so a change (or a save from
  *                   before loadouts existed) re-seeds them with the new default kit.
  *  cooldowns      — per ability id, not per slot, so rebinding a power can never skip its cooldown.
+ *  passives_off   — area passives (see AuraToggles) the player has switched off.
  */
 public class PlayerAbilityData {
 
@@ -26,8 +27,9 @@ public class PlayerAbilityData {
         Codec.STRING.optionalFieldOf("origin_loadout", "").forGetter(d -> d.originLoadout),
         Codec.STRING.optionalFieldOf("class_loadout", "").forGetter(d -> d.classLoadout),
         Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("cooldowns", Map.of()).forGetter(d -> d.cooldowns),
-        Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("cooldown_max", Map.of()).forGetter(d -> d.cooldownMax)
-    ).apply(i, (granted, oSlots, cSlots, oLoad, cLoad, cds, maxes) -> {
+        Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("cooldown_max", Map.of()).forGetter(d -> d.cooldownMax),
+        Codec.STRING.listOf().optionalFieldOf("passives_off", List.of()).forGetter(d -> List.copyOf(d.passivesOff))
+    ).apply(i, (granted, oSlots, cSlots, oLoad, cLoad, cds, maxes, off) -> {
         PlayerAbilityData d = new PlayerAbilityData();
         d.granted.addAll(granted);
         d.setSlots(SlotGroup.ORIGIN, oSlots);
@@ -36,6 +38,7 @@ public class PlayerAbilityData {
         d.classLoadout  = cLoad;
         d.cooldowns.putAll(cds);
         d.cooldownMax.putAll(maxes);
+        d.passivesOff.addAll(off);
         return d;
     }));
 
@@ -45,6 +48,7 @@ public class PlayerAbilityData {
     private String classLoadout  = "";
     private final Map<String, Integer> cooldowns   = new HashMap<>();
     private final Map<String, Integer> cooldownMax = new HashMap<>();
+    private final Set<String> passivesOff = new LinkedHashSet<>();
 
     public PlayerAbilityData() {
         for (SlotGroup g : SlotGroup.values()) {
@@ -62,6 +66,12 @@ public class PlayerAbilityData {
     public boolean grant(String id)          { return granted.add(id); }
     /** @return true if it was granted. */
     public boolean revoke(String id)         { return granted.remove(id); }
+
+    // ---- Area passive switches ------------------------------------------------------------
+
+    public Set<String> passivesOff()            { return Collections.unmodifiableSet(passivesOff); }
+    public boolean isPassiveOn(String id)       { return !passivesOff.contains(id); }
+    public void setPassiveOn(String id, boolean on) { if (on) passivesOff.remove(id); else passivesOff.add(id); }
 
     // ---- Slots ---------------------------------------------------------------------------
 
@@ -141,9 +151,11 @@ public class PlayerAbilityData {
 
     /** Replaces everything with a synced copy (client side). */
     public void replace(Collection<String> granted, List<String> originSlots, List<String> classSlots,
-                        Map<String, int[]> cooldowns) {
+                        Map<String, int[]> cooldowns, Collection<String> passivesOff) {
         this.granted.clear();
         this.granted.addAll(granted);
+        this.passivesOff.clear();
+        this.passivesOff.addAll(passivesOff);
         setSlots(SlotGroup.ORIGIN, originSlots);
         setSlots(SlotGroup.CLASS, classSlots);
         this.cooldowns.clear();

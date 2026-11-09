@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/infernal_chestplate"
+  "particle": "abyssorigins:item/armor/infernal"
  },
  "display": {
   "gui": {
@@ -17,9 +17,9 @@
     0
    ],
    "scale": [
-    0.789,
-    0.789,
-    0.789
+    0.637,
+    0.637,
+    0.637
    ]
   },
   "fixed": {
@@ -34,9 +34,9 @@
     0
    ],
    "scale": [
-    0.75,
-    0.75,
-    0.75
+    0.605,
+    0.605,
+    0.605
    ]
   },
   "ground": {
@@ -51,9 +51,9 @@
     0
    ],
    "scale": [
-    0.395,
-    0.395,
-    0.395
+    0.319,
+    0.319,
+    0.319
    ]
   },
   "thirdperson_righthand": {
@@ -68,9 +68,9 @@
     0
    ],
    "scale": [
-    0.316,
-    0.316,
-    0.316
+    0.255,
+    0.255,
+    0.255
    ]
   },
   "thirdperson_lefthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.316,
-    0.316,
-    0.316
+    0.255,
+    0.255,
+    0.255
    ]
   },
   "firstperson_righthand": {
@@ -102,9 +102,9 @@
     0
    ],
    "scale": [
-    0.355,
-    0.355,
-    0.355
+    0.287,
+    0.287,
+    0.287
    ]
   },
   "firstperson_lefthand": {
@@ -119,9 +119,9 @@
     0
    ],
    "scale": [
-    0.355,
-    0.355,
-    0.355
+    0.287,
+    0.287,
+    0.287
    ]
   },
   "head": {
@@ -136,9 +136,9 @@
     0
    ],
    "scale": [
-    0.631,
-    0.631,
-    0.631
+    0.51,
+    0.51,
+    0.51
    ]
   }
  }

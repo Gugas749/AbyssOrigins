@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/event_horizon"
+  "particle": "abyssorigins:item/weapon/event_horizon"
  },
  "display": {
   "thirdperson_righthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.45,
-    0.45,
-    0.45
+    0.366,
+    0.366,
+    0.366
    ]
   },
   "gui": {
@@ -97,14 +97,14 @@
     0
    ],
    "translation": [
-    -0.7954,
-    -0.7954,
-    0.0
+    0.923,
+    -1.024,
+    0
    ],
    "scale": [
-    0.703,
-    0.703,
-    0.703
+    0.605,
+    0.605,
+    0.605
    ]
   },
   "head": {
@@ -131,14 +131,14 @@
     0
    ],
    "translation": [
-    0.7954,
-    -0.7954,
-    0.0
+    -0.923,
+    -1.024,
+    0
    ],
    "scale": [
-    0.703,
-    0.703,
-    0.703
+    0.605,
+    0.605,
+    0.605
    ]
   }
  }

@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.specialization.guardian;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.PowerHooks;
 import com.gugas749.abyssorigins.effect.ModEffects;
@@ -51,7 +52,7 @@ public class GuardianHooks implements PowerHooks {
     private static Optional<ServerPlayer> guardianNear(LivingEntity victim, String skill, boolean includeSelf) {
         if (!(victim.level() instanceof net.minecraft.server.level.ServerLevel level)) return Optional.empty();
         return level.getEntitiesOfClass(ServerPlayer.class, victim.getBoundingBox().inflate(8),
-                p -> (includeSelf || p != victim) && p.isAlive() && isGuardian(p) && Skills.has(p, skill))
+                p -> (includeSelf || p != victim) && p.isAlive() && isGuardian(p) && AuraToggles.active(p, skill))
             .stream().findFirst();
     }
 

@@ -2,7 +2,7 @@
  "parent": "builtin/entity",
  "gui_light": "front",
  "textures": {
-  "particle": "abyssorigins:item/sanguine_scythe"
+  "particle": "abyssorigins:item/weapon/sanguine_scythe"
  },
  "display": {
   "thirdperson_righthand": {
@@ -85,9 +85,9 @@
     0
    ],
    "scale": [
-    0.45,
-    0.45,
-    0.45
+    0.369,
+    0.369,
+    0.369
    ]
   },
   "gui": {
@@ -97,14 +97,14 @@
     0
    ],
    "translation": [
-    -0.5874,
-    -1.9655,
-    0.0
+    1.908,
+    -0.139,
+    0
    ],
    "scale": [
-    0.639,
-    0.639,
-    0.639
+    0.527,
+    0.527,
+    0.527
    ]
   },
   "head": {
@@ -131,14 +131,14 @@
     0
    ],
    "translation": [
-    0.5874,
-    -1.9655,
-    0.0
+    -1.908,
+    -0.139,
+    0
    ],
    "scale": [
-    0.639,
-    0.639,
-    0.639
+    0.527,
+    0.527,
+    0.527
    ]
   }
  }

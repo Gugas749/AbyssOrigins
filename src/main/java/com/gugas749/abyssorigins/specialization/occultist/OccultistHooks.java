@@ -8,7 +8,6 @@ import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
 import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;

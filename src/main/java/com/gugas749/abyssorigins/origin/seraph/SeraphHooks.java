@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.origin.seraph;
 
+import com.gugas749.abyssorigins.power.AuraToggles;
 import com.gugas749.abyssorigins.item.gear.Gear;
 import com.gugas749.abyssorigins.api.Ability;
 import com.gugas749.abyssorigins.api.PowerHooks;
@@ -52,7 +53,7 @@ public class SeraphHooks implements PowerHooks {
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 30, 0, false, false, true));
 
         // Beacon of Dawn: share the light
-        if (Skills.has(player, "seraph_beacon") && player.tickCount % 100 == 0 && Skills.resource(player) > 50f) {
+        if (AuraToggles.active(player, "seraph_beacon") && player.tickCount % 100 == 0 && Skills.resource(player) > 50f) {
             Skills.originData(player).drainResource(1f);
             for (LivingEntity ally : Targeting.alliesAround(player, player.position(), 6))
                 ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0, false, true), player);

@@ -30,18 +30,6 @@ public class OriginAttachments {
                 .build()
         );
 
-    /**
-     * Legacy: the Eminence's old sovereign bindings. Superseded by {@link #ABILITIES}; still
-     * registered so existing saves load, and read once to migrate the bindings (Loadouts.ensure).
-     */
-    public static final Supplier<AttachmentType<EminenceData>> EMINENCE =
-        ATTACHMENT_TYPES.register("eminence", () ->
-            AttachmentType.builder(EminenceData::new)
-                .serialize(EminenceData.CODEC)
-                .copyOnDeath()
-                .build()
-        );
-
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }

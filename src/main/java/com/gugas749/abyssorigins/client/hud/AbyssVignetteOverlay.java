@@ -4,6 +4,8 @@ import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientTimers;
 import com.gugas749.abyssorigins.client.gui.AbyssTheme;
+import com.gugas749.abyssorigins.hiddenpower.HiddenPowers;
+import com.gugas749.abyssorigins.hiddenpower.PortalAbility;
 import com.gugas749.abyssorigins.specialization.occultist.OccultVisionAbility;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -37,6 +39,16 @@ public class AbyssVignetteOverlay implements LayeredDraw.Layer {
             AbyssTheme.gradientH(g, w / 2 - lw / 2 - 30, 3, w / 2, 15, 0x00140822, 0xA0140822);
             AbyssTheme.gradientH(g, w / 2, 3, w / 2 + lw / 2 + 30, 15, 0xA0140822, 0x00140822);
             AbyssTheme.centered(g, mc.font, label, w / 2, 5, AbyssTheme.alpha(0xFFC48BFF, 0.75f + 0.25f * p));
+        }
+
+        // An open portal: how long until it closes, in the same banner style
+        String portal = HiddenPowers.PORTAL.getId();
+        if (ClientTimers.isActive(portal)) {
+            Component label = Component.translatable("abyssorigins.hud.portal_remaining", PortalAbility.clock(ClientTimers.remaining(portal)));
+            int lw = mc.font.width(label), y = ClientTimers.isActive(OccultVisionAbility.ID) ? 17 : 3;
+            AbyssTheme.gradientH(g, w / 2 - lw / 2 - 30, y, w / 2, y + 12, 0x00140822, 0xA0140822);
+            AbyssTheme.gradientH(g, w / 2, y, w / 2 + lw / 2 + 30, y + 12, 0xA0140822, 0x00140822);
+            AbyssTheme.centered(g, mc.font, label, w / 2, y + 2, 0xFFD9B8FF);
         }
 
         if (ClientTimers.isActive("shade_meld"))
