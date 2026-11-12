@@ -55,10 +55,12 @@ public final class Gear {
         return n;
     }
 
-    /** True if the player wears the complete outfit of their own origin. */
+    /** True if the player wears a complete outfit of their own origin (any of that origin's sets). */
     public static boolean fullSet(Player p, String origin) {
-        ArmorSet set = ArmorSet.forOrigin(origin);
-        return set != null && Skills.isOrigin(p, origin) && worn(p, set) == 4;
+        if (!Skills.isOrigin(p, origin)) return false;
+        for (ArmorSet set : ArmorSet.values())
+            if (set.origin.equals(origin) && worn(p, set) == 4) return true;
+        return false;
     }
 
     /** Number of worn pieces belonging to a different origin. */

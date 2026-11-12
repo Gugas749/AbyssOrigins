@@ -26,6 +26,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *  Kneeling     — knelt before the Eminence: frozen, vision darkened, trembling (Presence)
  *  Sealed       — origin and class abilities cannot be used (Royal Decree)
  *  Crucified    — bound to a cross in the punishment realm: frozen, can't act (Punish Dimension)
+ *  Dread        — a Dementor is near: the world goes cold and dark, -10% speed per level (Dementor)
  */
 public class ModEffects {
 
@@ -70,6 +71,10 @@ public class ModEffects {
         () -> new AbyssMobEffect(MobEffectCategory.HARMFUL, 0x5A0A0A, Kind.STUNNED)
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, rl("effect.crucified_speed"), -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
             .addAttributeModifier(Attributes.JUMP_STRENGTH, rl("effect.crucified_jump"), -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+
+    public static final DeferredHolder<MobEffect, MobEffect> DREAD = EFFECTS.register("dread",
+        () -> new AbyssMobEffect(MobEffectCategory.HARMFUL, 0x1B2733, Kind.MARKER)
+            .addAttributeModifier(Attributes.MOVEMENT_SPEED, rl("effect.dread_speed"), -0.1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
     private static ResourceLocation rl(String path) {
         return ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, path);

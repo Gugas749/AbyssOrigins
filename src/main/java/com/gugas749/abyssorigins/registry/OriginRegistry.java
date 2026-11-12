@@ -183,6 +183,7 @@ public class OriginRegistry {
                 .addAbility(new EminenceAbilities.Presence())
                 .addAbility(new EminenceAbilities.RoyalDecree())
                 .addAbility(new EminenceAbilities.Usurp())
+                .addAbility(new EminenceAbilities.MireCall())
                 .setHooks(new EminenceHooks());
         AbyssOriginsAPI.registerOrigin(eminence);
     }

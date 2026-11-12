@@ -30,6 +30,15 @@ public class OriginAttachments {
                 .build()
         );
 
+    /** The Eminence's Sovereign Scythe while it rests in the mire (see SovereignScythe). */
+    public static final Supplier<AttachmentType<ScytheData>> SCYTHE =
+        ATTACHMENT_TYPES.register("sovereign_scythe", () ->
+            AttachmentType.builder(ScytheData::new)
+                .serialize(ScytheData.CODEC)
+                .copyOnDeath()
+                .build()
+        );
+
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }

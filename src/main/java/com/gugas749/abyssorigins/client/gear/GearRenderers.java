@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
@@ -43,14 +44,20 @@ public final class GearRenderers {
     }
 
     public static GeoRenderProvider relic(OriginWeaponItem item) {
+        return relic(item, null);
+    }
+
+    /** A weapon rendered from geo/item/weapon/ID.geo.json; {@code id} null = the item's registry path. */
+    public static <T extends Item & GeoItem> GeoRenderProvider relic(T item, String id) {
         return new GeoRenderProvider() {
-            private GeoItemRenderer<OriginWeaponItem> renderer;
+            private GeoItemRenderer<T> renderer;
 
             @Override
             public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
                 if (renderer == null) {
-                    renderer = new GeoItemRenderer<>(new DefaultedItemGeoModel<OriginWeaponItem>(rl("weapon/" + id(item))));
-                    if (hasGlowmask("weapon/" + id(item))) renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+                    String path = "weapon/" + (id != null ? id : BuiltInRegistries.ITEM.getKey(item).getPath());
+                    renderer = new GeoItemRenderer<>(new DefaultedItemGeoModel<T>(rl(path)));
+                    if (hasGlowmask(path)) renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
                 }
                 return renderer;
             }
@@ -89,10 +96,6 @@ public final class GearRenderers {
     private static boolean hasGlowmask(String path) {
         return Minecraft.getInstance().getResourceManager()
             .getResource(rl("textures/item/" + path + "_glowmask.png")).isPresent();
-    }
-
-    private static String id(OriginWeaponItem item) {
-        return BuiltInRegistries.ITEM.getKey(item).getPath();
     }
 
     private static ResourceLocation rl(String path) {

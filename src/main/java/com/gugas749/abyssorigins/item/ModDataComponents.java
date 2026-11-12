@@ -1,7 +1,14 @@
 package com.gugas749.abyssorigins.item;
 
 import com.gugas749.abyssorigins.Abyssorigins;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import java.util.UUID;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -21,6 +28,23 @@ public final class ModDataComponents {
         COMPONENTS.registerComponentType("seed_origin", b -> b
             .persistent(ResourceLocation.CODEC)
             .networkSynchronized(ResourceLocation.STREAM_CODEC));
+
+    /** Binds a summoned Sovereign Scythe to its Eminence and to the summon that made it. */
+    public record ScytheBond(UUID owner, int generation) {
+        public static final Codec<ScytheBond> CODEC = RecordCodecBuilder.create(i -> i.group(
+            UUIDUtil.CODEC.fieldOf("owner").forGetter(ScytheBond::owner),
+            Codec.INT.fieldOf("generation").forGetter(ScytheBond::generation)
+        ).apply(i, ScytheBond::new));
+        public static final StreamCodec<ByteBuf, ScytheBond> STREAM_CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, ScytheBond::owner,
+            ByteBufCodecs.VAR_INT, ScytheBond::generation,
+            ScytheBond::new);
+    }
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ScytheBond>> SCYTHE_BOND =
+        COMPONENTS.registerComponentType("scythe_bond", b -> b
+            .persistent(ScytheBond.CODEC)
+            .networkSynchronized(ScytheBond.STREAM_CODEC));
 
     private ModDataComponents() {}
 

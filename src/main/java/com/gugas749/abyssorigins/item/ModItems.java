@@ -4,6 +4,7 @@ import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.item.gear.ArmorSet;
 import com.gugas749.abyssorigins.item.gear.OriginArmorItem;
 import com.gugas749.abyssorigins.item.gear.OriginWeaponItem;
+import com.gugas749.abyssorigins.item.gear.SovereignScytheItem;
 import com.gugas749.abyssorigins.item.gear.WeaponPowers;
 import com.gugas749.abyssorigins.item.ritual.OriginOrbItem;
 import com.gugas749.abyssorigins.item.ritual.OriginSeedItem;
@@ -49,6 +50,9 @@ public class ModItems {
         () -> new OriginWeaponItem("voidborn", new WeaponPowers.EventHorizon(),     6, -3.1f, 0.5));
     public static final DeferredItem<Item> SHADOWFANG = ITEMS.register("shadowfang",
         () -> new OriginWeaponItem("shade",    new WeaponPowers.Shadowfang(),       1, -1.6f, 0.0));
+
+    /** The Eminence's own weapon — summoned by Mire Call, never crafted (and not in the creative tab). */
+    public static final DeferredItem<Item> SOVEREIGN_SCYTHE = ITEMS.register("sovereign_scythe", SovereignScytheItem::new);
 
     public static final List<DeferredItem<Item>> WEAPONS =
         List.of(OATHKEEPER, SANGUINE_SCYTHE, HELLBRAND_CLEAVER, DAWNSPEAR, EVENT_HORIZON, SHADOWFANG);

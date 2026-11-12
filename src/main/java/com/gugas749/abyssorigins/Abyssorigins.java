@@ -3,7 +3,9 @@ package com.gugas749.abyssorigins;
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.SpecializationAttachments;
+import com.gugas749.abyssorigins.block.ModBlocks;
 import com.gugas749.abyssorigins.effect.ModEffects;
+import com.gugas749.abyssorigins.entity.ModEntities;
 import com.gugas749.abyssorigins.hiddenpower.Portals;
 import com.gugas749.abyssorigins.item.ModCreativeTab;
 import com.gugas749.abyssorigins.item.ModDataComponents;
@@ -42,6 +44,8 @@ public class Abyssorigins {
         ModArmorMaterials.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
+        ModEntities.register(modEventBus);
         ModCreativeTab.register(modEventBus);
 
         // Presence: kneeling dims the world (not to black); the awed hold glints gold at the edges
@@ -49,6 +53,8 @@ public class Abyssorigins {
         AbyssScreenOverlay.bindEffect(ModEffects.AWED, AbyssOverlaySpec.vignette(0xC89A2E, 0.45f).fade(10, 15));
         // Punishment: a crucified player's sight closes in, blood-dark at the edges
         AbyssScreenOverlay.bindEffect(ModEffects.CRUCIFIED, AbyssOverlaySpec.vignette(0x3A0000, 0.6f).fade(10, 20));
+        // Dread: a Dementor is near — cold, colourless dark closing in
+        AbyssScreenOverlay.bindEffect(ModEffects.DREAD, AbyssOverlaySpec.vignette(0x060B12, 0.5f).fade(15, 40));
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerPackets);

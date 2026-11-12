@@ -155,6 +155,24 @@ public final class EminenceAbilities {
         }
     }
 
+    // ---- Mire Call -----------------------------------------------------------------------------
+
+    /**
+     * Black mire boils up beside you and the Sovereign Scythe rises out of it into your hand, as you last left
+     * it (enchantments and all). Cast again while carrying it to let the mire take it back. See SovereignScythe.
+     */
+    public static class MireCall extends OriginAbility {
+        public MireCall() {
+            super("eminence_mire_call", K + "eminence_mire_call.name", K + "eminence_mire_call.desc", 6, 10);
+            icon("☽"); color(0xFF8C7AA8);
+        }
+
+        @Override
+        public boolean activate(ServerPlayer player) {
+            return SovereignScythe.call(player);
+        }
+    }
+
     // ---- Usurp --------------------------------------------------------------------------------
 
     /** Seize a target's blessings and their origin's power for yourself. */

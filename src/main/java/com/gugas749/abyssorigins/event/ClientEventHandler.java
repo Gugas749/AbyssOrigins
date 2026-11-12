@@ -16,7 +16,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import com.gugas749.abyssorigins.block.ModBlocks;
+import com.gugas749.abyssorigins.client.block.PunishCrossRenderer;
+import com.gugas749.abyssorigins.client.entity.DementorRenderer;
+import com.gugas749.abyssorigins.entity.ModEntities;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -49,6 +54,14 @@ public class ClientEventHandler {
                 ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, "origin_hud"),
                 new OriginHudOverlay()
             );
+        }
+
+        @SubscribeEvent
+        public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
+            event.registerEntityRenderer(ModEntities.ABYSS_MIRE.get(), com.gugas749.abyssorigins.client.entity.AbyssMireRenderer::new);
+            event.registerEntityRenderer(ModEntities.THROWN_SCYTHE.get(), com.gugas749.abyssorigins.client.entity.ThrownScytheRenderer::new);
+            event.registerBlockEntityRenderer(ModBlocks.PUNISH_CROSS_BE.get(), PunishCrossRenderer::new);
         }
 
         /** Seeds wear their origin's colour (layer 0; the glint layer stays untinted). */
