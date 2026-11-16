@@ -7,7 +7,7 @@ import com.gugas749.abyssorigins.client.ClientAbilityData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.ClientTimers;
 import com.gugas749.abyssorigins.client.gui.AbilitiesScreen;
-import com.gugas749.abyssorigins.client.gui.HudLayoutScreen;
+import com.gugas749.abyssorigins.client.hud.OriginsHud;
 import com.gugas749.abyssorigins.client.gui.OriginInfoScreen;
 import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
 import net.minecraft.client.KeyMapping;
@@ -27,7 +27,7 @@ public class KeyInputHandler {
         Player player = mc.player;
         if (player == null) return;
 
-        // Smooth client-side countdowns between server syncs — once per TICK (the old HUD did it per frame)
+        // Smooth client-side countdowns between server syncs - once per TICK (the old HUD did it per frame)
         if (!mc.isPaused()) {
             ClientAbilityData.tick();
             ClientTimers.tick();
@@ -48,7 +48,7 @@ public class KeyInputHandler {
         if (KeyBindings.ORIGIN_INFO.consumeClick() && origin != null)
             mc.setScreen(new OriginInfoScreen());
 
-        // The Eminence walks no single path: without a class tree its "tree" is the Abilities tab
+        // The Eminence has no tree of its own: without a class tree, open the Abilities tab
         if (KeyBindings.SKILL_TREE.consumeClick() && origin != null)
             mc.setScreen(new SkillTreeScreen());
 
@@ -56,6 +56,6 @@ public class KeyInputHandler {
             mc.setScreen(new AbilitiesScreen(null, SlotGroup.ORIGIN));
 
         if (KeyBindings.HUD_CONFIG.consumeClick())
-            HudLayoutScreen.open();
+            OriginsHud.INSTANCE.openEditor();
     }
 }

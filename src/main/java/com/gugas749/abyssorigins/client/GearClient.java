@@ -11,6 +11,11 @@ public final class GearClient {
 
     private GearClient() {}
 
+    /** The local player's origin level (1 without an origin). */
+    public static int localOriginLevel() {
+        return ClientOriginData.getOrigin() != null ? ClientOriginData.getLevel() : 1;
+    }
+
     public static boolean localAttuned(String origin) {
         Player p = Minecraft.getInstance().player;
         if (p == null) return true;

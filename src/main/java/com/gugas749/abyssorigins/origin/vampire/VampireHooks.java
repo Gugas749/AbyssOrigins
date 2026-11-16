@@ -10,8 +10,8 @@ import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -44,8 +44,8 @@ public class VampireHooks implements PowerHooks {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 0, false, false, true));
         }
 
-        // Shadow Cloak: invisibility in low light
-        if (Skills.has(player, "vamp_shadow_cloak") && Targeting.lightAt(player) < 8
+        // Shadow Stalker: invisibility in low light
+        if (Skills.has(player, "vamp_shadow_stalker") && Targeting.lightAt(player) < 8
                 && !player.hasEffect(MobEffects.INVISIBILITY))
             player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false, true));
 
@@ -65,11 +65,11 @@ public class VampireHooks implements PowerHooks {
                 && player.getHealth() < player.getMaxHealth() && Skills.resource(player) > 30f) {
             player.heal(2f);
             Skills.originData(player).drainResource(2f);
-            Vfx.sparks(player.serverLevel(), Fx.chest(player), 0.6f, Palette.BLOOD, Palette.BLOOD_HI);
+            AbyssVfx.sparks(player.serverLevel(), Fx.chest(player), 0.6f, Palette.BLOOD, Palette.BLOOD_HI);
         }
 
-        // Progenitor: the night itself feeds you
-        if (Skills.has(player, "vamp_ascended_progenitor") && !player.level().isDay() && player.tickCount % 60 == 0)
+        // Day-walker: passive blood gain at night
+        if (Skills.has(player, "vamp_ascended_daywalker") && !player.level().isDay() && player.tickCount % 60 == 0)
             Skills.addResource(player, 1f);
     }
 
@@ -89,12 +89,12 @@ public class VampireHooks implements PowerHooks {
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,  60, 0), player);
         }
 
-        // Perfect Assassin: execute weakened prey (non-boss mobs die outright, players take double)
-        if (Skills.has(player, "vamp_specialist_assassin") && target.getHealth() / target.getMaxHealth() < 0.15f) {
+        // Shadow Master: execute weakened prey (non-boss mobs die outright, players take double)
+        if (Skills.has(player, "vamp_shadow_master") && target.getHealth() / target.getMaxHealth() < 0.15f) {
             if (target instanceof Player) event.setAmount(event.getAmount() * 2f);
             else if (!target.getType().is(Tags.EntityTypes.BOSSES)) event.setAmount(target.getHealth() + 20f);
-            Vfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(player.position())).scale(1.3f).extra(150)
-                .colors(Palette.BLOOD, Palette.BLOOD_HI).flags(Vfx.VERTICAL).duration(12).send(player.serverLevel());
+            AbyssVfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(player.position())).scale(1.3f).extra(150)
+                .colors(Palette.BLOOD, Palette.BLOOD_HI).flags(AbyssVfx.VERTICAL).duration(12).send(player.serverLevel());
         }
     }
 
@@ -102,12 +102,8 @@ public class VampireHooks implements PowerHooks {
     public void onDamageDealt(ServerPlayer player, LivingEntity target, DamageSource source, float amount) {
         if (!Targeting.isMelee(source, player) || !VampireBlood.hasBlood(target)) return;
         float lifesteal = 0f;
-        if (Skills.has(player, "vamp_blood_drain_skill"))   lifesteal += 0.10f;
+        if (Skills.has(player, "vamp_blood_frenzy"))        lifesteal += 0.10f;
         if (Skills.has(player, "vamp_forbidden_bloodpact")) lifesteal += 0.25f;
-        if (player.hasEffect(MobEffects.INVISIBILITY) && Skills.has(player, "vamp_synergy_bloodshadow")) {
-            lifesteal += 0.20f;
-            Skills.addResource(player, 5f);
-        }
         if (lifesteal > 0f) player.heal(amount * lifesteal);
     }
 
@@ -115,23 +111,18 @@ public class VampireHooks implements PowerHooks {
     public void onKill(ServerPlayer player, LivingEntity victim, DamageSource source) {
         var level = player.serverLevel();
 
-        // Blood Lord: victims burst, bleeding everything nearby
+        // Blood Lord: killed targets burst, applying Bleeding nearby
         if (AuraToggles.active(player, "vamp_blood_lord") && VampireBlood.hasBlood(victim)) {
             for (LivingEntity e : Targeting.enemiesAround(player, victim.position(), 4)) {
                 if (e == victim) continue;
                 e.hurt(Targeting.spell(player), 4f);
                 e.addEffect(new MobEffectInstance(ModEffects.BLEEDING, 80, 0), player);
             }
-            Vfx.burst(level, Fx.chest(victim), 1.6f, Palette.BLOOD, Palette.BLOOD_HI);
-            Vfx.shockwave(level, victim.position(), 4, Palette.BLOOD, Palette.BLOOD_HI, 16);
+            AbyssVfx.burst(level, Fx.chest(victim), 1.6f, Palette.BLOOD, Palette.BLOOD_HI);
+            AbyssVfx.shockwave(level, victim.position(), 4, Palette.BLOOD, Palette.BLOOD_HI, 16);
             Fx.sound(level, victim.position(), SoundEvents.SLIME_SQUISH, 1.0f, 0.5f);
         }
 
-        // Apex Predator: every kill fuels the hunt
-        if (Skills.has(player, "vamp_hybrid_predator")) {
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, 0, false, true));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,   100, 0, false, true));
-        }
     }
 
     @Override
@@ -139,7 +130,7 @@ public class VampireHooks implements PowerHooks {
         if (event.getSource().is(DamageTypeTags.IS_FALL) && Skills.has(player, "vamp_agility"))
             event.setAmount(event.getAmount() * 0.5f);
 
-        // Mist Form Mastery: dissolve into mist instead of taking a crippling blow (60s)
+        // Mist Form Mastery: avoid a heavy hit by turning to mist (60s)
         if (Skills.has(player, "vamp_mist_form")
                 && player.getHealth() - event.getAmount() < player.getMaxHealth() * 0.3f
                 && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)
@@ -148,8 +139,8 @@ public class VampireHooks implements PowerHooks {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 4, false, false));
             player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
             var level = player.serverLevel();
-            Vfx.of(VfxType.BURST).at(Fx.chest(player)).scale(1.4f).colors(0x2A0610, Palette.BLOOD).flags(Vfx.VOID).duration(16).send(level);
-            Vfx.of(VfxType.AURA).follow(player).scale(1.1f).colors(0x2A0610, Palette.BLOOD).flags(Vfx.VOID).duration(30).send(level);
+            AbyssVfx.of(VfxType.BURST).at(Fx.chest(player)).scale(1.4f).colors(0x2A0610, Palette.BLOOD).flags(AbyssVfx.VOID).duration(16).send(level);
+            AbyssVfx.of(VfxType.AURA).follow(player).scale(1.1f).colors(0x2A0610, Palette.BLOOD).flags(AbyssVfx.VOID).duration(30).send(level);
             Fx.sound(level, player.position(), SoundEvents.FIRE_EXTINGUISH, 0.8f, 0.6f);
             player.displayClientMessage(Component.translatable("abyssorigins.message.vamp_mist"), true);
         }
@@ -157,7 +148,7 @@ public class VampireHooks implements PowerHooks {
 
     @Override
     public boolean onLethal(ServerPlayer player, DamageSource source) {
-        // Immortal Flesh: 50 blood buys your life back (2 min)
+        // Immortal Flesh: spend 50 blood to survive a lethal hit (2 min)
         if (!Skills.has(player, "vamp_immortal_flesh") || Skills.resource(player) < 50f) return false;
         if (!PowerState.tryTrigger(player, "vamp_undying", 2400)) return false;
 
@@ -165,8 +156,8 @@ public class VampireHooks implements PowerHooks {
         player.setHealth(6f);
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1, false, true));
         var level = player.serverLevel();
-        Vfx.helix(level, player, 2.4f, Palette.BLOOD, Palette.BLOOD_HI, 30);
-        Vfx.of(VfxType.PILLAR).at(player.position()).scale(6).extra(0.8f).colors(Palette.BLOOD, Palette.BLOOD_HI).duration(30).send(level);
+        AbyssVfx.helix(level, player, 2.4f, Palette.BLOOD, Palette.BLOOD_HI, 30);
+        AbyssVfx.of(VfxType.PILLAR).at(player.position()).scale(6).extra(0.8f).colors(Palette.BLOOD, Palette.BLOOD_HI).duration(30).send(level);
         Fx.sound(level, player.position(), SoundEvents.WARDEN_HEARTBEAT, 1.2f, 0.7f);
         player.displayClientMessage(Component.translatable("abyssorigins.message.vamp_undying"), true);
         return true;
@@ -176,8 +167,8 @@ public class VampireHooks implements PowerHooks {
     public float cooldownMultiplier(ServerPlayer player, Ability ability) {
         if (!(ability instanceof OriginAbility)) return 1f;
         float m = 1f;
-        if (Skills.has(player, "vamp_swiftness"))   m *= 0.95f;
-        if (Skills.has(player, "vamp_bat_mastery")) m *= 0.90f;
+        if (Skills.has(player, "vamp_agility"))      m *= 0.95f;
+        if (Skills.has(player, "vamp_night_hunter")) m *= 0.90f;
         if (Skills.has(player, "vamp_mist_form"))   m *= 0.80f;
         if (Skills.has(player, "vamp_nosferatu"))   m *= 0.75f;
         return m;

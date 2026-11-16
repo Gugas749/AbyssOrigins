@@ -14,9 +14,9 @@ import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
 
 /**
- * Screen-edge atmosphere for active states, drawn only on the owning client:
- * Occult Vision (violet veil + indicator), Shadow Meld (ink), Bat Form (crimson),
- * and a heartbeat vignette when a vampire's blood runs low.
+ * Screen-edge vignettes for active states, drawn only on the owning client:
+ * Occult Vision (violet + indicator), Shadow Meld (dark), Bat Form (crimson),
+ * and a pulsing red vignette when a vampire's blood runs low.
  *
  * Replaces the old hard-edged rectangle frame drawn by OccultVisionAbility.
  */

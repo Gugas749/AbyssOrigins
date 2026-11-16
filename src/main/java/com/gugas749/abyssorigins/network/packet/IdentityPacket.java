@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Server → clients: which origin / class other players have. Only identities are
- * shared (never resources, cooldowns or skills) — used for Occult Vision aura colours.
+ * Server -> clients: which origin / class other players have. Only identities are
+ * shared (never resources, cooldowns or skills) - used for Occult Vision aura colours.
  */
 public record IdentityPacket(List<Entry> entries) implements CustomPacketPayload {
 

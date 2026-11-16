@@ -1,6 +1,7 @@
 package com.gugas749.abyssorigins.item;
 
 import com.gugas749.abyssorigins.Abyssorigins;
+import com.gugas749.abyssorigins.item.gear.RelicMastery;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
@@ -45,6 +46,12 @@ public final class ModDataComponents {
         COMPONENTS.registerComponentType("scythe_bond", b -> b
             .persistent(ScytheBond.CODEC)
             .networkSynchronized(ScytheBond.STREAM_CODEC));
+
+    /** A relic weapon's mastery (level and XP toward the next), kept on the item itself. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<RelicMastery>> RELIC_MASTERY =
+        COMPONENTS.registerComponentType("relic_mastery", b -> b
+            .persistent(RelicMastery.CODEC)
+            .networkSynchronized(RelicMastery.STREAM_CODEC));
 
     private ModDataComponents() {}
 

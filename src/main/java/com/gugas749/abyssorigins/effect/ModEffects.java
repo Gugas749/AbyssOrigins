@@ -16,17 +16,19 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * Custom buffs and debuffs shared by every origin and class.
  *
- *  Bleeding     — armour-ignoring damage over time (Vampire, Assassin, Warrior)
- *  Hexed        — takes +15% damage per level from all sources (Occultist, Assassin)
- *  Sundered     — -2 armour per level (Voidborn, Warrior)
- *  Sanctified   — takes -20% damage per level (Seraph, Guardian)
- *  Hunter's Mark— takes +25% projectile damage; level II: +15% from everything (Ranger)
- *  Stunned      — cannot move or jump, mobs lose their target (Guardian, Shade)
- *  Awed         — held in place by the Eminence's Presence while choosing / resisting
- *  Kneeling     — knelt before the Eminence: frozen, vision darkened, trembling (Presence)
- *  Sealed       — origin and class abilities cannot be used (Royal Decree)
- *  Crucified    — bound to a cross in the punishment realm: frozen, can't act (Punish Dimension)
- *  Dread        — a Dementor is near: the world goes cold and dark, -10% speed per level (Dementor)
+ *  Bleeding     - armour-ignoring damage over time (Vampire, Assassin, Warrior)
+ *  Hexed        - takes +15% damage per level from all sources (Occultist, Assassin)
+ *  Sundered     - -2 armour per level (Voidborn, Warrior)
+ *  Sanctified   - takes -20% damage per level (Seraph, Guardian)
+ *  Hunter's Mark- takes +25% projectile damage; level II: +15% from everything (Ranger)
+ *  Stunned      - cannot move or jump, mobs lose their target (Guardian, Shade)
+ *  Awed         - held in place by the Eminence's Presence while choosing / resisting
+ *  Kneeling     - frozen, darkened vision, camera tremble (Presence)
+ *  Sealed       - origin and class abilities cannot be used (Royal Decree)
+ *  Crucified    - bound to a cross in the punishment realm: frozen, can't act (Punish Dimension)
+ *  Dread        - a Dementor is near: dark vignette, -10% speed per level (Dementor)
+ *  Nullified    - inside the Inverted Spear of Heaven's field: skills, passives and powers are disabled
+ *  Phasing      - Shade's Phase Walk: can pass through blocks
  */
 public class ModEffects {
 
@@ -75,6 +77,14 @@ public class ModEffects {
     public static final DeferredHolder<MobEffect, MobEffect> DREAD = EFFECTS.register("dread",
         () -> new AbyssMobEffect(MobEffectCategory.HARMFUL, 0x1B2733, Kind.MARKER)
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, rl("effect.dread_speed"), -0.1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+
+    /** Refreshed every few ticks by NullField while the wielder is near; see power/Nullification. */
+    public static final DeferredHolder<MobEffect, MobEffect> NULLIFIED = EFFECTS.register("nullified",
+        () -> new AbyssMobEffect(MobEffectCategory.HARMFUL, 0xD8DCE3, Kind.MARKER));
+
+    /** Lets the player pass through blocks (PlayerPhaseMixin); kept alive by ShadeAbilities.PhaseWalk. */
+    public static final DeferredHolder<MobEffect, MobEffect> PHASING = EFFECTS.register("phasing",
+        () -> new AbyssMobEffect(MobEffectCategory.BENEFICIAL, 0x2A2F55, Kind.MARKER, ParticleTypes.SQUID_INK));
 
     private static ResourceLocation rl(String path) {
         return ResourceLocation.fromNamespaceAndPath(Abyssorigins.MODID, path);

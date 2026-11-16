@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.UUID;
 
 /**
- * Staff client → server: one edit to a player's profile. Untrusted — ProfileService re-checks
+ * Staff client -> server: one edit to a player's profile. Untrusted - ProfileService re-checks
  * ADMIN permission, that the target is online, and validates / clamps every argument.
  */
 public record ProfileEditPacket(UUID target, ProfileService.Action action, String arg, int value) implements CustomPacketPayload {

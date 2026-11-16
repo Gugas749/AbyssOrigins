@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Change origin / class. Hidden origins are only listed when the player already has one —
+ * Change origin / class. Hidden origins are only listed when the player already has one -
  * grant them with /abyssorigins set, as before. Changing refunds the old tree (confirmed first).
  */
 final class AssignTab implements AbyssTab {
@@ -92,7 +92,7 @@ final class AssignTab implements AbyssTab {
     }
 
     private static Choice none() {
-        return new Choice("", Component.translatable("gui.abyssorigins.profile.none"), "–", 0xFF5E5880);
+        return new Choice("", Component.translatable("gui.abyssorigins.profile.none"), "-", 0xFF5E5880);
     }
 
     private static void select(AbyssScrollList<Choice> list, List<Choice> items, String id) {

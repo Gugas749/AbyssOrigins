@@ -5,7 +5,7 @@ import com.gugas749.abyssorigins.api.OriginPassive;
 import com.gugas749.abyssorigins.item.ModItems;
 import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 
@@ -39,7 +39,7 @@ public class VampireSunPassive extends OriginPassive {
             player.hurt(player.level().damageSources().onFire(), dmg);
             player.igniteForSeconds(1);
             if (player.level() instanceof ServerLevel sl)
-                Vfx.sparks(sl, Fx.chest(player), 0.5f, 0xFFB050, 0xFFF0C0);
+                AbyssVfx.sparks(sl, Fx.chest(player), 0.5f, 0xFFB050, 0xFFF0C0);
         }
     }
 }

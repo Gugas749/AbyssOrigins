@@ -8,8 +8,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -41,7 +41,7 @@ public class GuardianHooks implements PowerHooks {
         if (player.tickCount % 20 != 0) return;
         if (Skills.has(player, "guardian_second_skin") && player.getHealth() < player.getMaxHealth() * 0.5f)
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 0, false, false, true));
-        // Bastion: plant your feet
+        // Bastion: Resistance II while sneaking and standing still
         if (Skills.has(player, "guardian_bastion") && player.isShiftKeyDown()
                 && player.getDeltaMovement().horizontalDistanceSqr() < 1.0E-3)
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 1, false, false, true));
@@ -68,7 +68,7 @@ public class GuardianHooks implements PowerHooks {
                 && event.getDamageSource().getDirectEntity() == attacker) {
             attacker.hurt(p.damageSources().thorns(p), 3f);
             attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0), p);
-            Vfx.burst(p.serverLevel(), Fx.chest(attacker), 0.5f, Palette.AEGIS, Palette.AEGIS_HI);
+            AbyssVfx.burst(p.serverLevel(), Fx.chest(attacker), 0.5f, Palette.AEGIS, Palette.AEGIS_HI);
         }
     }
 
@@ -83,7 +83,7 @@ public class GuardianHooks implements PowerHooks {
             redirecting = true;
             try { g.hurt(g.damageSources().magic(), share); }
             finally { redirecting = false; }
-            Vfx.beam(g.serverLevel(), Fx.chest(victim), Fx.chest(g), 0.14f, Palette.OATH, Palette.OATH_HI, 8);
+            AbyssVfx.beam(g.serverLevel(), Fx.chest(victim), Fx.chest(g), 0.14f, Palette.OATH, Palette.OATH_HI, 8);
         });
     }
 
@@ -97,8 +97,8 @@ public class GuardianHooks implements PowerHooks {
             event.setCanceled(true);
             victim.setHealth(victim.getMaxHealth() * 0.3f);
             victim.addEffect(new MobEffectInstance(ModEffects.SANCTIFIED, 80, 1), g);
-            Vfx.of(VfxType.PILLAR).at(victim.position()).scale(7).extra(1.0f).colors(Palette.OATH, Palette.OATH_HI).duration(36).send(g.serverLevel());
-            Vfx.beam(g.serverLevel(), Fx.chest(g), Fx.chest(victim), 0.3f, Palette.OATH, Palette.OATH_HI, 16);
+            AbyssVfx.of(VfxType.PILLAR).at(victim.position()).scale(7).extra(1.0f).colors(Palette.OATH, Palette.OATH_HI).duration(36).send(g.serverLevel());
+            AbyssVfx.beam(g.serverLevel(), Fx.chest(g), Fx.chest(victim), 0.3f, Palette.OATH, Palette.OATH_HI, 16);
             Fx.sound(g.level(), victim.position(), SoundEvents.TOTEM_USE, 0.7f, 0.8f);
             g.displayClientMessage(Component.translatable("abyssorigins.message.guardian_vow", victim.getDisplayName()), true);
         });

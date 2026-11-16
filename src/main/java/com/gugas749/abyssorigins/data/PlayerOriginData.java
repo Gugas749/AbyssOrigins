@@ -10,10 +10,10 @@ import java.util.Optional;
  * Persistent per-player origin data stored as a NeoForge attachment.
  *
  * Fields:
- *  originId      — ResourceLocation of the assigned origin (null = none)
- *  resource      — Current resource value (0-100), e.g. blood for vampires
- *  originLevel   — XP level within the origin (1-50)
- *  originXp      — Raw XP points
+ *  originId      - ResourceLocation of the assigned origin (null = none)
+ *  resource      - Current resource value (0-100), e.g. blood for vampires
+ *  originLevel   - XP level within the origin (1-50)
+ *  originXp      - Raw XP points
  *
  * Ability cooldowns live in PlayerAbilityData (per ability, shared by origin and class).
  */

@@ -28,10 +28,10 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
  *   weapon: geo/item/weapon/ID.geo.json, animations/item/weapon/ID.animation.json, textures/item/weapon/ID(_glowmask).png
  *   outfit: geo/item/armor/SET.geo.json (bones armorHead/Body/RightArm/LeftArm/RightLeg/LeftLeg/RightBoot/LeftBoot),
  *           animations/item/armor/SET.animation.json, textures/item/armor/SET(_glowmask).png
- *   icon:   geo/item/armor_icon/SET_PIECE.geo.json — uses the outfit's texture and animation
+ *   icon:   geo/item/armor_icon/SET_PIECE.geo.json - uses the outfit's texture and animation
  * Every animation file must define a looping "idle" animation.
  * The _glowmask texture is optional: without one the gear simply doesn't glow (GeckoLib's glow
- * layer is only added when the mask exists — added without one, it renders the model black).
+ * layer is only added when the mask exists - added without one, it renders the model black).
  */
 public final class GearRenderers {
 

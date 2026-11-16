@@ -2,6 +2,7 @@ package com.gugas749.abyssorigins.event;
 
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
+import com.gugas749.abyssorigins.ascension.AscensionCeremony;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.data.PlayerSpecializationData;
@@ -11,7 +12,7 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.skilltree.data.PlayerSkillData;
 import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -31,7 +32,8 @@ import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
  * Every origin XP grant also feeds class XP (scaled by Human / skill bonuses).
  * Each level grants 1 skill point in the matching tree.
  *
- * Curve: level L → L+1 costs 100 + 50·(L-1). Level 15 (tier 5) ≈ 600 hostile kills.
+ * Curve: level L -> L+1 costs 100 + 50·(L-1). Level 15 (tier 5) ≈ 600 hostile kills.
+ * Levels 25 and 50 are the origin's ascension stages (Noble, Lord): see AscensionCeremony.
  */
 @EventBusSubscriber(modid = Abyssorigins.MODID)
 public class XpEventHandler {
@@ -62,7 +64,7 @@ public class XpEventHandler {
     public static void onAdvancement(AdvancementEvent.AdvancementEarnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!AbyssOriginsAPI.hasOrigin(player)) return;
-        // Recipe unlocks are advancements too — only count ones with a toast/display.
+        // Recipe unlocks are advancements too - only count ones with a toast/display.
         if (event.getAdvancement().value().display().isEmpty()) return;
         grantXp(player, XP_ADVANCEMENT);
     }
@@ -92,7 +94,7 @@ public class XpEventHandler {
         grantClassXp(player, gained);
     }
 
-    /** Exactly {@code gained} origin XP — no bonuses, no class share (staff edits). Levels up as usual. */
+    /** Exactly {@code gained} origin XP - no bonuses, no class share (staff edits). Levels up as usual. */
     public static void addOriginXp(ServerPlayer player, int gained) {
         if (gained <= 0) return;
 
@@ -112,13 +114,14 @@ public class XpEventHandler {
                 String.valueOf(level),
                 String.valueOf(pointsGranted)));
             celebrate(player);
+            AscensionCeremony.onLevelChanged(player, oldLevel, level);
         }
 
         ModPackets.syncPlayer(player);
         ModPackets.syncSkills(player);
     }
 
-    /** Class XP — Humans learn crafts faster (Mortal Ingenuity, +25%). */
+    /** Class XP - Humans learn crafts faster (Mortal Ingenuity, +25%). */
     public static void grantClassXp(ServerPlayer player, int amount) {
         float mult = Skills.isOrigin(player, "human") ? 1.25f : 1f;
         addClassXp(player, Math.round(amount * mult));
@@ -151,6 +154,7 @@ public class XpEventHandler {
         data.setOriginLevel(level);
         data.setOriginXp(xpRequiredToReach(level));
         if (level > old) player.getData(SkillAttachments.PLAYER_SKILLS.get()).addSkillPoints((level - old) * POINTS_PER_LEVEL);
+        AscensionCeremony.onLevelChanged(player, old, level);
         ModPackets.syncPlayer(player);
         ModPackets.syncSkills(player);
     }
@@ -169,8 +173,8 @@ public class XpEventHandler {
     }
 
     private static void celebrate(ServerPlayer player) {
-        Vfx.helix(player.serverLevel(), player, 2.6f, 0xF2C14E, 0xFFF4C8, 30);
-        Vfx.shockwave(player.serverLevel(), player.position(), 3.5f, 0xF2C14E, 0xFFF4C8, 18);
+        AbyssVfx.helix(player.serverLevel(), player, 2.6f, 0xF2C14E, 0xFFF4C8, 30);
+        AbyssVfx.shockwave(player.serverLevel(), player.position(), 3.5f, 0xF2C14E, 0xFFF4C8, 18);
         Fx.sound(player.level(), player.position(), SoundEvents.PLAYER_LEVELUP, 0.6f, 0.7f);
     }
 

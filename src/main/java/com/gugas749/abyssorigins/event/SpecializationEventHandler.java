@@ -37,7 +37,7 @@ public class SpecializationEventHandler {
                     catch (Exception e) { Abyssorigins.LOGGER.error("Spec passive onEquip error: {}", e.getMessage()); }
                 });
             } else {
-                Abyssorigins.LOGGER.warn("[AbyssOrigins] Unknown saved spec {} for {} — clearing",
+                Abyssorigins.LOGGER.warn("[AbyssOrigins] Unknown saved spec {} for {} - clearing",
                     data.getSpecId(), player.getName().getString());
                 data.setSpecId(null);
             }
@@ -80,8 +80,8 @@ public class SpecializationEventHandler {
         Specialization spec = SpecializationRegistry.get(data.getSpecId()).orElse(null);
         if (spec == null) return;
 
-        // Tick passives
-        spec.getPassives().forEach(passive -> {
+        // Tick passives (disabled inside the Inverted Spear of Heaven's field)
+        if (!com.gugas749.abyssorigins.power.Nullification.is(player)) spec.getPassives().forEach(passive -> {
             try { passive.onTick(player); }
             catch (Exception e) {
                 Abyssorigins.LOGGER.error("Spec passive tick error {} for {}: {}",

@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 
 /**
- * Server → the transforming player: the stages of the Orb / Seed ritual that the client stages
+ * Server -> the transforming player: the stages of the Orb / Seed ritual that the client stages
  * (camera, choice menu). {@code origins} = the choices (CHOOSE) or the new origin (TRANSFORMED).
  */
 public record RitualPacket(Stage stage, List<String> origins) implements CustomPacketPayload {

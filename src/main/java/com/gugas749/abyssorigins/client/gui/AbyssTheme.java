@@ -1,5 +1,6 @@
 package com.gugas749.abyssorigins.client.gui;
 
+import com.gugas749.abysscore.api.gui.render.AbyssDraw;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
@@ -11,16 +12,14 @@ import net.minecraft.util.Mth;
 import java.util.List;
 
 /**
- * The Abyss visual language: deep violet-black void, drifting mist, faint rising motes,
- * thin luminous edges and diamond motifs. Every screen and HUD element draws through
- * these helpers so the mod reads as one cohesive interface.
+ * Shared GUI palette and drawing helpers (dark violet backgrounds, mist, rising motes, thin bright
+ * edges, diamond motifs). All screens and HUD elements draw through these so they share one style.
  */
 public final class AbyssTheme {
 
     // ---- Palette ------------------------------------------------------------
 
     public static final int VOID       = 0xFF06050C;
-    public static final int ABYSS      = 0xFF0E0B1A;
     public static final int PANEL      = 0xE00F0C1D;
     public static final int PANEL_HI   = 0xE0171230;
     public static final int EDGE       = 0xFF2E2650;
@@ -52,13 +51,8 @@ public final class AbyssTheme {
 
     public static int withAlpha(int rgb, int a) { return (Mth.clamp(a, 0, 255) << 24) | (rgb & 0xFFFFFF); }
 
-    public static int mix(int a, int b, float t) {
-        t = Mth.clamp(t, 0f, 1f);
-        int aa = (a >>> 24) & 0xFF, ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
-        int ba = (b >>> 24) & 0xFF, br = (b >> 16) & 0xFF, bg = (b >> 8) & 0xFF, bb = b & 0xFF;
-        return ((int) (aa + (ba - aa) * t) << 24) | ((int) (ar + (br - ar) * t) << 16)
-             | ((int) (ag + (bg - ag) * t) << 8) | (int) (ab + (bb - ab) * t);
-    }
+    /** ARGB blend (t = 0 -> a, 1 -> b); AbyssCore's. */
+    public static int mix(int a, int b, float t) { return AbyssDraw.mix(a, b, t); }
 
     public static int darken(int argb, float f)  { return mix(argb, argb & 0xFF000000, 1 - f); }
     public static int lighten(int argb, float f) { return mix(argb, argb | 0x00FFFFFF, f); }
@@ -66,13 +60,7 @@ public final class AbyssTheme {
     // ---- Primitive shapes -------------------------------------------------------
 
     public static void gradientH(GuiGraphics g, int x0, int y0, int x1, int y1, int left, int right) {
-        int w = x1 - x0;
-        if (w <= 0) return;
-        int steps = Math.min(w, 24);
-        for (int i = 0; i < steps; i++) {
-            int sx = x0 + w * i / steps, ex = x0 + w * (i + 1) / steps;
-            g.fill(sx, y0, ex, y1, mix(left, right, (i + 0.5f) / steps));
-        }
+        AbyssDraw.gradientH(g, x0, y0, x1, y1, left, right);
     }
 
     public static void border(GuiGraphics g, int x, int y, int w, int h, int color) {
@@ -135,7 +123,7 @@ public final class AbyssTheme {
         }
     }
 
-    // ---- Atmosphere -------------------------------------------------------------
+    // ---- Backgrounds -------------------------------------------------------------
 
     /** Full-screen abyss backdrop: gradient void, tinted mist, rising motes, vignette. */
     public static void backdrop(GuiGraphics g, int w, int h, int tint, float fade) {
@@ -177,7 +165,7 @@ public final class AbyssTheme {
         }
     }
 
-    /** Tiny glimmering particles rising through the dark. */
+    /** Small rising particles. */
     public static void motes(GuiGraphics g, int w, int h, int tint, int count, float fade) {
         float t = time();
         for (int i = 0; i < count; i++) {
@@ -196,11 +184,7 @@ public final class AbyssTheme {
     }
 
     public static void vignette(GuiGraphics g, int w, int h, int rgb, int depth, float strength) {
-        int a = (int) (200 * strength);
-        g.fillGradient(0, 0, w, depth, withAlpha(rgb, a), withAlpha(rgb, 0));
-        g.fillGradient(0, h - depth, w, h, withAlpha(rgb, 0), withAlpha(rgb, a));
-        gradientH(g, 0, 0, depth, h, withAlpha(rgb, a), withAlpha(rgb, 0));
-        gradientH(g, w - depth, 0, w, h, withAlpha(rgb, 0), withAlpha(rgb, a));
+        AbyssDraw.vignette(g, w, h, rgb, depth, strength);
     }
 
     private static float hash(float n) {
@@ -224,7 +208,7 @@ public final class AbyssTheme {
         g.fill(x + w - tick, y + h - 1, x + w, y + h, c); g.fill(x + w - 1, y + h - tick, x + w, y + h, c);
     }
 
-    /** "◆ TITLE ———" section header. Returns the height used. */
+    /** "◆ TITLE ---" section header. Returns the height used. */
     public static int header(GuiGraphics g, Font font, int x, int y, int w, Component text, int accent, float fade) {
         diamond(g, x + 3, y + 4, 3, alpha(accent, fade));
         g.drawString(font, text, x + 10, y, alpha(TEXT, fade), false);

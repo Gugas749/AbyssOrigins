@@ -7,7 +7,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 /**
  * A declarative attribute modifier attached to an origin, a class, or a skill node.
  * SkillEffectHandler.refresh() rebuilds every bonus from scratch whenever the
- * player's origin, class or unlocked skills change — and after respawn.
+ * player's origin, class or unlocked skills change - and after respawn.
  */
 public record StatBonus(Holder<Attribute> attribute, double amount, AttributeModifier.Operation operation) {
 

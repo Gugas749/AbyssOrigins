@@ -28,7 +28,7 @@ public final class ClientTimers {
     public static boolean isActive(String id)  { return ACTIVE.containsKey(id); }
     public static int remaining(String id)     { int[] v = ACTIVE.get(id); return v == null ? 0 : v[0]; }
 
-    /** 1.0 at start → 0.0 at expiry. Indefinite states report 1. */
+    /** 1.0 at start -> 0.0 at expiry. Indefinite states report 1. */
     public static float fraction(String id) {
         int[] v = ACTIVE.get(id);
         if (v == null) return 0f;

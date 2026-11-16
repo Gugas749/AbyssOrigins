@@ -1,17 +1,14 @@
 package com.gugas749.abyssorigins.api;
 
-import com.gugas749.abyssorigins.data.PlayerSpecializationData;
-import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.*;
 
 /**
  * A Specialization (shown to players as a "Class") is the second layer on top of an
- * Origin. It is origin-agnostic by default — set allowedOrigins() to restrict.
+ * Origin. Any origin can take any class.
  *
  * Self-contained: carries its own passives, abilities, hooks, resonances and skill tree.
  * Adding a new class requires only extending this class + one register() call.
@@ -27,7 +24,6 @@ public abstract class Specialization {
     private final List<SpecializationAbility> unlockable = new ArrayList<>();
     private final List<StatBonus>             baseStats  = new ArrayList<>();
     private final Map<String, Resonance>      resonances = new LinkedHashMap<>();
-    private final Set<String>                 allowedOriginPaths = new HashSet<>();
 
     private SkillTree  skillTree = null;
     private PowerHooks hooks     = PowerHooks.NONE;
@@ -78,16 +74,6 @@ public abstract class Specialization {
         this.sigil = glyph; return this;
     }
 
-    /**
-     * Restrict this specialization to certain origin paths.
-     * Leave empty (default) to allow all origins.
-     * Example: allowedOrigins("vampire", "human")
-     */
-    protected Specialization allowedOrigins(String... paths) {
-        allowedOriginPaths.addAll(Arrays.asList(paths));
-        return this;
-    }
-
     protected Specialization setThemeColor(int color) {
         this.themeColor = color; return this;
     }
@@ -113,20 +99,4 @@ public abstract class Specialization {
         return Optional.ofNullable(resonances.get(originPath));
     }
 
-    /** True if the player's current origin resonates with this class. */
-    public boolean hasResonance(Player player) {
-        Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
-        return origin != null && resonances.containsKey(origin.getPath());
-    }
-
-    /** True if this spec can be assigned to a player of the given origin path. */
-    public boolean isAllowedForOrigin(String originPath) {
-        return allowedOriginPaths.isEmpty() || allowedOriginPaths.contains(originPath);
-    }
-
-    /** Convenience: does the player have this class's skill node unlocked? */
-    public static boolean hasClassSkill(Player player, String skillId) {
-        PlayerSpecializationData data = player.getData(SpecializationAttachments.PLAYER_SPEC.get());
-        return data.hasSkill(skillId);
-    }
 }

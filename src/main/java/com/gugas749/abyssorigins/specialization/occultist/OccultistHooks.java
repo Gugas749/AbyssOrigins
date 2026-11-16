@@ -7,7 +7,7 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -33,10 +33,10 @@ public class OccultistHooks implements PowerHooks {
 
     @Override
     public void onAbilityUsed(ServerPlayer player, Ability ability) {
-        // Umbral Form: slip half out of the world after every ability
+        // Umbral Form: Resistance IV for 1.5s after every ability
         if (Skills.has(player, "occ_umbral_form")) {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 3, false, false));
-            Vfx.sparks(player.serverLevel(), Fx.chest(player), 1.0f, Palette.OCCULT, Palette.OCCULT_HI);
+            AbyssVfx.sparks(player.serverLevel(), Fx.chest(player), 1.0f, Palette.OCCULT, Palette.OCCULT_HI);
         }
     }
 

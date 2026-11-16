@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Server → owning client: the full set of the player's active sustained abilities. */
+/** Server -> owning client: the full set of the player's active sustained abilities. */
 public record SyncTimersPacket(List<Entry> entries) implements CustomPacketPayload {
 
     public record Entry(String id, int remaining, int max) {}

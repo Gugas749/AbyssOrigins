@@ -9,6 +9,7 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,25 +50,25 @@ public class AbyssOriginsConfig {
 
     // ---- Spec -----------------------------------------------------------
 
-    /** Where an element sits; offsets are measured from this point of the screen. AUTO = the default spot. */
+    /**
+     * Where an element sits; offsets are measured from this point of the screen. AUTO = the default spot.
+     * Only the stored form: these names are what client.toml holds. The maths is AbyssCore's
+     * {@link com.gugas749.abysscore.api.gui.hud.HudAnchor}, which has the same names (minus AUTO).
+     */
     public enum HudAnchor {
-        AUTO(0, 0),
-        TOP_LEFT(0, 0), TOP_CENTER(0.5f, 0), TOP_RIGHT(1, 0),
-        CENTER_LEFT(0, 0.5f), CENTER(0.5f, 0.5f), CENTER_RIGHT(1, 0.5f),
-        BOTTOM_LEFT(0, 1), BOTTOM_CENTER(0.5f, 1), BOTTOM_RIGHT(1, 1);
+        AUTO,
+        TOP_LEFT, TOP_CENTER, TOP_RIGHT,
+        CENTER_LEFT, CENTER, CENTER_RIGHT,
+        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT;
 
-        public final float fx, fy;
-
-        HudAnchor(float fx, float fy) {
-            this.fx = fx;
-            this.fy = fy;
+        /** AbyssCore's anchor; AUTO = none (the element's own default spot). */
+        @Nullable
+        public com.gugas749.abysscore.api.gui.hud.HudAnchor toCore() {
+            return this == AUTO ? null : com.gugas749.abysscore.api.gui.hud.HudAnchor.valueOf(name());
         }
 
-        /** The anchor for the screen third a point falls in (coordinates as 0..1 of the screen). */
-        public static HudAnchor nearest(float x, float y) {
-            int column = x < 1 / 3f ? 0 : x < 2 / 3f ? 1 : 2;
-            int row = y < 1 / 3f ? 0 : y < 2 / 3f ? 1 : 2;
-            return values()[1 + row * 3 + column];
+        public static HudAnchor fromCore(@Nullable com.gugas749.abysscore.api.gui.hud.HudAnchor anchor) {
+            return anchor == null ? AUTO : valueOf(anchor.name());
         }
     }
 

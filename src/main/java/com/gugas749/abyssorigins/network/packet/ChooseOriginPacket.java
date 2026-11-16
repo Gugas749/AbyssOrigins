@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Client → server: the origin picked in the Orb's choice menu ("" = let the power fade).
+ * Client -> server: the origin picked in the Orb's choice menu ("" = cancelled).
  * Only honoured while that player's orb is awaiting a choice (see OriginRitual.choose).
  */
 public record ChooseOriginPacket(String originId) implements CustomPacketPayload {

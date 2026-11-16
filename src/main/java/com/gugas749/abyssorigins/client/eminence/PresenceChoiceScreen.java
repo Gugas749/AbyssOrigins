@@ -12,7 +12,7 @@ import org.lwjgl.glfw.GLFW;
 
 import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 
-/** "Kneel or resist." Shown to every player caught in the Eminence's Presence. */
+/** Kneel-or-resist prompt shown to every player hit by the Eminence's Presence. */
 public class PresenceChoiceScreen extends Screen {
 
     private static final int GOLD_C = 0xFF000000 | Eminence.COLOR;
@@ -47,7 +47,7 @@ public class PresenceChoiceScreen extends Screen {
         motes(g, width, height, GOLD_C, 30, fade);
         vignette(g, width, height, 0x000000, Math.max(30, height / 4), 0.9f * fade);
 
-        // The crown bears down
+        // Dark vignette
         float crownY = cy - 74;
         glow(g, cx, crownY + 8, 46 + 6 * pulse(2.2f), Eminence.COLOR, 0.75f * fade);
         scaledText(g, font, Component.literal("♛"), cx - font.width("♛") * 2.6f / 2f, crownY - 4, 2.6f, alpha(GOLD_C, fade), true);

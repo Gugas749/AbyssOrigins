@@ -11,7 +11,7 @@ import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-/** Warrior — frontline brawler built around Momentum. */
+/** Warrior - frontline brawler built around Momentum. */
 public class WarriorSpecialization extends Specialization {
 
     private static final String P = "abyssorigins.skill.";
@@ -36,7 +36,7 @@ public class WarriorSpecialization extends Specialization {
         setSkillTree(buildTree(getId()));
     }
 
-    /** Path of Steel — left: Iron (survive), middle: Command, right: Blade (kill). */
+    /** Path of Steel - left: Iron (survive), middle: Command, right: Blade (kill). */
     private static SkillTree buildTree(ResourceLocation id) {
         SkillTree t = new SkillTree(id, "abyssorigins.skilltree.warrior.name");
 
@@ -79,7 +79,7 @@ public class WarriorSpecialization extends Specialization {
             .requiresAny("warrior_juggernaut", "warrior_relentless")
             .stat(Attributes.ARMOR_TOUGHNESS, 2).build());
 
-        // Apex (tier VI) — the late-game row beyond the capstones
+        // Apex (tier VI) - the late-game row beyond the capstones
         t.addNode(SkillNode.builder("warrior_apex_titan").lang("abyssorigins.skill.warrior_apex_titan")
             .icon("▲").tier(SkillTier.TIER_6).branch(SkillBranch.DEFENSE).cost(4).pos(-1, 5)
             .requires("warrior_warlord").stat(Attributes.MAX_HEALTH, 6).build());

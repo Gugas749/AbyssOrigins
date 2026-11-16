@@ -9,14 +9,14 @@ import java.util.*;
 /**
  * Every player's powers in one place, the same for every Origin and Class:
  *
- *  granted        — abilities given directly (command, staff GUI, items), including hidden ones.
+ *  granted        - abilities given directly (command, staff GUI, items), including hidden ones.
  *                   They persist across origin / class changes; whether they can be used depends
  *                   on the player's current loadouts (see Loadouts.known).
- *  slots          — the ORIGIN and CLASS loadouts: one ability id per slot ("" = empty).
- *  *_loadout      — which origin / class the slots were laid out for, so a change (or a save from
+ *  slots          - the ORIGIN and CLASS loadouts: one ability id per slot ("" = empty).
+ *  *_loadout      - which origin / class the slots were laid out for, so a change (or a save from
  *                   before loadouts existed) re-seeds them with the new default kit.
- *  cooldowns      — per ability id, not per slot, so rebinding a power can never skip its cooldown.
- *  passives_off   — area passives (see AuraToggles) the player has switched off.
+ *  cooldowns      - per ability id, not per slot, so rebinding a power can never skip its cooldown.
+ *  passives_off   - area passives (see AuraToggles) the player has switched off.
  */
 public class PlayerAbilityData {
 

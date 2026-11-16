@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.*;
 
 /**
- * The Eminence — the hidden sovereign origin. It holds every other origin's skills and
+ * The Eminence - a hidden origin. It has every other origin's skills and
  * powers: all of them are "known" to it, so any five can sit in its origin slots
  * (bound in the Abilities tab like any other origin's).
  */
@@ -46,8 +46,8 @@ public final class Eminence {
     }
 
     /**
-     * Every origin power the crown may bind: its own first, then each origin's in registration order.
-     * Hidden powers are not origin powers — the crown only holds them when granted, like anyone else.
+     * Every origin power the Eminence can bind: its own first, then each origin's in registration order.
+     * Hidden powers are not origin powers - the Eminence only has them when granted, like anyone else.
      */
     public static Map<String, OriginAbility> bindable() {
         Map<String, OriginAbility> map = new LinkedHashMap<>();

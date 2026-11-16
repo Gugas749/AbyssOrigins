@@ -15,8 +15,8 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
 /**
- * Something consumed to take on an Origin. Holding use plays the consumption (energy drawn in,
- * crystal shards, chimes); finishing it hands over to {@link OriginRitual}. Subclasses decide
+ * Something consumed to take on an Origin. Holding use plays the consumption (particles drawn in,
+ * crystal shards, chime sounds); finishing it hands over to {@link OriginRitual}. Subclasses decide
  * whether the origin is fixed (Seed) or chosen (Orb).
  */
 public abstract class RitualItem extends Item {
@@ -30,7 +30,7 @@ public abstract class RitualItem extends Item {
     protected abstract int color(ItemStack stack);
 
     /**
-     * Whether the ritual can start; tell the player why not. Runs on both sides — the client
+     * Whether the ritual can start; tell the player why not. Runs on both sides - the client
      * only knows its own origin, the server re-checks everything.
      */
     protected abstract boolean canBegin(Player player, ItemStack stack);
@@ -68,7 +68,7 @@ public abstract class RitualItem extends Item {
     }
 
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return OriginRitual.USE_TICKS; }
-    /** Brought to the lips and drunk in — shards of crystal and chimes instead of crumbs. */
+    /** Drink animation, with crystal shard particles and chime sounds instead of crumbs. */
     @Override public UseAnim getUseAnimation(ItemStack stack)  { return UseAnim.EAT; }
     @Override public SoundEvent getEatingSound()               { return SoundEvents.AMETHYST_BLOCK_CHIME; }
 }

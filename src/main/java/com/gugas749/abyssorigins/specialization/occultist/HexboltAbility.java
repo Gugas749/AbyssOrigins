@@ -6,15 +6,15 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
-/** Hexbolt: a curse-bolt at the creature you look at — magic damage + Hexed. */
+/** Hexbolt: a curse-bolt at the creature you look at - magic damage + Hexed. */
 public class HexboltAbility extends SpecializationAbility {
 
     public HexboltAbility() {
@@ -47,9 +47,9 @@ public class HexboltAbility extends SpecializationAbility {
 
         Vec3 from = Fx.hand(player);
         Vec3 to = Fx.chest(target);
-        Vfx.beam(level, from, to, 0.32f, Palette.OCCULT, Palette.OCCULT_HI, 12);
-        Vfx.burst(level, to, 0.8f, Palette.OCCULT, Palette.OCCULT_HI);
-        Vfx.of(VfxType.MARK).follow(target).colors(Palette.OCCULT, Palette.OCCULT_HI).duration(hexMark ? 200 : 120).send(level);
+        AbyssVfx.beam(level, from, to, 0.32f, Palette.OCCULT, Palette.OCCULT_HI, 12);
+        AbyssVfx.burst(level, to, 0.8f, Palette.OCCULT, Palette.OCCULT_HI);
+        AbyssVfx.of(VfxType.MARK).follow(target).colors(Palette.OCCULT, Palette.OCCULT_HI).duration(hexMark ? 200 : 120).send(level);
         Fx.sound(level, player.position(), SoundEvents.EVOKER_CAST_SPELL, 0.8f, 1.3f);
         Fx.sound(level, to, SoundEvents.ZOMBIE_VILLAGER_CURE, 0.3f, 1.8f);
         return true;

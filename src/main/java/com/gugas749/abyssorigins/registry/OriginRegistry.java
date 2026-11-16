@@ -26,7 +26,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
  * All built-in origins. Each origin = identity (colour, sigil, traits) + resource +
- * two abilities (R / V) + passives + PowerHooks + a skill tree.
+ * two abilities (R / V) + passives + PowerHooks + a skill tree, plus its ascension
+ * (ceremony motif and colours, and the stats of its Noble and Lord stages).
  */
 public class OriginRegistry {
 
@@ -66,6 +67,13 @@ public class OriginRegistry {
              .addPassive(new HumanIngenuityPassive())
              .addAbility(new HumanAdaptabilityAbility())
              .addAbility(new HumanSecondWindAbility())
+             .addUnlockableAbility(new HumanPerfectAdaptationAbility())     // skill node human_perfect_adaptation
+             .setAscension(Ascension.Motif.RADIANT, 0xE8C872, 0xFFF6D8)
+             .addStageStat(Ascension.NOBLE, StatBonus.add(Attributes.MAX_HEALTH, 4))
+             .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.05))
+             .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 6))
+             .addStageStat(Ascension.LORD, StatBonus.add(Attributes.ARMOR, 2))
+             .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
              .setHooks(new HumanHooks());
         AbyssOriginsAPI.registerOrigin(human);
     }
@@ -86,6 +94,13 @@ public class OriginRegistry {
                .addPassive(new BloodDrainGazePassive())
                .addAbility(new VampireBloodDrainAbility())
                .addAbility(new VampireBatFormAbility())
+               .addUnlockableAbility(new VampireCrimsonSlashAbility())     // skill node vampire_crimson_slash
+               .setAscension(Ascension.Motif.BLOOD, 0xC0182E, 0xFF7A88)
+               .addStageStat(Ascension.NOBLE, StatBonus.add(Attributes.MAX_HEALTH, 4))
+               .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
+               .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 6))
+               .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
+               .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_SPEED, 0.10))
                .setHooks(new VampireHooks());
         AbyssOriginsAPI.registerOrigin(vampire);
     }
@@ -104,6 +119,13 @@ public class OriginRegistry {
              .addPassive(TraitPassive.of("demon_doused"))
              .addAbility(new DemonAbilities.HellfireNova())
              .addAbility(new DemonAbilities.InfernalCharge())
+             .addUnlockableAbility(new DemonAbilities.RageMode())           // skill node demon_rage_mode
+             .setAscension(Ascension.Motif.HELLFIRE, 0xFF6A1F, 0xFFD27A)
+             .addStageStat(Ascension.NOBLE, StatBonus.add(Attributes.ARMOR, 2))
+             .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
+             .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 6))
+             .addStageStat(Ascension.LORD, StatBonus.add(Attributes.ARMOR_TOUGHNESS, 2))
+             .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
              .setHooks(new DemonHooks());
         AbyssOriginsAPI.registerOrigin(demon);
     }
@@ -124,6 +146,13 @@ public class OriginRegistry {
               .addPassive(TraitPassive.of("seraph_earthbound"))
               .addAbility(new SeraphAbilities.AscendantWings())
               .addAbility(new SeraphAbilities.DivineLight())
+              .addUnlockableAbility(new SeraphAbilities.Judgement())        // skill node seraph_judgement_blade
+              .setAscension(Ascension.Motif.DIVINE, 0xF6D77A, 0xFFFFFF)
+              .addStageStat(Ascension.NOBLE, StatBonus.add(Attributes.MAX_HEALTH, 4))
+              .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.MOVEMENT_SPEED, 0.05))
+              .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 6))
+              .addStageStat(Ascension.LORD, StatBonus.add(Attributes.ARMOR, 2))
+              .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
               .setHooks(new SeraphHooks());
         AbyssOriginsAPI.registerOrigin(seraph);
     }
@@ -142,20 +171,28 @@ public class OriginRegistry {
                 .addPassive(TraitPassive.of("void_hollow_form"))
                 .addAbility(new VoidbornAbilities.VoidStep())
                 .addAbility(new VoidbornAbilities.RiftCollapse())
+                .addUnlockableAbility(new VoidbornAbilities.EchoStrikes())  // skill node void_echo_strikes
+                .setAscension(Ascension.Motif.VOID, 0x9B6BFF, 0xE4D6FF)
+                .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.MOVEMENT_SPEED, 0.05))
+                .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.08))
+                .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 4))
+                .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.MOVEMENT_SPEED, 0.05))
+                .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.10))
                 .setHooks(new VoidbornHooks());
         AbyssOriginsAPI.registerOrigin(voidborn);
     }
 
     /**
-     * The Eminence — hidden sovereign of every bloodline. Not listed anywhere; granted only
-     * with /abyssorigins set <player> eminence. Holds every origin skill and power, binds any
-     * five to its sovereign keys, and rules with Presence, Royal Decree and Usurp.
+     * The Eminence - a hidden origin. Not listed anywhere; granted only with
+     * /abyssorigins set <player> eminence. Has every origin skill and power, can bind any five
+     * to its origin slots, and has its own Presence, Royal Decree, Usurp, Mire Call and
+     * the I Am Atomic ultimate.
      */
     private static void registerEminence() {
         Origin eminence = create(Eminence.PATH, ImpactLevel.HIGH);
         eminence.setHidden(true)
                 .setThemeColor(0xFF000000 | Eminence.COLOR).setSigil("♛")
-                // Sovereign Body: the crown has no tree of its own, so its strength is innate.
+                // Sovereign Body: no skill tree of its own, so its stats are innate.
                 // Health: (20 + 16) x 1.25 = 45 (22.5 hearts). Damage: (base + 2) x 1.30.
                 .setHealthModifier(1.25f)
                 .setDamageModifier(1.30f)
@@ -175,7 +212,7 @@ public class OriginRegistry {
                 .addPassive(TraitPassive.of("eminence_crown"))
                 .addPassive(TraitPassive.of("eminence_sovereign_body"))
                 .addPassive(TraitPassive.of("eminence_unbowed"))
-                // Inherited bloodline passives (their text lives with their own origins)
+                // Passives inherited from other origins (their text lives with their own origins)
                 .addPassive(new HumanRegenPassive().hidden())
                 .addPassive(new HumanResiliencePassive().hidden())
                 .addPassive(new VampireNightPassive().hidden())
@@ -184,6 +221,11 @@ public class OriginRegistry {
                 .addAbility(new EminenceAbilities.RoyalDecree())
                 .addAbility(new EminenceAbilities.Usurp())
                 .addAbility(new EminenceAbilities.MireCall())
+                .addAbility(new EminenceAbilities.Atomic())
+                .setAscension(Ascension.Motif.SOVEREIGN, 0x7B4DFF, Eminence.COLOR)
+                .addStageStat(Ascension.NOBLE, StatBonus.add(Attributes.MAX_HEALTH, 4))
+                .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 6))
+                .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.05))
                 .setHooks(new EminenceHooks());
         AbyssOriginsAPI.registerOrigin(eminence);
     }
@@ -203,6 +245,13 @@ public class OriginRegistry {
              .addPassive(TraitPassive.of("shade_light_bane"))
              .addAbility(meld)
              .addAbility(new ShadeAbilities.UmbralGrasp())
+             .addUnlockableAbility(new ShadeAbilities.PhaseWalk())          // skill node shade_phase_walk
+             .setAscension(Ascension.Motif.SHADOW, 0x7D93C9, 0xD6E2FF)
+             .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.MOVEMENT_SPEED, 0.08))
+             .addStageStat(Ascension.NOBLE, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.05))
+             .addStageStat(Ascension.LORD, StatBonus.add(Attributes.MAX_HEALTH, 4))
+             .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_SPEED, 0.10))
+             .addStageStat(Ascension.LORD, StatBonus.percent(Attributes.ATTACK_DAMAGE, 0.12))
              .setHooks(new ShadeHooks(meld));
         AbyssOriginsAPI.registerOrigin(shade);
     }

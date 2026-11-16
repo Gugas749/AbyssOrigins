@@ -6,7 +6,7 @@ import com.gugas749.abyssorigins.network.packet.KneelPacket;
 import com.gugas749.abyssorigins.network.packet.PresencePromptPacket;
 import com.gugas749.abyssorigins.network.packet.ResistStartPacket;
 import com.gugas749.abyssorigins.power.Fx;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -26,8 +26,8 @@ import java.util.UUID;
 
 /**
  * Server authority for Presence: who is choosing, who is resisting, and their deadlines.
- * The client only reports a choice and the minigame outcome; silence is submission
- * (choice timeout → kneel) and a stalled minigame is a failure.
+ * The client only reports a choice and the minigame outcome; no answer counts as kneeling
+ * (choice timeout -> kneel) and a stalled minigame is a failure.
  */
 @EventBusSubscriber(modid = Abyssorigins.MODID)
 public final class PresenceSessions {
@@ -54,7 +54,7 @@ public final class PresenceSessions {
         return SESSIONS.containsKey(p.getUUID()) || p.hasEffect(ModEffects.KNEELING);
     }
 
-    /** The Presence falls on {@code target}: hold them and ask them to kneel or resist. */
+    /** Presence hits {@code target}: hold them and ask them to kneel or resist. */
     public static void begin(ServerPlayer caster, ServerPlayer target) {
         SESSIONS.put(target.getUUID(), new Session(caster.getUUID(), caster.getGameProfile().getName()));
         target.addEffect(new MobEffectInstance(ModEffects.AWED, CHOICE_TICKS + RESIST_TICKS + 40, 0, false, false, true));
@@ -97,19 +97,19 @@ public final class PresenceSessions {
             target.getDisplayName()).withStyle(ChatFormatting.GOLD));
     }
 
-    /** Failed resistance: half of current health is torn away, then a long kneel. */
+    /** Failed resistance: lose half of current health, then a long kneel. */
     private static void break_(ServerPlayer target, Session s) {
         float half = target.getHealth() / 2f;
         target.setHealth(Math.max(0.5f, half));
         target.level().broadcastDamageEvent(target, target.damageSources().magic());
-        Vfx.burst(target.serverLevel(), target.position().add(0, 1, 0), 1.2f, Eminence.COLOR, 0x5A0010);
+        AbyssVfx.burst(target.serverLevel(), target.position().add(0, 1, 0), 1.2f, Eminence.COLOR, 0x5A0010);
         Fx.sound(target.level(), target.position(), SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH, 1f, 0.5f);
         kneel(target, BROKEN_TICKS, s, true);
     }
 
     private static void defy(ServerPlayer target, Session s) {
         target.removeEffect(ModEffects.AWED);
-        Vfx.shockwave(target.serverLevel(), target.position(), 3f, 0xFFFFFF, Eminence.COLOR_HI, 14);
+        AbyssVfx.shockwave(target.serverLevel(), target.position(), 3f, 0xFFFFFF, Eminence.COLOR_HI, 14);
         Fx.sound(target.level(), target.position(), SoundEvents.TOTEM_USE, 0.6f, 1.4f);
         target.displayClientMessage(Component.translatable("abyssorigins.presence.defied", s.casterName)
             .withStyle(ChatFormatting.AQUA), false);
@@ -136,8 +136,8 @@ public final class PresenceSessions {
             if (target == null || !target.isAlive()) { it.remove(); continue; }
             if (--s.ticksLeft > 0) continue;
             it.remove();
-            if (s.stage == Stage.CHOOSING) kneel(target, KNEEL_TICKS, s, false);   // silence is submission
-            else break_(target, s);                                                // the will gave out
+            if (s.stage == Stage.CHOOSING) kneel(target, KNEEL_TICKS, s, false);   // no answer: kneel
+            else break_(target, s);                                                // minigame stalled: fail
         }
     }
 

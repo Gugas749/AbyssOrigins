@@ -31,10 +31,9 @@ public class PlayerSkillData {
     public boolean hasSkill(String skillId)    { return unlockedSkills.contains(skillId); }
     public void    unlockSkill(String skillId) { if (!hasSkill(skillId)) unlockedSkills.add(skillId); }
     public void    clearSkills()               { unlockedSkills.clear(); }
+    public boolean removeSkill(String skillId) { return unlockedSkills.remove(skillId); }
 
     public List<String>      getUnlockedSkills()    { return Collections.unmodifiableList(unlockedSkills); }
-    /** Returns as Set — used by SkillNode.canUnlock() */
-    public Set<String>       getUnlockedSkillsSet() { return new HashSet<>(unlockedSkills); }
 
     public int  getSkillPoints()               { return skillPoints; }
     public void addSkillPoints(int n)          { this.skillPoints = Math.max(0, skillPoints + n); }

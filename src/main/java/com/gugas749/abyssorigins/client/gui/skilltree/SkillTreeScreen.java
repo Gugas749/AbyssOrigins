@@ -4,6 +4,7 @@ import com.gugas749.abyssorigins.api.*;
 import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.gui.AbilitiesScreen;
+import com.gugas749.abyssorigins.client.gui.MasteryScreen;
 import com.gugas749.abyssorigins.registry.AbilityRegistry;
 import com.gugas749.abyssorigins.network.packet.UnlockSkillPacket;
 import com.gugas749.abyssorigins.network.packet.UnlockSpecSkillPacket;
@@ -30,18 +31,20 @@ import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
  * The Abyss skill tree.
  *
  * Origin and class trees in tabs (plus the Abilities tab); diamond nodes whose glow reflects their state;
- * connections that pulse once a path is walked; an inspector panel with the node's
+ * connections that pulse once unlocked; an inspector panel with the node's
  * real stat bonuses, requirements and exclusions. Click to inspect, click again (or
  * press the inspector button) to unlock. Unlocks are predicted client-side and
- * reconciled by the server's next sync.
+ * reconciled by the server's next sync. The ascension rows (tiers VII and VIII) are
+ * labelled with the stage that opens them and veiled until the player reaches it.
  */
 public class SkillTreeScreen extends Screen {
 
     private static final int   HEADER_H = 42, FOOTER_H = 16;
     private static final float SPACING_X = 62, SPACING_Y = 58, NODE_R = 13;
-    private static final String[] ROMAN = { "I", "II", "III", "IV", "V", "VI" };
+    private static final String[] ROMAN = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII" };
+    private static final int SEALED_RING = 0xFF3A3350;
 
-    private enum State { UNLOCKED, AVAILABLE, NEED_POINTS, LOCKED, EXCLUDED }
+    private enum State { UNLOCKED, AVAILABLE, NEED_POINTS, LOCKED, EXCLUDED, SEALED }
 
     private record TreeView(SkillTree tree, boolean isClass, int accent, String sigil, Component owner) {}
 
@@ -56,14 +59,14 @@ public class SkillTreeScreen extends Screen {
     private long openedAt, tabSwitchedAt;
     private int panelW;
 
-    /** nodeId → time of client-side predicted unlock (reconciled against server sync). */
+    /** nodeId -> time of client-side predicted unlock (reconciled against server sync). */
     private final Map<String, Long> predicted = new HashMap<>();
     private final Map<String, Long> unlockFx  = new HashMap<>();
 
     // Click targets computed during render
     private int[] unlockButton = null;
     private final List<int[]> tabRects = new ArrayList<>();
-    private int[] abilitiesTab = null;
+    private int[] abilitiesTab = null, masteryTab = null;
     private int[] closeRect = new int[4];
     private boolean startOnClass;
 
@@ -150,9 +153,21 @@ public class SkillTreeScreen extends Screen {
     private State state(SkillNode n, Set<String> unlocked, Set<String> excluded, int level, int points) {
         if (unlocked.contains(n.getId())) return State.UNLOCKED;
         if (excluded.contains(n.getId())) return State.EXCLUDED;
+        if (sealed(n.getTier(), level)) return State.SEALED;
         if (!n.prerequisitesMet(unlocked)) return State.LOCKED;
         if (level < n.getTier().getLevelRequired() || points < n.getPointCost()) return State.NEED_POINTS;
         return State.AVAILABLE;
+    }
+
+    /** An ascension tier the player's origin stage hasn't opened yet. */
+    private boolean sealed(SkillNode.SkillTier tier, int level) {
+        return !view().isClass() && tier.stage() > 0 && level < tier.getLevelRequired();
+    }
+
+    /** Name of the stage that opens {@code tier} for the viewed origin ("Noble Vampire"). */
+    private Component stageTitle(SkillNode.SkillTier tier) {
+        Origin o = ClientOriginData.getOrigin();
+        return o != null && !view().isClass() ? Ascension.title(o, tier.stage()) : Component.literal(ROMAN[tier.getTier() - 1]);
     }
 
     private float nodeX(SkillNode n) { return panX + n.getGridX() * SPACING_X * zoom; }
@@ -195,6 +210,7 @@ public class SkillTreeScreen extends Screen {
         for (SkillNode n : v.tree().getNodes())
             drawNode(g, n, state(n, unlocked, excluded, level, points), mx, my, easeOut((intro - n.getGridY() * 70f) / 320f) * fade);
         drawUnlockFx(g, now);
+        drawSeals(g, level, fade);
         if (hovered != null) drawNodeLabel(g, hovered);
         g.disableScissor();
 
@@ -209,13 +225,47 @@ public class SkillTreeScreen extends Screen {
         SkillTree tree = view().tree();
         Map<Integer, SkillNode.SkillTier> rowTier = new TreeMap<>();
         for (SkillNode n : tree.getNodes()) rowTier.putIfAbsent(n.getGridY(), n.getTier());
+        SkillNode.SkillTier last = null;
         for (Map.Entry<Integer, SkillNode.SkillTier> e : rowTier.entrySet()) {
             int y = (int) (panY + e.getKey() * SPACING_Y * zoom);
-            if (y < HEADER_H || y > height - FOOTER_H) continue;
-            gradientH(g, 34, y, canvasRight() - 12, y + 1, alpha(EDGE, 0f), alpha(EDGE, 0.55f * fade));
             SkillNode.SkillTier t = e.getValue();
-            g.drawString(font, ROMAN[t.getTier() - 1], 8, y - 8, alpha(t.getTier() >= SkillNode.SkillTier.TIER_5.getTier() ? GOLD : TEXT_FAINT, fade), false);
+            boolean first = t != last;      // a tier spread over two rows is labelled once
+            last = t;
+            if (y < HEADER_H || y > height - FOOTER_H) continue;
+            boolean ascension = t.stage() > 0;
+            int tierColor = SkillNode.tierColor(t);
+            int edge = ascension ? mix(EDGE, tierColor, 0.35f) : EDGE;
+            gradientH(g, 34, y, canvasRight() - 12, y + 1, alpha(edge, 0f), alpha(edge, 0.55f * fade));
+            if (!first) continue;
+            int labelColor = ascension ? tierColor : t.getTier() >= SkillNode.SkillTier.TIER_5.getTier() ? GOLD : TEXT_FAINT;
+            g.drawString(font, ROMAN[t.getTier() - 1], 8, y - 8, alpha(labelColor, fade), false);
             g.drawString(font, "Lv" + t.getLevelRequired(), 8, y + 2, alpha(TEXT_FAINT, 0.7f * fade), false);
+            if (ascension && !view().isClass())
+                g.drawString(font, stageTitle(t), 36, y - 11, alpha(labelColor, 0.9f * fade), true);
+        }
+    }
+
+    /** Veils the ascension rows the player hasn't reached, naming the stage that opens them. */
+    private void drawSeals(GuiGraphics g, int level, float fade) {
+        Map<SkillNode.SkillTier, int[]> rows = new EnumMap<>(SkillNode.SkillTier.class);
+        for (SkillNode n : view().tree().getNodes()) {
+            if (!sealed(n.getTier(), level)) continue;
+            rows.merge(n.getTier(), new int[]{ n.getGridY(), n.getGridY() },
+                (a, b) -> new int[]{ Math.min(a[0], b[0]), Math.max(a[1], b[1]) });
+        }
+        for (Map.Entry<SkillNode.SkillTier, int[]> e : rows.entrySet()) {
+            float top = panY + (e.getValue()[0] - 0.5f) * SPACING_Y * zoom, bottom = panY + (e.getValue()[1] + 0.5f) * SPACING_Y * zoom;
+            int y0 = Math.max(HEADER_H, Math.round(top)), y1 = Math.min(height - FOOTER_H, Math.round(bottom));
+            if (y1 <= y0) continue;
+            int color = SkillNode.tierColor(e.getKey());
+            g.fill(0, y0, canvasRight(), y1, alpha(0xB0050310, fade));
+            gradientH(g, 0, y0, canvasRight(), y0 + 1, alpha(color & 0xFFFFFF, fade), alpha(color, 0.5f * fade));
+            gradientH(g, 0, y1 - 1, canvasRight(), y1, alpha(color, 0.5f * fade), alpha(color & 0xFFFFFF, fade));
+            int cy = Math.round((top + bottom) / 2f);
+            if (cy < y0 + 4 || cy > y1 - 4) continue;
+            Component label = Component.literal("✦ ").append(Component.translatable("gui.abyssorigins.sealed",
+                stageTitle(e.getKey()), e.getKey().getLevelRequired())).append(" ✦");
+            centered(g, font, label, canvasRight() / 2, cy - 4, alpha(lighten(color, 0.2f), (0.75f + 0.25f * pulse(1.2f)) * fade));
         }
     }
 
@@ -273,6 +323,7 @@ public class SkillTreeScreen extends Screen {
             }
             case NEED_POINTS -> { ring = mix(GOLD, EDGE, 0.55f); fill = 0xFF120E22; icon = mix(branch, TEXT_DIM, 0.5f); }
             case EXCLUDED    -> { ring = 0xFF5A1A26; fill = 0xFF190A10; icon = 0xFF5A2A33; }
+            case SEALED      -> { ring = SEALED_RING; fill = 0xFF08060F; icon = mix(TEXT_FAINT, 0xFF000000, 0.3f); }
             default          -> { ring = EDGE; fill = 0xFF0B0915; icon = TEXT_FAINT; }
         }
 
@@ -282,7 +333,7 @@ public class SkillTreeScreen extends Screen {
             squareOutline(g, cx, cy, r + 3.5f * zoom, -time() * 40f, 1.2f, alpha(0xFFFFFFFF, 0.8f * appear));
 
         diamondRing(g, cx, cy, r, Math.max(1.2f, 1.6f * zoom), alpha(ring, appear), alpha(fill, appear));
-        diamond(g, cx, cy - r + 3.2f * zoom, 1.6f * zoom, alpha(branch, (s == State.LOCKED ? 0.35f : 0.9f) * appear));
+        diamond(g, cx, cy - r + 3.2f * zoom, 1.6f * zoom, alpha(branch, (s == State.LOCKED || s == State.SEALED ? 0.35f : 0.9f) * appear));
 
         if (zoom >= 0.5f) {
             float scale = Mth.clamp(zoom, 0.6f, 1.6f) * (n.isCapstone() ? 1.15f : 1f);
@@ -296,7 +347,7 @@ public class SkillTreeScreen extends Screen {
             line(g, cx - r * 0.45f, cy - r * 0.45f, cx + r * 0.45f, cy + r * 0.45f, 1.2f, alpha(BAD, 0.6f * appear));
             line(g, cx - r * 0.45f, cy + r * 0.45f, cx + r * 0.45f, cy - r * 0.45f, 1.2f, alpha(BAD, 0.6f * appear));
         }
-        if (s != State.UNLOCKED && s != State.EXCLUDED && zoom >= 0.7f) {
+        if (s != State.UNLOCKED && s != State.EXCLUDED && s != State.SEALED && zoom >= 0.7f) {
             String cost = String.valueOf(n.getPointCost());
             g.drawString(font, cost, (int) cx - font.width(cost) / 2, (int) (cy + r + 2), alpha(s == State.AVAILABLE ? GOLD : TEXT_FAINT, appear), true);
         }
@@ -379,8 +430,23 @@ public class SkillTreeScreen extends Screen {
         g.drawString(font, label, tx + 13, ty + 3, alpha(hover ? TEXT : TEXT_DIM, fade), false);
         abilitiesTab = new int[]{ tx, ty, w, h };
 
+        // Relic mastery
+        tx += w + 4;
+        Component mlabel = Component.translatable("gui.abyssorigins.tab.mastery");
+        int mw = font.width(mlabel) + 20;
+        boolean mhover = inside(mx, my, tx, ty, mw, h);
+        g.fill(tx, ty, tx + mw, ty + h, alpha(mhover ? 0x40FFFFFF : 0x30000000, fade));
+        border(g, tx, ty, mw, h, alpha(mhover ? lighten(EDGE, 0.4f) : EDGE, fade));
+        g.drawString(font, "⚔", tx + 4, ty + 3, alpha(GOLD, fade), false);
+        g.drawString(font, mlabel, tx + 13, ty + 3, alpha(mhover ? TEXT : TEXT_DIM, fade), false);
+        masteryTab = new int[]{ tx, ty, mw, h };
+
         // Level + points
         Component lvl = Component.translatable("gui.abyssorigins.level", level);
+        Origin stageOrigin = ClientOriginData.getOrigin();
+        if (!v.isClass() && stageOrigin != null && Ascension.stageAt(level) > 0)
+            lvl = Ascension.titleAtLevel(stageOrigin, level).copy().withColor(lighten(stageOrigin.getThemeColor(), 0.3f) & 0xFFFFFF)
+                .append(Component.literal("  ·  ").withColor(TEXT_FAINT & 0xFFFFFF)).append(lvl);
         Component pts = Component.translatable("gui.abyssorigins.points", points);
         int right = width - 26;
         g.drawString(font, lvl, right - font.width(lvl), 9, alpha(GOLD, fade), true);
@@ -427,7 +493,12 @@ public class SkillTreeScreen extends Screen {
             g.drawString(font, statLine(b), ix, iy, alpha(b.amount() >= 0 ? GOOD : BAD, fade), false);
             iy += 10;
         }
-        if (!n.getStats().isEmpty()) iy += 4;
+        if (n.getCooldownReduction() > 0) {
+            g.drawString(font, Component.translatable("gui.abyssorigins.stat.cooldown",
+                String.format(Locale.ROOT, "-%.0f%%", n.getCooldownReduction() * 100)), ix, iy, alpha(GOOD, fade), false);
+            iy += 10;
+        }
+        if (!n.getStats().isEmpty() || n.getCooldownReduction() > 0) iy += 4;
 
         Ability taught = n.grantsAbility() ? AbilityRegistry.ability(n.getGrantedAbility()) : null;
         if (taught != null) {
@@ -438,8 +509,10 @@ public class SkillTreeScreen extends Screen {
 
         // Requirements
         iy += header(g, font, ix, iy, iw, Component.translatable("gui.abyssorigins.requirements"), accent, fade);
-        iy = requirement(g, ix, iy, Component.translatable("gui.abyssorigins.req_level", n.getTier().getLevelRequired()),
-            level >= n.getTier().getLevelRequired(), fade);
+        Component levelReq = n.getTier().stage() > 0 && !view().isClass()
+            ? Component.translatable("gui.abyssorigins.req_stage", stageTitle(n.getTier()), n.getTier().getLevelRequired())
+            : Component.translatable("gui.abyssorigins.req_level", n.getTier().getLevelRequired());
+        iy = requirement(g, ix, iy, levelReq, level >= n.getTier().getLevelRequired(), fade);
         for (String req : n.getPrerequisites()) {
             SkillNode r = view().tree().getSkill(req);
             if (r != null) iy = requirement(g, ix, iy, r.getDisplayName(), unlocked.contains(req), fade);
@@ -475,6 +548,7 @@ public class SkillTreeScreen extends Screen {
                 col = TEXT_FAINT;
             }
             case EXCLUDED    -> { label = Component.translatable("gui.abyssorigins.btn.forsaken"); col = BAD; }
+            case SEALED      -> { label = Component.translatable("gui.abyssorigins.btn.sealed", n.getTier().getLevelRequired()); col = SkillNode.tierColor(n.getTier()); }
             default          -> { label = Component.translatable("gui.abyssorigins.btn.locked"); col = TEXT_FAINT; }
         }
         boolean bh = enabled && inside(mx, my, bx, by, bw, 18);
@@ -504,6 +578,8 @@ public class SkillTreeScreen extends Screen {
         y = legend(g, x, y, mix(GOLD, EDGE, 0.55f), "need", fade);
         y = legend(g, x, y, EDGE, "locked", fade);
         y = legend(g, x, y, 0xFF5A1A26, "forsaken", fade);
+        if (!view().isClass() && tree.getNodes().stream().anyMatch(n -> n.getTier().stage() > 0))
+            y = legend(g, x, y, SEALED_RING, "sealed", fade);
         y += 4;
 
         y += header(g, font, x, y, w, Component.translatable("gui.abyssorigins.schools"), view().accent(), fade) + 2;
@@ -548,6 +624,11 @@ public class SkillTreeScreen extends Screen {
         if (abilitiesTab != null && inside(mx, my, abilitiesTab[0], abilitiesTab[1], abilitiesTab[2], abilitiesTab[3])) {
             uiSound(1.1f);
             if (minecraft != null) minecraft.setScreen(new AbilitiesScreen(parent, view().isClass() ? SlotGroup.CLASS : SlotGroup.ORIGIN));
+            return true;
+        }
+        if (masteryTab != null && inside(mx, my, masteryTab[0], masteryTab[1], masteryTab[2], masteryTab[3])) {
+            uiSound(1.1f);
+            if (minecraft != null) minecraft.setScreen(new MasteryScreen(parent));
             return true;
         }
         if (unlockButton != null && selected != null && inside(mx, my, unlockButton[0], unlockButton[1], unlockButton[2], unlockButton[3])) {

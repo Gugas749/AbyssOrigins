@@ -28,6 +28,7 @@ public class ModCreativeTab {
                     AbyssOriginsAPI.getAllOrigins().stream().filter(o -> !o.isHidden())
                         .forEach(o -> output.accept(OriginSeedItem.of(o)));
                     ModItems.WEAPONS.forEach(w -> output.accept(w.get()));
+                    output.accept(ModItems.INVERTED_SPEAR_OF_HEAVEN.get());
                     ModItems.ARMOR.values().forEach(set -> set.forEach(piece -> output.accept(piece.get())));
                 })
                 .build()

@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-/** Client → server: bind a known power to one of the player's own slots (empty id unbinds). */
+/** Client -> server: bind a known power to one of the player's own slots (empty id unbinds). */
 public record BindAbilityPacket(SlotGroup group, int slot, String abilityId) implements CustomPacketPayload {
 
     public static final Type<BindAbilityPacket> TYPE =
@@ -23,7 +23,7 @@ public record BindAbilityPacket(SlotGroup group, int slot, String abilityId) imp
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
 
-    /** Validation (known, fits the slot) happens in Loadouts.bind — nothing here is trusted. */
+    /** Validation (known, fits the slot) happens in Loadouts.bind - nothing here is trusted. */
     public void handle(IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (ctx.player() instanceof ServerPlayer player) Loadouts.bind(player, group, slot, abilityId);

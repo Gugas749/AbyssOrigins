@@ -8,8 +8,8 @@ import com.gugas749.abyssorigins.specialization.occultist.skills.OccultistSkillT
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Occultist — the seer. Reveals what hides (including invisible Shades and Vampires),
- * curses targets with Hexbolt, and sustains through forbidden rites.
+ * Occultist - reveals hidden entities (including invisible Shades and Vampires),
+ * curses targets with Hexbolt, and sustains through ritual skills.
  *
  * Available to ALL origins. Assigned by OPs: /abyssorigins specialization set <player> occultist
  *

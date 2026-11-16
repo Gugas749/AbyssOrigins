@@ -8,9 +8,10 @@ import com.gugas749.abyssorigins.effect.ModEffects;
 import com.gugas749.abyssorigins.origin.eminence.Eminence;
 import com.gugas749.abyssorigins.power.*;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -21,8 +22,8 @@ import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
- * Shade mechanics. Umbra pools in darkness and bleeds away in light. Shadow Meld's
- * breaking strike is the Shade's signature burst; Light-Bane is its price.
+ * Shade mechanics. Umbra is gained in darkness and drains in light. Shadow Meld's
+ * breaking strike is the Shade's main burst; Light-Bane is its weakness.
  */
 @EventBusSubscriber(modid = Abyssorigins.MODID)
 public class ShadeHooks implements PowerHooks {
@@ -78,7 +79,7 @@ public class ShadeHooks implements PowerHooks {
     public void onAttack(ServerPlayer player, LivingEntity target, LivingIncomingDamageEvent event) {
         if (!Targeting.isMelee(event.getSource(), player)) return;
 
-        // Breaking Shadow Meld with a strike: the ambush
+        // Breaking Shadow Meld with an attack: ambush bonus
         if (AbilityStates.isActive(player, ShadeAbilities.MELD_ID)) {
             float mult = Skills.has(player, "shade_ambush") ? 2.5f : 2.0f;
             event.setAmount(event.getAmount() * mult);
@@ -86,15 +87,31 @@ public class ShadeHooks implements PowerHooks {
             PowerState.flag(player, "meld_break", 2); // read by class hooks later in the same event (Assassin resonance)
             AbilityStates.stop(player, ShadeAbilities.MELD_ID);
             var level = player.serverLevel();
-            Vfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(player.position())).scale(1.5f).extra(160)
-                .colors(Palette.SHADOW_HI, 0xE0E8FF).flags(Vfx.VERTICAL).duration(12).send(level);
-            Vfx.of(VfxType.BURST).at(Fx.chest(target)).scale(1.0f).colors(Palette.SHADOW, Palette.SHADOW_HI).flags(Vfx.VOID).duration(12).send(level);
+            AbyssVfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(player.position())).scale(1.5f).extra(160)
+                .colors(Palette.SHADOW_HI, 0xE0E8FF).flags(AbyssVfx.VERTICAL).duration(12).send(level);
+            AbyssVfx.of(VfxType.BURST).at(Fx.chest(target)).scale(1.0f).colors(Palette.SHADOW, Palette.SHADOW_HI).flags(AbyssVfx.VOID).duration(12).send(level);
             Fx.sound(level, target.position(), SoundEvents.PLAYER_ATTACK_CRIT, 1.0f, 0.6f);
         }
 
         if (Skills.has(player, "shade_phantom_blade")
                 && (target.hasEffect(MobEffects.BLINDNESS) || target.hasEffect(ModEffects.STUNNED)))
             event.setAmount(event.getAmount() * 1.3f);
+
+        // Backstab: +25% from behind
+        if (Skills.has(player, "shade_backstab") && Targeting.isBehind(player, target)) event.setAmount(event.getAmount() * 1.25f);
+
+        // Umbral Reaper: +40% against targets below 25% health
+        if (Skills.has(player, "shade_reaper") && target.getHealth() < target.getMaxHealth() * 0.25f)
+            event.setAmount(event.getAmount() * 1.4f);
+
+        // Nightmare: hits from the dark weaken
+        if (Skills.has(player, "shade_nightmare") && Targeting.lightAt(player) <= 7)
+            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0), player);
+    }
+
+    @Override
+    public void onKill(ServerPlayer player, LivingEntity victim, DamageSource source) {
+        if (Skills.has(player, "shade_umbra_feast")) Skills.addResource(player, 10f);   // Umbra Feast
     }
 
     @Override
@@ -105,7 +122,12 @@ public class ShadeHooks implements PowerHooks {
         if (Skills.has(player, "shade_void_shroud") && Targeting.inSunlight(player))
             event.setAmount(event.getAmount() * 1.5f);
 
-        // Shadow Double: slip away when cornered (90s)
+        // Veil Step: hit in darkness, 25% chance to vanish for 3s (10s cooldown)
+        if (Skills.has(player, "shade_veil_step") && light <= 7 && player.getRandom().nextFloat() < 0.25f
+                && PowerState.tryTrigger(player, "shade_veil_step", 200))
+            player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, false, false, true));
+
+        // Shadow Double: free meld below 40% health (90s cooldown)
         if (Skills.has(player, "shade_shadow_clone")
                 && player.getHealth() - event.getAmount() < player.getMaxHealth() * 0.4f
                 && !AbilityStates.isActive(player, ShadeAbilities.MELD_ID)
@@ -114,7 +136,7 @@ public class ShadeHooks implements PowerHooks {
         }
     }
 
-    /** Shadow-Woven: mobs struggle to notice you in darkness. */
+    /** Shadow-Woven: halved mob detection range in darkness. */
     @SubscribeEvent
     public static void onVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || !(Skills.isOrigin(p, "shade") || Eminence.is(p))) return;

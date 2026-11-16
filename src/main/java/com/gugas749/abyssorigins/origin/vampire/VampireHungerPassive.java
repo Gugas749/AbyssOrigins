@@ -16,7 +16,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 /**
- * Blood Dependency: mortal food is meaningless; blood is the only sustenance.
+ * Blood Dependency: normal food is refused; only blood feeds a vampire.
  *
  * The vanilla hunger bar is hidden for vampires (the blood bar replaces it) but its
  * value now MIRRORS blood: 100 blood = 20 hunger, never below 7 so sprinting always

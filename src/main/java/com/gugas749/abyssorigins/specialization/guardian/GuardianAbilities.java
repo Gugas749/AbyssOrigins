@@ -9,8 +9,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -56,13 +56,13 @@ public final class GuardianAbilities {
                 e.hurtMarked = true;
                 e.addEffect(new MobEffectInstance(ModEffects.STUNNED, concussive ? 50 : 30, 0), player);
                 if (Skills.has(player, "guardian_provoke") && e instanceof Mob mob) mob.setTarget(player);
-                Vfx.burst(level, Fx.chest(e), 0.6f, Palette.AEGIS, Palette.AEGIS_HI);
+                AbyssVfx.burst(level, Fx.chest(e), 0.6f, Palette.AEGIS, Palette.AEGIS_HI);
             }
 
             Vec3 front = player.position().add(look.scale(1.5)).add(0, 1, 0);
-            Vfx.of(VfxType.SLASH).at(player.position().add(0, 1.0, 0)).dir(look).scale(2.4f).extra(120)
+            AbyssVfx.of(VfxType.SLASH).at(player.position().add(0, 1.0, 0)).dir(look).scale(2.4f).extra(120)
                 .colors(Palette.AEGIS, Palette.AEGIS_HI).duration(12).send(level);
-            Vfx.shockwave(level, player.position().add(look.scale(1.5)), 2.2f, Palette.AEGIS, Palette.AEGIS_HI, 12);
+            AbyssVfx.shockwave(level, player.position().add(look.scale(1.5)), 2.2f, Palette.AEGIS, Palette.AEGIS_HI, 12);
             Fx.sound(level, front, SoundEvents.SHIELD_BLOCK, 1.0f, 0.7f);
             Fx.sound(level, front, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, 0.6f, 1.2f);
             return true;
@@ -90,7 +90,7 @@ public final class GuardianAbilities {
                 if (kb != null && !kb.hasModifier(UNBREAKABLE))
                     kb.addTransientModifier(new AttributeModifier(UNBREAKABLE, 1.0, AttributeModifier.Operation.ADD_VALUE));
             }
-            // Taunt: every hostile nearby turns on the Guardian
+            // Taunt: nearby hostiles target the Guardian
             for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(10),
                     m -> m instanceof Enemy && m.isAlive()))
                 mob.setTarget(player);
@@ -98,8 +98,8 @@ public final class GuardianAbilities {
             if (Skills.isOrigin(player, "seraph")) Skills.addResource(player, 10f);   // Aegis of Dawn
 
             var lvl = player.serverLevel();
-            Vfx.of(VfxType.DOME).follow(player).scale((float) radius(player)).colors(Palette.OATH, Palette.OATH_HI).flags(Vfx.HALF).duration(duration).send(lvl);
-            Vfx.of(VfxType.SIGIL).follow(player).scale((float) radius(player) * 0.6f).extra(6).colors(Palette.OATH, Palette.OATH_HI).duration(duration).send(lvl);
+            AbyssVfx.of(VfxType.DOME).follow(player).scale((float) radius(player)).colors(Palette.OATH, Palette.OATH_HI).flags(AbyssVfx.HALF).duration(duration).send(lvl);
+            AbyssVfx.of(VfxType.SIGIL).follow(player).scale((float) radius(player) * 0.6f).extra(6).colors(Palette.OATH, Palette.OATH_HI).duration(duration).send(lvl);
 
             Fx.sound(player.level(), player.position(), SoundEvents.BEACON_POWER_SELECT, 1.0f, 1.2f);
             Fx.sound(player.level(), player.position(), SoundEvents.ANVIL_LAND, 0.4f, 1.6f);
@@ -127,8 +127,8 @@ public final class GuardianAbilities {
         public void onEnd(ServerPlayer player) {
             AttributeInstance kb = player.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
             if (kb != null) kb.removeModifier(UNBREAKABLE);
-            Vfx.stop(player.serverLevel(), player, VfxType.DOME);
-            Vfx.stop(player.serverLevel(), player, VfxType.SIGIL);
+            AbyssVfx.stop(player.serverLevel(), player, VfxType.DOME);
+            AbyssVfx.stop(player.serverLevel(), player, VfxType.SIGIL);
             Fx.sound(player.level(), player.position(), SoundEvents.BEACON_DEACTIVATE, 0.8f, 1.2f);
         }
     }

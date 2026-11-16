@@ -2,7 +2,7 @@ package com.gugas749.abyssorigins.api;
 
 import net.minecraft.world.entity.player.Player;
 
-/** Class equivalent of TraitPassive — listed in the UI, mechanics live in the class's hooks. */
+/** Class equivalent of TraitPassive - listed in the UI, mechanics live in the class's hooks. */
 public class ClassTraitPassive extends SpecializationPassive {
 
     public ClassTraitPassive(String id, String nameKey, String descKey) {

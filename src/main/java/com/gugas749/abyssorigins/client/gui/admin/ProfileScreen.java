@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.IntConsumer;
 
 /**
- * Staff profile — /abyssorigins profile &lt;player&gt;. Shows a player's origin, class, levels,
+ * Staff profile - /abyssorigins profile &lt;player&gt;. Shows a player's origin, class, levels,
  * XP, skills and abilities (hidden ones included), and edits them.
  *
  * Purely a view: every button sends a ProfileEditPacket that the server re-validates against

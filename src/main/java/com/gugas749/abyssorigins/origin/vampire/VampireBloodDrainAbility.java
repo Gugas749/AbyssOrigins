@@ -5,7 +5,7 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Blood Drain: bite the nearest blood-bearing enemy. Crimson Tide turns it into an
- * area drain. Does nothing — and costs nothing — if no valid target is in reach.
+ * area drain. Does nothing - and costs nothing - if no valid target is in reach.
  */
 public class VampireBloodDrainAbility extends OriginAbility {
     private static final float RANGE = 3.0f, TIDE_RANGE = 4.5f, DAMAGE = 3.0f, HEAL = 2.0f, BLOOD_GAIN = 15.0f;
@@ -32,7 +32,7 @@ public class VampireBloodDrainAbility extends OriginAbility {
 
     @Override
     public boolean activate(ServerPlayer player) {
-        boolean tide = Skills.has(player, "vamp_crimson_tide");
+        boolean tide = Skills.has(player, "vamp_blood_lord");
         double range = tide ? TIDE_RANGE : RANGE;
 
         List<LivingEntity> candidates = Targeting.preyAround(player, player.position(), range).stream()
@@ -53,8 +53,8 @@ public class VampireBloodDrainAbility extends OriginAbility {
             target.hurt(Targeting.spell(player), DAMAGE);
             player.heal(heal);
             Skills.addResource(player, BLOOD_GAIN);
-            Vfx.beam(level, Fx.chest(target), mouth, 0.3f, Palette.BLOOD, Palette.BLOOD_HI, 14);
-            Vfx.burst(level, Fx.chest(target), 0.6f, Palette.BLOOD, Palette.BLOOD_HI);
+            AbyssVfx.beam(level, Fx.chest(target), mouth, 0.3f, Palette.BLOOD, Palette.BLOOD_HI, 14);
+            AbyssVfx.burst(level, Fx.chest(target), 0.6f, Palette.BLOOD, Palette.BLOOD_HI);
         }
 
         Fx.sound(level, player.position(), SoundEvents.GENERIC_DRINK, 1.0f, 0.6f);

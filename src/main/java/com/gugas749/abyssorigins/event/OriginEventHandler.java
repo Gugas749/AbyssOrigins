@@ -12,6 +12,7 @@ import com.gugas749.abyssorigins.power.Loadouts;
 import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.power.Powers;
 import com.gugas749.abyssorigins.skilltree.registry.SkillEffectHandler;
+import com.gugas749.abyssorigins.skilltree.SkillService;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -44,10 +45,11 @@ public class OriginEventHandler {
                 AbyssOriginsAPI.setPlayerOrigin(player, origin);
                 // Grant starting points if this is effectively a new assignment
                 XpEventHandler.grantStartingPoints(player);
+                SkillService.refundRetired(player);       // nodes removed from the tree since the last login
                 Abyssorigins.LOGGER.info("[AbyssOrigins] Restored origin {} for {}",
                     savedId, player.getName().getString());
             } else {
-                Abyssorigins.LOGGER.warn("[AbyssOrigins] Unknown saved origin {} for {} — clearing",
+                Abyssorigins.LOGGER.warn("[AbyssOrigins] Unknown saved origin {} for {} - clearing",
                     savedId, player.getName().getString());
                 data.setOriginId(null);
             }
@@ -83,7 +85,7 @@ public class OriginEventHandler {
         }
     }
 
-    /** The cloned body has fresh attributes — rebuild stats and top up to the new max health. */
+    /** The cloned body has fresh attributes - rebuild stats and top up to the new max health. */
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
@@ -103,7 +105,7 @@ public class OriginEventHandler {
         if (player.level().isClientSide()) return;
         if (!(player instanceof ServerPlayer sp)) return;
 
-        // Shared power tick — runs for origin and class alike
+        // Shared power tick - runs for origin and class alike
         AbilityStates.tick(sp);
         Loadouts.data(sp).tick();
         Powers.forEach(sp, h -> h.tick(sp));
@@ -125,7 +127,7 @@ public class OriginEventHandler {
             }
         }
 
-        origin.getPassives().forEach(passive -> {
+        if (!com.gugas749.abyssorigins.power.Nullification.is(player)) origin.getPassives().forEach(passive -> {
             try { passive.onTick(player); }
             catch (Exception e) {
                 Abyssorigins.LOGGER.error("Error ticking passive {} for {}: {}",
@@ -138,7 +140,7 @@ public class OriginEventHandler {
         }
     }
 
-    /** Only blood starvation hurts — empty wrath / radiance / umbra simply can't pay for abilities. */
+    /** Only blood starvation hurts - empty wrath / radiance / umbra simply can't pay for abilities. */
     private static void onBloodDepleted(ServerPlayer player) {
         if (player.tickCount % 40 == 0) {
             player.hurt(player.damageSources().starve(), 1.0f);

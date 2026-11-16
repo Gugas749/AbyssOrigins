@@ -7,8 +7,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.origin.eminence.Eminence;
 import com.gugas749.abyssorigins.power.Skills;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * Origin gear rules: only the matching origin may wield it (creative players are exempt).
- * Anyone else is rejected — hurt and weakened — and gains none of its powers or set bonus.
+ * Anyone else is rejected (damaged and weakened) and gets none of its powers or set bonus.
  */
 public final class Gear {
 
@@ -44,7 +44,7 @@ public final class Gear {
     private static final EquipmentSlot[] ARMOR = { EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET };
 
     public static boolean attuned(Player p, String origin) {
-        return p.isCreative() || Skills.isOrigin(p, origin) || Eminence.is(p);   // every relic answers the crown
+        return p.isCreative() || Skills.isOrigin(p, origin) || Eminence.is(p);   // the Eminence can use every relic
     }
 
     /** Pieces of {@code set} currently worn. */
@@ -87,7 +87,7 @@ public final class Gear {
         if (severity >= 2) p.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, true));
 
         int color = originColor(item.originPath());
-        Vfx.of(VfxType.BURST).at(Fx.chest(p)).scale(0.8f).colors(color, 0x200008).flags(Vfx.VOID).duration(12).send(p.serverLevel());
+        AbyssVfx.of(VfxType.BURST).at(Fx.chest(p)).scale(0.8f).colors(color, 0x200008).flags(AbyssVfx.VOID).duration(12).send(p.serverLevel());
         Fx.sound(p.level(), p.position(), SoundEvents.WITHER_HURT, 0.5f, 1.6f);
         p.displayClientMessage(Component.translatable("abyssorigins.message.gear_rejected", originName(item.originPath()))
             .withStyle(ChatFormatting.RED), true);

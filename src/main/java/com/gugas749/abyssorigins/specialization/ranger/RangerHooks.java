@@ -8,7 +8,7 @@ import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,7 +19,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-/** Ranger mechanics — rewards distance, marks and fully drawn shots. */
+/** Ranger mechanics - rewards distance, marks and fully drawn shots. */
 public class RangerHooks implements PowerHooks {
 
     private static boolean ownProjectile(DamageSource src, ServerPlayer p) {
@@ -39,7 +39,7 @@ public class RangerHooks implements PowerHooks {
         if (Skills.has(player, "ranger_heartseeker") && target.hasEffect(ModEffects.HUNTERS_MARK)
                 && src.getDirectEntity() instanceof AbstractArrow arrow && arrow.isCritArrow()) {
             mult *= 1.5f;
-            Vfx.burst(player.serverLevel(), Fx.chest(target), 0.8f, Palette.HUNT, Palette.HUNT_HI);
+            AbyssVfx.burst(player.serverLevel(), Fx.chest(target), 0.8f, Palette.HUNT, Palette.HUNT_HI);
         }
         if (Skills.isOrigin(player, "seraph") && Targeting.isUndead(target)) {         // Sunshot
             mult *= 1.2f;
@@ -58,7 +58,7 @@ public class RangerHooks implements PowerHooks {
         Vec3 away = player.position().subtract(attacker.position()).multiply(1, 0, 1).normalize().scale(1.1);
         player.setDeltaMovement(away.x, 0.45, away.z);
         player.hurtMarked = true;
-        Vfx.shockwave(player.serverLevel(), player.position(), 1.8f, Palette.HUNT, Palette.HUNT_HI, 10);
+        AbyssVfx.shockwave(player.serverLevel(), player.position(), 1.8f, Palette.HUNT, Palette.HUNT_HI, 10);
         Fx.sound(player.level(), player.position(), SoundEvents.PHANTOM_FLAP, 0.7f, 1.6f);
     }
 

@@ -12,7 +12,7 @@ import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-/** Guardian — the wall. Stuns, taunts, shields allies and takes their pain. */
+/** Guardian - tank. Stuns, taunts, shields allies and takes a share of their damage. */
 public class GuardianSpecialization extends Specialization {
 
     private static final String P = "abyssorigins.skill.";
@@ -39,7 +39,7 @@ public class GuardianSpecialization extends Specialization {
         setSkillTree(buildTree(getId()));
     }
 
-    /** Oath of the Bulwark — left: Stone (self), middle: Oath (punish), right: Ward (allies). */
+    /** Oath of the Bulwark - left: Stone (self), middle: Oath (punish), right: Ward (allies). */
     private static SkillTree buildTree(ResourceLocation id) {
         SkillTree t = new SkillTree(id, "abyssorigins.skilltree.guardian.name");
 
@@ -81,7 +81,7 @@ public class GuardianSpecialization extends Specialization {
             .icon("♕").tier(SkillTier.TIER_5).branch(SkillBranch.ASCENDED).cost(5).pos(0, 4)
             .requiresAny("guardian_unbreakable", "guardian_martyr").build());
 
-        // Apex (tier VI) — the late-game row beyond the capstones
+        // Apex (tier VI) - the late-game row beyond the capstones
         t.addNode(SkillNode.builder("guardian_apex_living_bulwark").lang("abyssorigins.skill.guardian_apex_living_bulwark")
             .icon("⛨").tier(SkillTier.TIER_6).branch(SkillBranch.DEFENSE).cost(4).pos(-1, 5)
             .requires("guardian_eternal_vow").stat(Attributes.ARMOR, 3).stat(Attributes.ARMOR_TOUGHNESS, 2).build());

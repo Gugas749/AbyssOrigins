@@ -33,7 +33,7 @@ import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 /**
  * The Abilities tab: every power the player knows, and the slots they are bound to.
  *
- * Two loadouts with the same layout for every Origin and Class — Origin (five slots) and
+ * Two loadouts with the same layout for every Origin and Class - Origin (five slots) and
  * Class (three slots). Pick a slot, then a power; right-click
  * a slot to clear it. Powers are grouped by the origin / class they come from, with a badge
  * for how they were learned (granted, skill, inherited). The server re-validates every bind.
@@ -57,7 +57,7 @@ public class AbilitiesScreen extends Screen {
     private int contentH;
     private final List<Row> rows = new ArrayList<>();
     private final List<int[]> tabRects = new ArrayList<>();
-    private int[] treeRect = null, closeRect = new int[4];
+    private int[] treeRect = null, masteryRect = null, closeRect = new int[4];
     private List<FormattedCharSequence> tooltip;
 
     public AbilitiesScreen(Screen parent, SlotGroup group) {
@@ -91,7 +91,7 @@ public class AbilitiesScreen extends Screen {
 
     private Component ownerName() {
         if (group == SlotGroup.CLASS && ClientSpecializationData.getSpec() != null) return ClientSpecializationData.getSpec().getDisplayName();
-        return ClientOriginData.getOrigin() != null ? ClientOriginData.getOrigin().getDisplayName() : Component.empty();
+        return ClientOriginData.getOrigin() != null ? Ascension.titleAtLevel(ClientOriginData.getOrigin(), ClientOriginData.getLevel()) : Component.empty();
     }
 
     private String ownerSigil() {
@@ -233,8 +233,11 @@ public class AbilitiesScreen extends Screen {
             tx += r[2] + 6;
         }
         treeRect = null;
-        if (hasTree())
+        if (hasTree()) {
             treeRect = tab(g, tx + 8, Component.translatable("gui.abyssorigins.tab.tree"), MIST, false, true, mx, my, fade);
+            tx += 8 + treeRect[2] + 6 - 8;
+        }
+        masteryRect = tab(g, tx + 8, Component.translatable("gui.abyssorigins.tab.mastery"), GOLD, false, true, mx, my, fade);
 
         closeRect = new int[]{ width - 18, 6, 12, 12 };
         boolean ch = inside(mx, my, closeRect[0], closeRect[1], 12, 12);
@@ -388,6 +391,11 @@ public class AbilitiesScreen extends Screen {
         if (treeRect != null && inside(mx, my, treeRect[0], treeRect[1], treeRect[2], treeRect[3])) {
             click(1.1f);
             minecraft.setScreen(new SkillTreeScreen(parent, group == SlotGroup.CLASS));
+            return true;
+        }
+        if (masteryRect != null && inside(mx, my, masteryRect[0], masteryRect[1], masteryRect[2], masteryRect[3])) {
+            click(1.1f);
+            minecraft.setScreen(new MasteryScreen(parent));
             return true;
         }
         for (int i = 0; i < group.size(); i++) {

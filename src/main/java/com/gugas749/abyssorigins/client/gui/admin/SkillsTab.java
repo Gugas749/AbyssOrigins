@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The unlocked nodes of both trees (read-only — respec from the Overview tab). */
+/** The unlocked nodes of both trees (read-only - respec from the Overview tab). */
 final class SkillsTab implements AbyssTab {
 
     private static final int GAP = 8, ROW_H = 12, TITLE_H = 14;

@@ -68,7 +68,7 @@ public record SyncSpecializationPacket(
             data.setSpecXp(pkt.specXp);
             data.setSkillPoints(pkt.skillPoints);
 
-            // REPLACE the unlocked set — the old handler only ever added, so respecs never showed.
+            // Replace the unlocked set (adding would keep respecced skills)
             data.clearSkills();
             pkt.unlockedSkills.forEach(data::unlockSkill);
 

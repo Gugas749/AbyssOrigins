@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Server → owning client: granted abilities, both loadouts, every running cooldown and the switched-off area passives. */
+/** Server -> owning client: granted abilities, both loadouts, every running cooldown and the switched-off area passives. */
 public record SyncAbilitiesPacket(List<String> granted, List<String> originSlots, List<String> classSlots,
                                   List<Cooldown> cooldowns, List<String> passivesOff) implements CustomPacketPayload {
 

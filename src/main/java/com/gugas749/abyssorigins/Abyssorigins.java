@@ -1,6 +1,7 @@
 package com.gugas749.abyssorigins;
 
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
+import com.gugas749.abyssorigins.config.AbyssOriginsServerConfig;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.block.ModBlocks;
@@ -36,6 +37,7 @@ public class Abyssorigins {
     public Abyssorigins(IEventBus modEventBus, ModContainer modContainer) {
         AbyssOriginsConfig.migrateOldFile();
         modContainer.registerConfig(ModConfig.Type.CLIENT, AbyssOriginsConfig.CLIENT_SPEC, AbyssOriginsConfig.CLIENT_FILE);
+        modContainer.registerConfig(ModConfig.Type.SERVER, AbyssOriginsServerConfig.SPEC, AbyssOriginsServerConfig.FILE);
 
         OriginAttachments.register(modEventBus);
         SkillAttachments.register(modEventBus);
@@ -48,12 +50,12 @@ public class Abyssorigins {
         ModEntities.register(modEventBus);
         ModCreativeTab.register(modEventBus);
 
-        // Presence: kneeling dims the world (not to black); the awed hold glints gold at the edges
+        // Presence: dark vignette while kneeling, gold vignette while awed
         AbyssScreenOverlay.bindEffect(ModEffects.KNEELING, AbyssOverlaySpec.tint(0x07040C, 0.34f).fade(20, 30));
         AbyssScreenOverlay.bindEffect(ModEffects.AWED, AbyssOverlaySpec.vignette(0xC89A2E, 0.45f).fade(10, 15));
-        // Punishment: a crucified player's sight closes in, blood-dark at the edges
+        // Punishment: dark red vignette while crucified
         AbyssScreenOverlay.bindEffect(ModEffects.CRUCIFIED, AbyssOverlaySpec.vignette(0x3A0000, 0.6f).fade(10, 20));
-        // Dread: a Dementor is near — cold, colourless dark closing in
+        // Dread: dark blue vignette while a Dementor is near
         AbyssScreenOverlay.bindEffect(ModEffects.DREAD, AbyssOverlaySpec.vignette(0x060B12, 0.5f).fade(15, 40));
 
         modEventBus.addListener(this::commonSetup);

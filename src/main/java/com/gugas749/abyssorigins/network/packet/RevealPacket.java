@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Server → ONE client: outline an entity for a while, in a colour, for this viewer only.
+ * Server -> ONE client: outline an entity for a while, in a colour, for this viewer only.
  *
  * This is how marks (Hunter's Mark, Mark for Death) become visible without the vanilla
  * Glowing effect, which is a world-wide entity flag every player would see.

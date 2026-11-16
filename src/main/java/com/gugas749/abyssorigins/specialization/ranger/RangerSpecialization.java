@@ -11,7 +11,7 @@ import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-/** Ranger — marks prey and punishes it from range. */
+/** Ranger - marks targets and deals ranged damage. */
 public class RangerSpecialization extends Specialization {
 
     private static final String P = "abyssorigins.skill.";
@@ -36,7 +36,7 @@ public class RangerSpecialization extends Specialization {
         setSkillTree(buildTree(getId()));
     }
 
-    /** Wild Hunt — left: Volley, middle: Prey, right: Survival. */
+    /** Wild Hunt - left: Volley, middle: Prey, right: Survival. */
     private static SkillTree buildTree(ResourceLocation id) {
         SkillTree t = new SkillTree(id, "abyssorigins.skilltree.ranger.name");
 
@@ -77,7 +77,7 @@ public class RangerSpecialization extends Specialization {
             .icon("♕").tier(SkillTier.TIER_5).branch(SkillBranch.ASCENDED).cost(5).pos(0, 4)
             .requiresAny("ranger_storm_of_arrows", "ranger_heartseeker").build());
 
-        // Apex (tier VI) — the late-game row beyond the capstones
+        // Apex (tier VI) - the late-game row beyond the capstones
         t.addNode(SkillNode.builder("ranger_apex_windrunner").lang("abyssorigins.skill.ranger_apex_windrunner")
             .icon("»").tier(SkillTier.TIER_6).branch(SkillBranch.UTILITY).cost(4).pos(-1, 5)
             .requires("ranger_apex_hunter").statPct(Attributes.MOVEMENT_SPEED, 0.1).build());

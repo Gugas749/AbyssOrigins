@@ -15,9 +15,9 @@ import net.minecraft.world.item.TooltipFlag;
 import java.util.List;
 
 /**
- * Seed of Origin — the same consumption and awakening as the Orb, but the origin is already
+ * Seed of Origin - the same consumption and awakening as the Orb, but the origin is already
  * decided (stored in the {@code abyssorigins:seed_origin} component), so no menu is shown.
- * Tinted with its origin's colour. A seed with no (or an unknown) origin is barren.
+ * Tinted with its origin's colour. A seed with no (or an unknown) origin does nothing.
  */
 public class OriginSeedItem extends RitualItem {
 

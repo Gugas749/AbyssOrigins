@@ -8,8 +8,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -46,7 +46,7 @@ public final class RangerAbilities {
                 for (LivingEntity e : Targeting.enemiesAround(player, target.position(), 5))
                     if (e != target) mark(player, e);
 
-            Vfx.of(VfxType.BEAM).at(Fx.hand(player)).to(Fx.chest(target)).extra(0.08f)
+            AbyssVfx.of(VfxType.BEAM).at(Fx.hand(player)).to(Fx.chest(target)).extra(0.08f)
                 .colors(Palette.HUNT, Palette.HUNT_HI).duration(10).sendTo(player);
             Fx.sound(player.level(), player.position(), SoundEvents.CROSSBOW_LOADING_END.value(), 1.0f, 1.4f);
             return true;
@@ -58,7 +58,7 @@ public final class RangerAbilities {
             target.addEffect(new MobEffectInstance(ModEffects.HUNTERS_MARK, ticks, predator ? 1 : 0), player);
             RevealPacket.send(player, target, ticks, MARK_RGB);    // visible to the Ranger only
             ServerLevel level = player.serverLevel();
-            Vfx.of(VfxType.MARK).follow(target).colors(Palette.HUNT, Palette.HUNT_HI).duration(ticks).sendTo(player);
+            AbyssVfx.of(VfxType.MARK).follow(target).colors(Palette.HUNT, Palette.HUNT_HI).duration(ticks).sendTo(player);
         }
     }
 
@@ -94,9 +94,9 @@ public final class RangerAbilities {
                 if (Skills.isOrigin(player, "voidborn"))    arrow.addEffect(new MobEffectInstance(ModEffects.SUNDERED, 80, 0)); // Rift Arrows
                 arrow.shootFromRotation(player, player.getXRot(), player.getYRot() + yawOffset, 0f, 2.6f, 0.5f);
                 level.addFreshEntity(arrow);
-                Vfx.of(VfxType.TRAIL).follow(arrow).scale(0.3f).colors(Palette.HUNT, Palette.HUNT_HI).duration(40).send(level);
+                AbyssVfx.of(VfxType.TRAIL).follow(arrow).scale(0.3f).colors(Palette.HUNT, Palette.HUNT_HI).duration(40).send(level);
             }
-            Vfx.burst(level, player.getEyePosition().add(player.getLookAngle().scale(1.2)), 0.6f, Palette.HUNT, Palette.HUNT_HI);
+            AbyssVfx.burst(level, player.getEyePosition().add(player.getLookAngle().scale(1.2)), 0.6f, Palette.HUNT, Palette.HUNT_HI);
             Fx.sound(level, player.position(), SoundEvents.ARROW_SHOOT, 1.0f, 0.8f);
             Fx.sound(level, player.position(), SoundEvents.CROSSBOW_SHOOT, 0.7f, 1.2f);
         }

@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 
 /**
  * A vampire's food. It is a genuine food item (nutrition, always edible) so that
- * auto-feeding mods — e.g. Sophisticated Backpacks' Feeding Upgrade — recognise it.
+ * auto-feeding mods - e.g. Sophisticated Backpacks' Feeding Upgrade - recognise it.
  * For vampires the hunger bar mirrors their blood (see VampireHungerPassive), so a
  * feeder sees the deficit and feeds hearts; the heart then restores 40 blood.
  */
@@ -51,7 +51,7 @@ public class HumanHeartItem extends Item {
             player.removeEffect(MobEffects.WEAKNESS);
             ModPackets.syncPlayer(player);
         } else {
-            // Non-vampires get punished
+            // Non-vampires get negative effects
             player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0, false, true));
             player.addEffect(new MobEffectInstance(MobEffects.HUNGER,    200, 1, false, true));
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,  200, 0, false, true));

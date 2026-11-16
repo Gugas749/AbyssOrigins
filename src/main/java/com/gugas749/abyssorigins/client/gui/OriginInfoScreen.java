@@ -27,7 +27,7 @@ import java.util.List;
 import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 
 /**
- * The Codex — origin & class dashboard.
+ * The Codex - origin & class dashboard.
  * Left: who you are (origin, traits, resource). Middle: what you can do (abilities,
  * passives). Right: your class, its resonance with your origin, and progression.
  */
@@ -74,7 +74,7 @@ public class OriginInfoScreen extends Screen {
 
         // Title
         centered(g, font, Component.translatable("gui.abyssorigins.codex").withStyle(ChatFormatting.ITALIC), width / 2, 6, alpha(TEXT_FAINT, fade));
-        MutableComponent title = origin.getDisplayName().copy();
+        MutableComponent title = Ascension.titleAtLevel(origin, ClientOriginData.getLevel()).copy();
         if (spec != null) title.append(Component.literal("  ◆  ").withColor(TEXT_FAINT & 0xFFFFFF)).append(spec.getDisplayName());
         float ts = 1.35f;
         scaledText(g, font, title, width / 2f - font.width(title) * ts / 2f, 17, ts, alpha(lighten(accent, 0.3f), fade), true);
@@ -120,7 +120,8 @@ public class OriginInfoScreen extends Screen {
         iy += 42;
 
         float ns = 1.3f;
-        scaledText(g, font, origin.getDisplayName(), cx - font.width(origin.getDisplayName()) * ns / 2, iy, ns, alpha(TEXT, fade), true);
+        Component name = Ascension.titleAtLevel(origin, ClientOriginData.getLevel());
+        scaledText(g, font, name, cx - font.width(name) * ns / 2, iy, ns, alpha(TEXT, fade), true);
         iy += 14;
         int impact = origin.getImpactLevel().ordinal();
         int ic = impact == 0 ? GOOD : impact == 1 ? GOLD : BAD;
@@ -294,6 +295,19 @@ public class OriginInfoScreen extends Screen {
         int op = ClientOriginData.getSkillPoints(), cp = spec != null ? ClientSpecializationData.getSkillPoints() : 0;
         Component pts = Component.translatable("gui.abyssorigins.points_split", op, cp);
         g.drawString(font, pts, ix, iy, alpha(op + cp > 0 ? mix(GOLD, 0xFFFFF4C8, pulse(1.5f)) : TEXT_DIM, fade), false);
+        iy += 13;
+
+        // The next ascension stage, or a note that the last one is reached
+        int stage = Ascension.stageAt(ClientOriginData.getLevel());
+        if (iy + 20 <= y + h - 28) {
+            Component head = stage < Ascension.LORD
+                ? Component.translatable("gui.abyssorigins.next_ascension", Ascension.levelFor(stage + 1))
+                : Component.translatable("gui.abyssorigins.final_ascension");
+            g.drawString(font, head, ix, iy, alpha(TEXT_FAINT, fade), false);
+            Component next = Ascension.title(origin, Math.min(Ascension.LORD, stage + 1));
+            if (font.width(next) > iw) next = Component.literal(font.plainSubstrByWidth(next.getString(), iw - 6) + "…");
+            g.drawString(font, next, ix, iy + 10, alpha(stage < Ascension.LORD ? TEXT_DIM : lighten(origin.getThemeColor(), 0.3f), fade), false);
+        }
 
         // Skill tree button
         treeButton = button(g, ix, y + h - 26, iw, mx, my, fade,

@@ -22,14 +22,14 @@ import java.util.*;
  *
  * A player <b>knows</b> an ability of a group when it is in their origin's / class's default
  * kit, inherited (the Eminence knows every origin power), taught by an unlocked skill node,
- * or granted directly. Hidden powers ({@link HiddenPowers}) are known only through a direct grant —
+ * or granted directly. Hidden powers ({@link HiddenPowers}) are known only through a direct grant -
  * no kit or skill node can teach one. Known abilities can be bound into that group's slots; only
  * bound abilities can be activated. The known-set maths is pure so the client (Abilities tab,
  * staff profile) and the server agree; every mutation below is server-only and re-validated.
  */
 public final class Loadouts {
 
-    /** Why a player knows an ability — shown as a badge in the UI. */
+    /** Why a player knows an ability - shown as a badge in the UI. */
     public enum Source { DEFAULT, INHERITED, SKILL, GRANTED, HIDDEN }
 
     private Loadouts() {}
@@ -81,12 +81,6 @@ public final class Loadouts {
 
     public static boolean knows(Player p, SlotGroup group, String id) {
         return known(p, group).containsKey(id);
-    }
-
-    /** The ability bound to {@code slot}, or null when empty / unknown. */
-    public static Ability bound(Player p, SlotGroup group, int slot) {
-        String id = data(p).slot(group, slot);
-        return id.isEmpty() ? null : AbilityRegistry.ability(id);
     }
 
     /** Whether {@code id} may sit in {@code slot} of {@code group}: it must belong to that loadout. */
@@ -151,7 +145,7 @@ public final class Loadouts {
     }
 
     /**
-     * Grants access to any registered ability — hidden ones (the Eminence's) included —
+     * Grants access to any registered ability - hidden ones (the Eminence's) included -
      * and drops it into the first free slot of its group. @return false if unknown id.
      */
     public static boolean grant(ServerPlayer p, String id) {

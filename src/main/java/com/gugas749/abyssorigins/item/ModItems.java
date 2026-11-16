@@ -2,9 +2,11 @@ package com.gugas749.abyssorigins.item;
 
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.item.gear.ArmorSet;
+import com.gugas749.abyssorigins.item.gear.InvertedSpearItem;
 import com.gugas749.abyssorigins.item.gear.OriginArmorItem;
 import com.gugas749.abyssorigins.item.gear.OriginWeaponItem;
 import com.gugas749.abyssorigins.item.gear.SovereignScytheItem;
+import com.gugas749.abyssorigins.item.gear.WeaponClass;
 import com.gugas749.abyssorigins.item.gear.WeaponPowers;
 import com.gugas749.abyssorigins.item.ritual.OriginOrbItem;
 import com.gugas749.abyssorigins.item.ritual.OriginSeedItem;
@@ -37,22 +39,26 @@ public class ModItems {
         "origin_seed", OriginSeedItem::new);
 
     // ---- Relic weapons (one per origin) -----------------------------------------------
-    //                                                   origin      power                                dmg  speed  reach
+    // Stats grow with each relic's own mastery (WeaponClass, RelicMastery)
+    //                                                   origin      power                                type
     public static final DeferredItem<Item> OATHKEEPER = ITEMS.register("oathkeeper",
-        () -> new OriginWeaponItem("human",    new WeaponPowers.Oathkeeper(),       4, -2.6f, 0.5));
+        () -> new OriginWeaponItem("human",    new WeaponPowers.Oathkeeper(),       WeaponClass.SWORD));
     public static final DeferredItem<Item> SANGUINE_SCYTHE = ITEMS.register("sanguine_scythe",
-        () -> new OriginWeaponItem("vampire",  new WeaponPowers.SanguineScythe(),   5, -3.0f, 1.0));
+        () -> new OriginWeaponItem("vampire",  new WeaponPowers.SanguineScythe(),   WeaponClass.SCYTHE));
     public static final DeferredItem<Item> HELLBRAND_CLEAVER = ITEMS.register("hellbrand_cleaver",
-        () -> new OriginWeaponItem("demon",    new WeaponPowers.HellbrandCleaver(), 6, -3.2f, 0.0));
+        () -> new OriginWeaponItem("demon",    new WeaponPowers.HellbrandCleaver(), WeaponClass.HEAVY));
     public static final DeferredItem<Item> DAWNSPEAR = ITEMS.register("dawnspear",
-        () -> new OriginWeaponItem("seraph",   new WeaponPowers.Dawnspear(),        3, -2.5f, 1.5));
+        () -> new OriginWeaponItem("seraph",   new WeaponPowers.Dawnspear(),        WeaponClass.SPEAR));
     public static final DeferredItem<Item> EVENT_HORIZON = ITEMS.register("event_horizon",
-        () -> new OriginWeaponItem("voidborn", new WeaponPowers.EventHorizon(),     6, -3.1f, 0.5));
+        () -> new OriginWeaponItem("voidborn", new WeaponPowers.EventHorizon(),     WeaponClass.GREATSWORD));
     public static final DeferredItem<Item> SHADOWFANG = ITEMS.register("shadowfang",
-        () -> new OriginWeaponItem("shade",    new WeaponPowers.Shadowfang(),       1, -1.6f, 0.0));
+        () -> new OriginWeaponItem("shade",    new WeaponPowers.Shadowfang(),       WeaponClass.DAGGER));
 
-    /** The Eminence's own weapon — summoned by Mire Call, never crafted (and not in the creative tab). */
+    /** The Eminence's own weapon - summoned by Mire Call, never crafted (and not in the creative tab). */
     public static final DeferredItem<Item> SOVEREIGN_SCYTHE = ITEMS.register("sovereign_scythe", SovereignScytheItem::new);
+
+    /** The Inverted Spear of Heaven - bound to no origin and never crafted; disables powers near it. */
+    public static final DeferredItem<Item> INVERTED_SPEAR_OF_HEAVEN = ITEMS.register("inverted_spear_of_heaven", InvertedSpearItem::new);
 
     public static final List<DeferredItem<Item>> WEAPONS =
         List.of(OATHKEEPER, SANGUINE_SCYTHE, HELLBRAND_CLEAVER, DAWNSPEAR, EVENT_HORIZON, SHADOWFANG);

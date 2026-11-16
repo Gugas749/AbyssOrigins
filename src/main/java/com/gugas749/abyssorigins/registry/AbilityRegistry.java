@@ -75,7 +75,7 @@ public final class AbilityRegistry {
     private static void put(Map<String, Entry> map, Entry e) {
         Entry old = map.putIfAbsent(e.id(), e);
         if (old != null && old.ability() != e.ability())
-            Abyssorigins.LOGGER.warn("[AbyssOrigins] Duplicate ability id '{}' ({} and {}) — keeping the first",
+            Abyssorigins.LOGGER.warn("[AbyssOrigins] Duplicate ability id '{}' ({} and {}) - keeping the first",
                 e.id(), old.owner(), e.owner());
     }
 }

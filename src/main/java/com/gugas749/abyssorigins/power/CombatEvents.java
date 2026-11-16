@@ -59,7 +59,7 @@ public class CombatEvents {
             Powers.forEach(attacker, h -> h.onDamageDealt(attacker, target, event.getSource(), event.getNewDamage()));
     }
 
-    /** Death prevention runs first — a cancelled death never counts as a kill. */
+    /** Death prevention runs first - a cancelled death never counts as a kill. */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLethal(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer victim)) return;

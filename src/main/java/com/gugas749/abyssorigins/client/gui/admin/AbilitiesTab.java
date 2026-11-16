@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * Left: every power the player knows (both loadouts), where it's bound and how it was learned.
  * Right: the catalogue to grant from. Hidden abilities (the Eminence's) are not listed in the
- * catalogue — type their exact id in the search to grant one — but once granted they are
+ * catalogue - type their exact id in the search to grant one - but once granted they are
  * listed and tracked on the left like any other.
  */
 final class AbilitiesTab implements AbyssTab {
@@ -111,7 +111,7 @@ final class AbilitiesTab implements AbyssTab {
                 out.add(new Known(entry, g, e.getValue(), s.slots(g).indexOf(e.getKey()), s.granted().contains(e.getKey())));
             }
         }
-        // Granted but not usable right now (e.g. a class power while classless) — still tracked
+        // Granted but not usable right now (e.g. a class power while classless) - still tracked
         for (String id : s.granted()) {
             AbilityRegistry.Entry entry = AbilityRegistry.get(id);
             if (entry != null && out.stream().noneMatch(k -> k.entry().id().equals(id)))

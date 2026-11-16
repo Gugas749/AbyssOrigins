@@ -29,8 +29,8 @@ import java.util.Map;
  * Client-local entity outlines ("reveals").
  *
  * Decides, for THIS client only, which entities should render with a glowing outline
- * and in which colour. Nothing here touches server state or other players' clients —
- * this is what makes Occult Vision a private sight instead of a server-wide Glowing.
+ * and in which colour. Nothing here touches server state or other players' clients -
+ * so Occult Vision is only visible to its user, unlike the server-wide Glowing effect.
  *
  * Sources:
  *  - Occult Vision:   other players coloured by origin (+ hostiles with Ascended)
@@ -45,9 +45,9 @@ public final class RevealClient {
     private static final int HOSTILE_RGB = 0xFF4646;
     private static final int BLOOD_RGB   = 0xD0203A;
 
-    /** entityId → rgb, rebuilt every client tick. */
+    /** entityId -> rgb, rebuilt every client tick. */
     private static final Map<Integer, Integer> ACTIVE = new HashMap<>();
-    /** entityId → {remainingTicks, rgb} from RevealPacket. */
+    /** entityId -> {remainingTicks, rgb} from RevealPacket. */
     private static final Map<Integer, int[]> MARKS = new HashMap<>();
 
     private RevealClient() {}
@@ -104,7 +104,7 @@ public final class RevealClient {
 
         // Predator Senses
         Origin origin = ClientOriginData.getOrigin();
-        if (origin != null && origin.getPath().equals("vampire") && ClientOriginData.hasSkill("vamp_senses")
+        if (origin != null && origin.getPath().equals("vampire") && ClientOriginData.hasSkill("vamp_charm")
                 && me.isShiftKeyDown()) {
             AABB box = me.getBoundingBox().inflate(20);
             for (LivingEntity e : mc.level.getEntitiesOfClass(LivingEntity.class, box, e -> e != me && VampireBlood.hasBlood(e)))

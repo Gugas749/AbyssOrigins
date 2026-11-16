@@ -5,13 +5,13 @@ import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.ClientAbilityData;
 import com.gugas749.abyssorigins.client.ClientTimers;
-import com.gugas749.abyssorigins.client.gui.HudLayoutScreen;
 import com.gugas749.abyssorigins.client.input.KeyBindings;
 import com.gugas749.abyssorigins.config.AbyssOriginsConfig;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.util.Mth;
 
@@ -26,7 +26,8 @@ import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
  * sweeps, ready flashes, sustained-ability timers and key hints. Empty slots show a faint
  * "+" when the player knows a power that could fill them (bind it in the Abilities tab).
  *
- * Each of the three is a {@link HudElement} the player can place with {@link HudLayoutScreen}.
+ * Each of the three is a {@link HudElement}: AbyssCore's HUD API ({@link OriginsHud}) places
+ * them and runs the layout editor; this class only draws them.
  */
 public class OriginHudOverlay implements LayeredDraw.Layer {
 
@@ -38,19 +39,10 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
     /** ability is null for an empty slot. */
     private record Slot(Ability ability, SlotGroup group, int index, int cooldown, int maxCooldown, int accent) {}
 
+    /** Draws every visible element where it belongs (nothing while the layout editor is open: it draws them itself). */
     @Override
     public void render(GuiGraphics gfx, DeltaTracker delta) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
-        if (mc.screen instanceof HudLayoutScreen) return;   // the editor draws the HUD itself, over its fog
-
-        Origin origin = currentOrigin();
-        if (origin == null) return;
-
-        for (HudElement element : HudElement.values()) {
-            if (!element.isVisible() || !element.appliesTo(origin)) continue;
-            drawElement(gfx, element, origin, element.box(origin, false), ClientOriginData.getResourceBar(), false);
-        }
+        OriginsHud.INSTANCE.render(gfx, delta.getGameTimeDeltaPartialTick(true));
     }
 
     /** The local player's origin, or null without one. */
@@ -61,22 +53,19 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
     }
 
     /**
-     * Draws one element at its box, at its scale.
-     * @param resource the resource value the bar should show, 0..100
-     * @param preview  true in the layout editor, where an empty ability bar still needs something to grab
+     * Draws one element with its top-left corner at (0, 0); AbyssCore has already moved and scaled the pose.
+     * @param preview true in the layout editor: the bar's fill sweeps, and an empty ability bar still
+     *                shows something to grab
      */
-    public static void drawElement(GuiGraphics g, HudElement element, Origin origin, HudElement.Box box, float resource, boolean preview) {
+    public static void drawElement(GuiGraphics g, HudElement element, Origin origin, boolean preview) {
         Font font = Minecraft.getInstance().font;
-        g.pose().pushPose();
-        g.pose().translate(box.x(), box.y(), 0);
-        g.pose().scale(element.layout().scale, element.layout().scale, 1f);
         switch (element) {
             case PLATE -> renderPlate(g, font, origin);
             case RESOURCE -> ResourceBarRenderer.draw(g, font, BarStyle.current(origin), origin.getResourceType(),
-                origin.getThemeColor(), resource, AbyssOriginsConfig.showResourceValue);
+                origin.getThemeColor(), preview ? HudElement.previewResource() : ClientOriginData.getResourceBar(),
+                AbyssOriginsConfig.showResourceValue);
             case ABILITIES -> renderAbilityBar(g, font, origin, preview);
         }
-        g.pose().popPose();
     }
 
     /** Unscaled size as {width, height}. */
@@ -113,8 +102,18 @@ public class OriginHudOverlay implements LayeredDraw.Layer {
 
         // Name + level
         int tx = x + 27;
-        g.drawString(font, origin.getDisplayName(), tx, y + 5, TEXT, true);
         String lvl = "Lv " + ClientOriginData.getLevel();
+        Component name = Ascension.titleAtLevel(origin, ClientOriginData.getLevel());
+        float room = x + w - 5 - font.width(lvl) - 4 - tx, nw = font.width(name);
+        if (nw <= room) g.drawString(font, name, tx, y + 5, TEXT, true);
+        else {   // long stage names ("The Eminence in Shadow") shrink to fit
+            float s = room / nw;
+            g.pose().pushPose();
+            g.pose().translate(tx, y + 5 + (1 - s) * font.lineHeight / 2f, 0);
+            g.pose().scale(s, s, 1);
+            g.drawString(font, name, 0, 0, TEXT, true);
+            g.pose().popPose();
+        }
         g.drawString(font, lvl, x + w - 5 - font.width(lvl), y + 5, GOLD, true);
 
         // Unspent points beacon

@@ -7,7 +7,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
  * Behavioural hooks an Origin or Class plugs into the combat / tick pipeline.
- * This is where skill-tree nodes with real mechanics live — each origin and class
+ * This is where skill-tree nodes with real mechanics live - each origin and class
  * owns one implementation, dispatched by CombatEvents and the tick handlers.
  *
  * All methods are server-side only.
@@ -32,7 +32,7 @@ public interface PowerHooks {
     default void onKill(ServerPlayer player, LivingEntity victim, DamageSource source) {}
 
     /**
-     * The player is about to die. Return true to prevent the death — the hook is then
+     * The player is about to die. Return true to prevent the death - the hook is then
      * responsible for setting health / applying effects.
      */
     default boolean onLethal(ServerPlayer player, DamageSource source) { return false; }

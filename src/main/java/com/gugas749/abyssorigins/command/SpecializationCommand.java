@@ -133,7 +133,7 @@ public class SpecializationCommand {
 
             int newLevel = data.getSpecLevel();
             ctx.getSource().sendSuccess(() -> Component.literal(
-                player.getName().getString() + "'s spec level: " + oldLevel + " → " + newLevel
+                player.getName().getString() + "'s spec level: " + oldLevel + " -> " + newLevel
                 + " (+" + amount + " skill points)"), true);
 
             player.sendSystemMessage(Component.translatable(

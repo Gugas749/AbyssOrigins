@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Client staging of the Orb / Seed ritual. While the player awakens, the camera swings to the
- * front so they see their own aura flare and change colour; it returns to whatever view they
- * had a few seconds after the transformation (or at once if the ritual is abandoned).
+ * Client side of the Orb / Seed ritual. During the ritual the camera switches to the front view so the
+ * player sees their aura change colour; it returns to the previous view a few seconds after the
+ * transformation (or at once if the ritual is cancelled).
  */
 @EventBusSubscriber(modid = Abyssorigins.MODID, value = Dist.CLIENT)
 public final class ClientRitual {

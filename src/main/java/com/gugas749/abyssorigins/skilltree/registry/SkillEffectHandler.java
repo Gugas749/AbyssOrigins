@@ -2,6 +2,8 @@ package com.gugas749.abyssorigins.skilltree.registry;
 
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
+import com.gugas749.abyssorigins.api.Ascension;
+import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.api.Specialization;
 import com.gugas749.abyssorigins.api.StatBonus;
@@ -28,8 +30,9 @@ import java.util.Set;
  *
  * Instead of applying modifiers one-by-one as skills unlock (which leaked
  * modifiers on reset and lost them on respawn), refresh() strips all of our
- * modifiers and rebuilds them from: origin base stats, the origin's unlocked
- * skill nodes, class base stats and the class's unlocked skill nodes.
+ * modifiers and rebuilds them from: origin base stats, the origin's ascension
+ * stage stats, the origin's unlocked skill nodes, class base stats and the
+ * class's unlocked skill nodes.
  *
  * Call refresh() after any change to origin, class or unlocked skills, and on
  * login / respawn. Behavioural (non-stat) skill effects live in PowerHooks.
@@ -40,7 +43,7 @@ public class SkillEffectHandler {
     private static final String P_CLASS  = "class/";
     private static final String P_SKILL  = "skill/";
 
-    /** Modifier ids written by pre-0.1 versions (one flat id per skill) — removed on refresh. */
+    /** Modifier ids written by pre-0.1 versions (one flat id per skill) - removed on refresh. */
     private static final Set<String> LEGACY_IDS = Set.of(
         "human_tough_skin","human_iron_will","human_fighter","human_endurance","human_swift",
         "vamp_vitality","vamp_agility","vamp_fangs","vamp_resilience","vamp_resilience_hp",
@@ -57,6 +60,8 @@ public class SkillEffectHandler {
 
     public static void refresh(ServerPlayer player) {
         removeAll(player);
+        // Inside the Inverted Spear of Heaven's field skill-node stats are removed (base stats remain)
+        boolean nullified = com.gugas749.abyssorigins.power.Nullification.is(player);
 
         Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
         if (origin != null) {
@@ -68,9 +73,11 @@ public class SkillEffectHandler {
             if (origin.getDamageModifier() != 1f)
                 base.add(StatBonus.percent(Attributes.ATTACK_DAMAGE, origin.getDamageModifier() - 1f));
             apply(player, P_ORIGIN + origin.getPath(), base);
+            int stage = Ascension.stageAt(player.getData(OriginAttachments.PLAYER_ORIGIN.get()).getOriginLevel());
+            for (int s = 1; s <= stage; s++) apply(player, P_ORIGIN + origin.getPath() + "/stage" + s, origin.getStageStats(s));
 
             PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
-            SkillTreeRegistry.getTree(origin.getId()).ifPresent(tree -> applyTree(player, tree, skills.getUnlockedSkills()));
+            if (!nullified) SkillTreeRegistry.getTree(origin.getId()).ifPresent(tree -> applyTree(player, tree, skills.getUnlockedSkills()));
         }
 
         PlayerSpecializationData spec = player.getData(SpecializationAttachments.PLAYER_SPEC.get());
@@ -78,7 +85,7 @@ public class SkillEffectHandler {
             Specialization s = SpecializationRegistry.get(spec.getSpecId()).orElse(null);
             if (s != null) {
                 apply(player, P_CLASS + s.getPath(), s.getBaseStats());
-                if (s.getSkillTree() != null) applyTree(player, s.getSkillTree(), spec.getUnlockedSkills());
+                if (s.getSkillTree() != null && !nullified) applyTree(player, s.getSkillTree(), spec.getUnlockedSkills());
             }
         }
 

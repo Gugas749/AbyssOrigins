@@ -16,16 +16,19 @@ public class SkillNode {
         ELEMENTAL_A, ELEMENTAL_B,
         HYBRID, SPECIALIST,
         FORBIDDEN, ASCENDED,
-        SYNERGY_AD, SYNERGY_AU, SYNERGY_DU
+        SYNERGY_AD
     }
 
     /**
      * Tier gates. Levels are deliberately reachable: origin XP comes from kills and
      * advancements (see XpEventHandler), so tier 5 lands around level 15. Tier 6 (Apex)
      * is the late-game row past the capstones, where trees grow new selectable powers.
+     * Tiers 7 and 8 are the ascension rows, sealed until the origin's Noble (level 25) and
+     * Lord (level 50) stages ({@link com.gugas749.abyssorigins.api.Ascension}).
      */
     public enum SkillTier {
-        TIER_1(1, 0), TIER_2(2, 3), TIER_3(3, 6), TIER_4(4, 10), TIER_5(5, 15), TIER_6(6, 20);
+        TIER_1(1, 0), TIER_2(2, 3), TIER_3(3, 6), TIER_4(4, 10), TIER_5(5, 15), TIER_6(6, 20),
+        TIER_7(7, 25), TIER_8(8, 50);
 
         private final int tier;
         private final int levelRequired;
@@ -34,6 +37,8 @@ public class SkillNode {
 
         public int getTier()          { return tier; }
         public int getLevelRequired() { return levelRequired; }
+        /** The ascension stage that opens this tier (1 Noble, 2 Lord), or 0 for the ordinary tiers. */
+        public int stage()            { return this == TIER_8 ? 2 : this == TIER_7 ? 1 : 0; }
     }
 
     // ---- Fields ---------------------------------------------------------
@@ -52,6 +57,7 @@ public class SkillNode {
     private final List<String> exclusions;
     private final List<StatBonus> stats;
     private final String    grantedAbility;
+    private final double    cooldownReduction;
 
     private SkillNode(Builder b) {
         this.id           = b.id;
@@ -68,6 +74,7 @@ public class SkillNode {
         this.exclusions   = Collections.unmodifiableList(b.exclusions);
         this.stats        = Collections.unmodifiableList(b.stats);
         this.grantedAbility = b.grantedAbility;
+        this.cooldownReduction = b.cooldownReduction;
     }
 
     // ---- Accessors ------------------------------------------------------
@@ -90,7 +97,9 @@ public class SkillNode {
     /** Ability id this node teaches (it then appears in the Abilities tab), or "" for none. */
     public String    getGrantedAbility(){ return grantedAbility; }
     public boolean   grantsAbility()    { return !grantedAbility.isEmpty(); }
-    /** Capstones (tier 5) and the Apex row beyond them get the grand treatment. */
+    /** Fraction taken off the cooldown of every power while unlocked (0.1 = 10% shorter), or 0. */
+    public double    getCooldownReduction() { return cooldownReduction; }
+    /** Capstones (tier 5) and the Apex row beyond them use the larger node style. */
     public boolean   isCapstone()       { return tier.getTier() >= SkillTier.TIER_5.getTier(); }
 
     // ---- Logic ----------------------------------------------------------
@@ -101,13 +110,7 @@ public class SkillNode {
         return true;
     }
 
-    public boolean canUnlock(Set<String> unlocked, Set<String> excluded, int playerLevel) {
-        if (playerLevel < tier.getLevelRequired()) return false;
-        if (excluded.contains(id)) return false;
-        return prerequisitesMet(unlocked);
-    }
-
-    /** Abyss palette — each branch reads as a distinct "school". */
+    /** Branch colours. */
     public int getBranchColor() { return colorOf(branch); }
 
     public static int colorOf(SkillBranch branch) {
@@ -123,12 +126,12 @@ public class SkillNode {
             case FORBIDDEN   -> 0xFFB3122E;
             case ASCENDED    -> 0xFFFFF1B8;
             case SYNERGY_AD  -> 0xFFE070D8;
-            case SYNERGY_AU  -> 0xFFE8A86B;
-            case SYNERGY_DU  -> 0xFF6BE8E0;
         };
     }
 
-    public int getTierColor() {
+    public int getTierColor() { return tierColor(tier); }
+
+    public static int tierColor(SkillTier tier) {
         return switch (tier) {
             case TIER_1 -> 0xFF6E6889;
             case TIER_2 -> 0xFF5FB58A;
@@ -136,6 +139,8 @@ public class SkillNode {
             case TIER_4 -> 0xFFA86BE8;
             case TIER_5 -> 0xFFF2C14E;
             case TIER_6 -> 0xFFFFF1B8;
+            case TIER_7 -> 0xFFFF9A6B;
+            case TIER_8 -> 0xFFFF5C7A;
         };
     }
 
@@ -158,12 +163,13 @@ public class SkillNode {
         private final List<String> exclusions       = new ArrayList<>();
         private final List<StatBonus> stats         = new ArrayList<>();
         private String    grantedAbility = "";
+        private double    cooldownReduction = 0;
 
         public Builder(String id)                          { this.id = id; }
 
-        /** Pass a lang key — will be wrapped in Component.translatable(). */
+        /** Pass a lang key - will be wrapped in Component.translatable(). */
         public Builder name(String langKey)                { this.displayName = Component.translatable(langKey); return this; }
-        /** Pass a lang key — will be wrapped in Component.translatable(). */
+        /** Pass a lang key - will be wrapped in Component.translatable(). */
         public Builder desc(String langKey)                { this.description = Component.translatable(langKey); return this; }
         /** Shorthand for name(prefix + ".name").desc(prefix + ".desc"). */
         public Builder lang(String prefix)                 { return name(prefix + ".name").desc(prefix + ".desc"); }
@@ -187,6 +193,8 @@ public class SkillNode {
         public Builder stat(Holder<Attribute> attr, double amount)    { stats.add(StatBonus.add(attr, amount));     return this; }
         /** Percentage attribute bonus (of base value) applied while unlocked. */
         public Builder statPct(Holder<Attribute> attr, double amount) { stats.add(StatBonus.percent(attr, amount)); return this; }
+        /** Every power's cooldown is {@code fraction} shorter while unlocked (stacks additively, see Skills.cooldownFactor). */
+        public Builder cooldown(double fraction)                       { this.cooldownReduction = fraction; return this; }
         public SkillNode build()                           { return new SkillNode(this); }
     }
 }

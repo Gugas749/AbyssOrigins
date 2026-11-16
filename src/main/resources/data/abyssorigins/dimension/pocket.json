@@ -1,0 +1,12 @@
+{
+  "type": "abyssorigins:pocket",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "abyssorigins:pocket",
+      "layers": [],
+      "lakes": false,
+      "features": false
+    }
+  }
+}

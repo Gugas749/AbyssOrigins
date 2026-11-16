@@ -4,12 +4,12 @@ import com.gugas749.abyssorigins.api.Origin;
 import com.gugas749.abyssorigins.api.OriginAbility;
 import com.gugas749.abyssorigins.api.ResourceType;
 import com.gugas749.abyssorigins.client.ritual.ClientRitual;
-import com.gugas749.abyssorigins.client.vfx.VfxManager;
+import com.gugas749.abysscore.api.vfx.client.AbyssVfxClient;
 import com.gugas749.abyssorigins.item.ritual.OriginRitual;
 import com.gugas749.abyssorigins.network.packet.ChooseOriginPacket;
 import com.gugas749.abyssorigins.network.packet.RitualPacket;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,10 +28,10 @@ import java.util.List;
 import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 
 /**
- * The Orb's choice: origins down the left, the highlighted one described on the right, and the
- * player — seen from the front, wreathed in the awakening aura — in the open centre. Selecting an
- * origin recolours that aura locally as a preview; "Embrace" makes it real for everyone.
- * Closing the menu any other way lets the power fade and returns the orb (server side).
+ * Origin Orb selection screen: origins listed on the left, the highlighted one described on the right,
+ * and the player (front view, with the ritual aura) in the centre. Selecting an origin recolours the
+ * aura locally as a preview; "Embrace" confirms it for everyone. Closing the screen any other way
+ * cancels the ritual and returns the orb (server side).
  */
 public class OriginChoiceScreen extends Screen {
 
@@ -84,7 +84,7 @@ public class OriginChoiceScreen extends Screen {
         Origin focus = hovered != null ? hovered : selected;
         int accent = focus != null ? focus.getThemeColor() : 0xFF000000 | OriginRitual.NEUTRAL;
 
-        // Keep the centre open: the player and their aura are the point of this screen
+        // Keep the centre clear for the player model and aura
         vignette(g, width, height, accent & 0xFFFFFF, 90, 0.85f * fade);
         g.fillGradient(0, 0, width, 40, alpha(0xC0060410, fade), alpha(0x00060410, fade));
 
@@ -222,13 +222,13 @@ public class OriginChoiceScreen extends Screen {
     private void setPreview(int rgb) {
         var player = minecraft != null ? minecraft.player : null;
         if (player == null) return;
-        // The pale awakening aura gives way to the chosen colour — on this screen only, until confirmed
-        VfxManager.spawn(Vfx.of(VfxType.AURA).follow(player).color(OriginRitual.NEUTRAL).extra(1).flags(Vfx.STOP).build());
+        // Preview: recolour the aura to the selected origin (local only until confirmed)
+        AbyssVfxClient.spawn(AbyssVfx.of(VfxType.AURA).follow(player).color(OriginRitual.NEUTRAL).extra(1).flags(AbyssVfx.STOP).build());
         if (previewColor >= 0)
-            VfxManager.spawn(Vfx.of(VfxType.AURA).follow(player).color(previewColor).extra(1).flags(Vfx.STOP).build());
+            AbyssVfxClient.spawn(AbyssVfx.of(VfxType.AURA).follow(player).color(previewColor).extra(1).flags(AbyssVfx.STOP).build());
         previewColor = rgb;
         if (rgb >= 0)
-            VfxManager.spawn(Vfx.of(VfxType.AURA).follow(player).scale(1.3f).colors(rgb, 0xFFFFFF).duration(20 * 120).build());
+            AbyssVfxClient.spawn(AbyssVfx.of(VfxType.AURA).follow(player).scale(1.3f).colors(rgb, 0xFFFFFF).duration(20 * 120).build());
     }
 
     // ---- Input -------------------------------------------------------------------------------------
@@ -274,7 +274,7 @@ public class OriginChoiceScreen extends Screen {
         onClose();
     }
 
-    /** Any way out other than Embrace lets the power fade (the server returns the orb). */
+    /** Closing without Embrace cancels the ritual (the server returns the orb). */
     @Override
     public void removed() {
         if (minecraft != null && hudWasHidden != null) minecraft.options.hideGui = hudWasHidden;

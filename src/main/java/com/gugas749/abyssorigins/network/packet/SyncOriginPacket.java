@@ -18,7 +18,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
-/** Server → owning client: origin, resource and progression (cooldowns travel in SyncAbilitiesPacket). */
+/** Server -> owning client: origin, resource and progression (cooldowns travel in SyncAbilitiesPacket). */
 public record SyncOriginPacket(
     UUID   target,
     String originId,
@@ -71,7 +71,7 @@ public record SyncOriginPacket(
             }
             AbyssOriginsAPI.setPlayerOriginClient(player, origin);
 
-            // Feed the HUD cache — only ever with our own data
+            // Feed the HUD cache - only ever with our own data
             if (player == mc.player) {
                 ClientOriginData.updateOrigin(origin, pkt.resource, pkt.level, pkt.xp);
             }

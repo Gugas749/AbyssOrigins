@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-/** Client → server: activate whatever is bound to origin slot {@code slot} (0-4). */
+/** Client -> server: activate whatever is bound to origin slot {@code slot} (0-4). */
 public record ActivateAbilityPacket(int slot) implements CustomPacketPayload {
 
     public static final Type<ActivateAbilityPacket> TYPE =

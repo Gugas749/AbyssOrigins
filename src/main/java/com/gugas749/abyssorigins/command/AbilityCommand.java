@@ -24,10 +24,10 @@ import java.util.Map;
 /**
  * Registered as a sub-literal of /abyssorigins in OriginCommand. AbyssCore ADMIN (or console).
  *
- * /abyssorigins ability grant  <player> <ability>   — any registered ability, hidden Eminence powers included
- * /abyssorigins ability revoke <player> <ability>   — removes a direct grant
- * /abyssorigins ability info   <player>             — loadouts + granted list
- * /abyssorigins ability list                        — every public ability id
+ * /abyssorigins ability grant  <player> <ability>   - any registered ability, hidden Eminence powers included
+ * /abyssorigins ability revoke <player> <ability>   - removes a direct grant
+ * /abyssorigins ability info   <player>             - loadouts + granted list
+ * /abyssorigins ability list                        - every public ability id
  *
  * Hidden abilities are never suggested; they are granted by exact id, like hidden origins.
  */
@@ -72,7 +72,7 @@ public final class AbilityCommand {
         boolean usable = Loadouts.knows(player, e.group(), id);
         ctx.getSource().sendSuccess(() -> Component.literal((fresh ? "Granted " : "Already granted: ") + id
             + " (" + e.ability().getDisplayName().getString() + ") to " + player.getName().getString()
-            + (usable ? "" : " — usable once they have a " + (e.group() == SlotGroup.CLASS ? "class" : "origin")))
+            + (usable ? "" : " - usable once they have a " + (e.group() == SlotGroup.CLASS ? "class" : "origin")))
             .withStyle(fresh ? ChatFormatting.GREEN : ChatFormatting.YELLOW), true);
         if (fresh) player.sendSystemMessage(Component.translatable("abyssorigins.message.ability_granted", e.ability().getDisplayName()));
         return 1;

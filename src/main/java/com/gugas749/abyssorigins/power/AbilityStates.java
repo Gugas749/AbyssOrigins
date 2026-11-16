@@ -73,7 +73,7 @@ public final class AbilityStates {
         }
     }
 
-    /** Ends everything — death, logout, origin or class change. */
+    /** Ends everything - death, logout, origin or class change. */
     public static void stopAll(ServerPlayer player) {
         Map<String, State> map = STATES.remove(player.getUUID());
         if (map == null || map.isEmpty()) return;

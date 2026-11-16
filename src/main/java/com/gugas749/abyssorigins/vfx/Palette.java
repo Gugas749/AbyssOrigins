@@ -2,7 +2,7 @@ package com.gugas749.abyssorigins.vfx;
 
 /**
  * Shared colour pairs for ability visuals (primary, highlight). Keeping them in one
- * place makes each origin/class read as one consistent element across all its effects.
+ * place keeps each origin/class visually consistent across all its effects.
  */
 public final class Palette {
 

@@ -7,8 +7,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-/** Demon abilities: Hellfire Nova (R) and Infernal Charge (V). Both spend Wrath. */
+/** Demon abilities: Hellfire Nova (R) and Infernal Charge (V), plus Rage Mode (taught by the tree). All spend Wrath. */
 public final class DemonAbilities {
 
     private DemonAbilities() {}
@@ -56,13 +56,13 @@ public final class DemonAbilities {
                     e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 0), player);
             }
 
-            Vfx.shockwave(level, c, (float) radius, Palette.INFERNO, Palette.INFERNO_HI, 22);
-            Vfx.of(VfxType.SIGIL).at(c).scale((float) radius * 0.55f).extra(5).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(26).send(level);
-            Vfx.burst(level, c.add(0, 1, 0), 1.3f * power, Palette.INFERNO, Palette.INFERNO_HI);
+            AbyssVfx.shockwave(level, c, (float) radius, Palette.INFERNO, Palette.INFERNO_HI, 22);
+            AbyssVfx.of(VfxType.SIGIL).at(c).scale((float) radius * 0.55f).extra(5).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(26).send(level);
+            AbyssVfx.burst(level, c.add(0, 1, 0), 1.3f * power, Palette.INFERNO, Palette.INFERNO_HI);
             for (int i = 0; i < 6; i++) {                       // eruption columns around the rim
                 double a = Math.PI * 2 * i / 6 + player.getRandom().nextDouble() * 0.4;
                 Vec3 at = c.add(Math.cos(a) * radius * 0.7, 0, Math.sin(a) * radius * 0.7);
-                Vfx.of(VfxType.PILLAR).at(at).scale(2.8f).extra(0.35f).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(18).send(level);
+                AbyssVfx.of(VfxType.PILLAR).at(at).scale(2.8f).extra(0.35f).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(18).send(level);
             }
             Fx.sound(level, c, SoundEvents.BLAZE_SHOOT, 1.2f, 0.6f);
             Fx.sound(level, c, SoundEvents.GENERIC_EXPLODE, 0.5f, 1.4f);
@@ -97,8 +97,8 @@ public final class DemonAbilities {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20, 0, false, false));
             Fx.sound(player.level(), player.position(), SoundEvents.FIRECHARGE_USE, 1.0f, 0.7f);
             int ticks = Skills.has(player, "demon_cinder_dash") ? 12 : 8;
-            Vfx.of(VfxType.TRAIL).follow(player).scale(1.1f).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(ticks + 10).send(player.serverLevel());
-            Vfx.burst(player.serverLevel(), Fx.chest(player), 0.9f, Palette.INFERNO, Palette.INFERNO_HI);
+            AbyssVfx.of(VfxType.TRAIL).follow(player).scale(1.1f).colors(Palette.INFERNO, Palette.INFERNO_HI).duration(ticks + 10).send(player.serverLevel());
+            AbyssVfx.burst(player.serverLevel(), Fx.chest(player), 0.9f, Palette.INFERNO, Palette.INFERNO_HI);
             AbilityStates.start(player, getId(), ticks, this);
             return true;
         }
@@ -120,7 +120,7 @@ public final class DemonAbilities {
                 e.igniteForSeconds(3);
                 e.push(dir.x * 0.6, 0.4, dir.z * 0.6);
                 e.hurtMarked = true;
-                Vfx.burst(level, Fx.chest(e), 0.7f, Palette.INFERNO, Palette.INFERNO_HI);
+                AbyssVfx.burst(level, Fx.chest(e), 0.7f, Palette.INFERNO, Palette.INFERNO_HI);
             }
         }
 
@@ -130,7 +130,67 @@ public final class DemonAbilities {
             DIRECTION.remove(player.getUUID());
             player.setDeltaMovement(player.getDeltaMovement().scale(0.3));
             player.hurtMarked = true;
-            Vfx.shockwave(player.serverLevel(), player.position(), 2.2f, Palette.INFERNO, Palette.INFERNO_HI, 12);
+            AbyssVfx.shockwave(player.serverLevel(), player.position(), 2.2f, Palette.INFERNO, Palette.INFERNO_HI, 12);
+        }
+    }
+
+    // ---- Rage Mode (skill node "demon_rage_mode") ---------------------------------------
+
+    /**
+     * Rage Mode: Speed II and Strength II for 10 seconds, and every melee hit applies Bleeding
+     * (DemonHooks.onAttack). Press again to calm down early.
+     */
+    public static class RageMode extends OriginAbility implements Sustained {
+        public static final String ID = "demon_rage_mode";
+        private static final int DURATION = 200;
+
+        public RageMode() {
+            super(ID, "abyssorigins.ability." + ID + ".name", "abyssorigins.ability." + ID + ".desc", 50, 40);
+            icon("☄"); color(0xFFD4231A);
+        }
+
+        public static boolean raging(ServerPlayer p) { return AbilityStates.isActive(p, ID); }
+
+        @Override
+        public boolean activate(ServerPlayer player) {
+            var level = player.serverLevel();
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, DURATION, 1, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, DURATION, 1, false, false, true));
+
+            Vec3 c = player.position();
+            AbyssVfx.shockwave(level, c, 4.5f, Palette.BLOOD, Palette.INFERNO, 18);
+            AbyssVfx.burst(level, Fx.chest(player), 1.5f, Palette.BLOOD, Palette.INFERNO_HI);
+            AbyssVfx.of(VfxType.PILLAR).at(c).scale(4.5f).extra(0.8f).colors(Palette.BLOOD, Palette.INFERNO).duration(20).send(level);
+            AbyssVfx.of(VfxType.SIGIL).at(c).scale(2.4f).extra(5).colors(Palette.BLOOD_DARK, Palette.INFERNO).duration(30).send(level);
+            AbyssVfx.of(VfxType.TRAIL).follow(player).scale(0.9f).colors(Palette.BLOOD, Palette.INFERNO_HI).duration(DURATION).send(level);
+            Fx.sound(level, c, SoundEvents.RAVAGER_ROAR, 1.0f, 0.8f);
+            Fx.sound(level, c, SoundEvents.BLAZE_SHOOT, 1.0f, 0.5f);
+            AbilityStates.start(player, getId(), DURATION, this);
+            return true;
+        }
+
+        @Override
+        public void tickActive(ServerPlayer player, int remaining) {
+            var level = player.serverLevel();
+            if (remaining % 20 == 0) {
+                AbyssVfx.of(VfxType.AURA).follow(player).scale(1.6f).colors(Palette.BLOOD, Palette.INFERNO).duration(24).send(level);
+                Fx.sound(level, player.position(), SoundEvents.BLAZE_BURN, 0.4f, 0.6f);
+            }
+            if (remaining % 6 == 0)
+                AbyssVfx.sparks(level, Fx.chest(player), 0.4f, Palette.BLOOD, Palette.INFERNO);
+        }
+
+        @Override
+        public void onEnd(ServerPlayer player) {
+            // Only strip what the rage gave (level II), never a potion the player drank
+            MobEffectInstance speed = player.getEffect(MobEffects.MOVEMENT_SPEED);
+            if (speed != null && speed.getAmplifier() == 1 && speed.getDuration() <= DURATION) player.removeEffect(MobEffects.MOVEMENT_SPEED);
+            MobEffectInstance str = player.getEffect(MobEffects.DAMAGE_BOOST);
+            if (str != null && str.getAmplifier() == 1 && str.getDuration() <= DURATION) player.removeEffect(MobEffects.DAMAGE_BOOST);
+            var level = player.serverLevel();
+            AbyssVfx.stop(level, player, VfxType.TRAIL);
+            AbyssVfx.burst(level, Fx.chest(player), 0.8f, Palette.BLOOD_DARK, Palette.INFERNO);
+            Fx.sound(level, player.position(), SoundEvents.FIRE_EXTINGUISH, 0.6f, 0.7f);
         }
     }
 }

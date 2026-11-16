@@ -11,13 +11,13 @@ import java.util.*;
  * Public API for AbyssOrigins.
  *
  * Addon mods (or this mod itself) call registerOrigin() during FMLCommonSetupEvent.
- * All other systems read from here — nothing else needs to be touched.
+ * All other systems read from here - nothing else needs to be touched.
  */
 public class AbyssOriginsAPI {
 
     private static final Map<ResourceLocation, Origin> ORIGINS = new LinkedHashMap<>();
 
-    // Runtime cache keyed by UUID — survives respawn because we key on UUID not entity
+    // Runtime cache keyed by UUID - survives respawn because we key on UUID not entity
     private static final Map<UUID, Origin> PLAYER_ORIGINS = new HashMap<>();
 
     private AbyssOriginsAPI() {}

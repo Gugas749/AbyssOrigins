@@ -11,7 +11,7 @@ import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
 
-/** Orb of Origins — a circle of unshaped energy. Consumed, it lets the player choose an origin. */
+/** Orb of Origins. Consumed, it lets the player choose an origin. */
 public class OriginOrbItem extends RitualItem {
 
     public OriginOrbItem() {

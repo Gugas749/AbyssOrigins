@@ -12,7 +12,7 @@ import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-/** Assassin — burst from behind, poisons, and slippery survival. */
+/** Assassin - backstab burst, poisons and evasion. */
 public class AssassinSpecialization extends Specialization {
 
     private static final String P = "abyssorigins.skill.";
@@ -38,7 +38,7 @@ public class AssassinSpecialization extends Specialization {
         setSkillTree(buildTree(getId()));
     }
 
-    /** Whispering Blades — left: Venom, middle: Opportunity, right: Evasion. */
+    /** Whispering Blades - left: Venom, middle: Opportunity, right: Evasion. */
     private static SkillTree buildTree(ResourceLocation id) {
         SkillTree t = new SkillTree(id, "abyssorigins.skilltree.assassin.name");
 
@@ -79,7 +79,7 @@ public class AssassinSpecialization extends Specialization {
             .icon("♕").tier(SkillTier.TIER_5).branch(SkillBranch.ASCENDED).cost(5).pos(0, 4)
             .requiresAny("assassin_cutthroat", "assassin_smoke_bomb").build());
 
-        // Apex (tier VI) — the late-game row beyond the capstones
+        // Apex (tier VI) - the late-game row beyond the capstones
         t.addNode(SkillNode.builder("assassin_apex_shadow_dance").lang("abyssorigins.skill.assassin_apex_shadow_dance")
             .icon("≈").tier(SkillTier.TIER_6).branch(SkillBranch.UTILITY).cost(4).pos(-1, 5)
             .requires("assassin_deathmark").statPct(Attributes.MOVEMENT_SPEED, 0.1).build());

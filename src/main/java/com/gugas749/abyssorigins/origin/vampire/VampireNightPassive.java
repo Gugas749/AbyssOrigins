@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 /**
  * Creature of the Night: permanent night vision, +15% speed in darkness.
  *
- * The speed bonus is a transient attribute modifier rather than a Speed effect —
+ * The speed bonus is a transient attribute modifier rather than a Speed effect -
  * the old version removed *every* Speed effect each daylight tick, including potions.
  */
 public class VampireNightPassive extends OriginPassive {
@@ -28,7 +28,7 @@ public class VampireNightPassive extends OriginPassive {
     @Override public void onTick(Player player) {
         if (player.level().isClientSide()) return;
 
-        // Refresh when below 10 seconds remaining — never lets it flicker
+        // Refresh when below 10 seconds remaining - never lets it flicker
         var nightVision = player.getEffect(MobEffects.NIGHT_VISION);
         if (nightVision == null || nightVision.getDuration() < 220) {
             player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 500, 0, false, false));

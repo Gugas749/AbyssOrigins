@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 /**
  * A passive trait of an Origin, ticked every server tick.
  *
- * Passive instances are shared by every player with the origin — never keep
+ * Passive instances are shared by every player with the origin - never keep
  * per-player state in fields. Gate periodic work on {@code player.tickCount}
  * and store per-player state in PowerState.
  */

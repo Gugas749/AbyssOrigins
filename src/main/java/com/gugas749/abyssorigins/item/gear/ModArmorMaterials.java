@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * One armor material per origin outfit. The armor is drawn by GeckoLib (see GearRenderers), so the
- * material's layer only names the set — no vanilla textures/models/armor layer textures exist.
+ * material's layer only names the set - no vanilla textures/models/armor layer textures exist.
  */
 public final class ModArmorMaterials {
 

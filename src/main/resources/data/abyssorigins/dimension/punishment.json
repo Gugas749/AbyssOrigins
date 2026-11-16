@@ -1,0 +1,12 @@
+{
+  "type": "abyssorigins:punishment",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "abyssorigins:punishment",
+      "layers": [],
+      "lakes": false,
+      "features": false
+    }
+  }
+}

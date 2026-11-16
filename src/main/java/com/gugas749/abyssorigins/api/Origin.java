@@ -29,10 +29,14 @@ public class Origin {
     private boolean hidden = false;
     private int    themeColor = 0xFFB9A7FF;
     private String sigil      = "◆";
+    private Ascension.Motif motif = Ascension.Motif.RADIANT;
+    private int ascensionColor = -1, ascensionColor2 = -1;
+    /** Stats added at each stage (index 1 = Noble, 2 = Lord); they stack, so a Lord has both. */
+    private final List<List<StatBonus>> stageStats = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
     /**
-     * @param nameKey  Lang key — e.g. "abyssorigins.origin.human.name"
-     * @param descKey  Lang key — e.g. "abyssorigins.origin.human.description"
+     * @param nameKey  Lang key - e.g. "abyssorigins.origin.human.name"
+     * @param descKey  Lang key - e.g. "abyssorigins.origin.human.description"
      */
     public Origin(ResourceLocation id, String nameKey, String descKey, ImpactLevel impactLevel) {
         this.id          = id;
@@ -48,7 +52,7 @@ public class Origin {
     /** Part of the default kit: known from the start and laid into the first free slots. */
     public Origin addAbility(OriginAbility ability)   { abilities.add(ability);   return this; }
     /**
-     * A power this origin owns but does not start with — learned through a skill node
+     * A power this origin owns but does not start with - learned through a skill node
      * ({@code SkillNode.Builder.grants}) or granted by staff, then bound in the Abilities tab.
      */
     public Origin addUnlockableAbility(OriginAbility ability) { unlockable.add(ability); return this; }
@@ -57,6 +61,15 @@ public class Origin {
     public Origin setHooks(PowerHooks hooks)          { this.hooks = hooks;       return this; }
     public Origin setThemeColor(int argb)             { this.themeColor = argb;   return this; }
     public Origin setSigil(String glyph)              { this.sigil = glyph;       return this; }
+    /**
+     * How this origin's ascension ceremony looks ({@link Ascension}). The colours are the ceremony's energy
+     * and its highlight; -1 uses the theme colour and white.
+     */
+    public Origin setAscension(Ascension.Motif motif, int color, int color2) {
+        this.motif = motif; this.ascensionColor = color & 0xFFFFFF; this.ascensionColor2 = color2 & 0xFFFFFF; return this;
+    }
+    /** A stat the origin gains at {@code stage} (Ascension.NOBLE or LORD) and keeps afterwards. */
+    public Origin addStageStat(int stage, StatBonus bonus) { stageStats.get(Math.max(1, Math.min(2, stage))).add(bonus); return this; }
     /** Hidden origins are left out of listings and suggestions; they can only be granted by exact id. */
     public Origin setHidden(boolean hidden)           { this.hidden = hidden;     return this; }
     /** @param langKey trait text; positive = strength (green), otherwise weakness (red). */
@@ -77,6 +90,13 @@ public class Origin {
     public int                   getThemeColor()   { return themeColor; }
     public String                getSigil()        { return sigil; }
     public boolean               isHidden()        { return hidden; }
+    public Ascension.Motif       getMotif()        { return motif; }
+    public int                   getAscensionColor()  { return ascensionColor >= 0 ? ascensionColor : themeColor & 0xFFFFFF; }
+    public int                   getAscensionColor2() { return ascensionColor2 >= 0 ? ascensionColor2 : 0xFFFFFF; }
+    /** Stats of exactly {@code stage} (not the ones before it). */
+    public List<StatBonus>       getStageStats(int stage) {
+        return stage < 1 || stage > 2 ? List.of() : Collections.unmodifiableList(stageStats.get(stage));
+    }
     /** The default kit (see {@link #addAbility}). */
     public List<OriginAbility>   getAbilities()    { return Collections.unmodifiableList(abilities); }
     public List<OriginAbility>   getUnlockableAbilities() { return Collections.unmodifiableList(unlockable); }

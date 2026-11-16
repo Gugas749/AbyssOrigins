@@ -3,10 +3,10 @@ package com.gugas749.abyssorigins.client.dev;
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.client.gui.OriginInfoScreen;
 import com.gugas749.abyssorigins.client.gui.skilltree.SkillTreeScreen;
-import com.gugas749.abyssorigins.client.vfx.VfxManager;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxSpec;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.client.AbyssVfxClient;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxSpec;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * DEVELOPER TOOL — inert unless the JVM is started with -Dabyssorigins.vfxShowcase=true
+ * DEVELOPER TOOL - inert unless the JVM is started with -Dabyssorigins.vfxShowcase=true
  * (gradle task: runVfxShowcase).
  *
  * Creates/opens a flat night world, stages every VFX type in front of the camera,
@@ -121,7 +121,7 @@ public final class VfxShowcase {
         STEPS.clear();
         // name = screenshot taken after `wait` ticks; "" = setup step without a shot
         add("shockwave", 7, mc -> spawn(VfxType.SHOCKWAVE, STAGE, Vec3.ZERO, 5, 0, 0xFF6A1F, 0xFFD27A, 24, -1, 0));
-        add("dome", 20, mc -> spawn(VfxType.DOME, STAGE, Vec3.ZERO, 3.2f, 0, 0xF6D77A, 0xFFF4C8, 60, -1, Vfx.HALF));
+        add("dome", 20, mc -> spawn(VfxType.DOME, STAGE, Vec3.ZERO, 3.2f, 0, 0xF6D77A, 0xFFF4C8, 60, -1, AbyssVfx.HALF));
         add("pillar_sigil", 14, mc -> {
             spawn(VfxType.PILLAR, STAGE, Vec3.ZERO, 8, 1.0f, 0xF6D77A, 0xFFFFFF, 40, -1, 0);
             spawn(VfxType.SIGIL, STAGE, Vec3.ZERO, 3.5f, 6, 0xF6D77A, 0xFFF0B0, 50, -1, 0);
@@ -131,7 +131,7 @@ public final class VfxShowcase {
         add("helix", 12, mc -> spawn(VfxType.HELIX, STAGE, Vec3.ZERO, 2.4f, 0, 0xE8C872, 0xFFFFFF, 30, -1, 0));
         add("auras", 22, mc -> {
             spawn(VfxType.AURA, STAGE.add(-2, 0, 0), Vec3.ZERO, 1.2f, 0, 0x7CD957, 0xC8FFB0, 60, -1, 0);
-            spawn(VfxType.AURA, STAGE.add(2, 0, 0), Vec3.ZERO, 1.2f, 0, 0x2A2F55, 0x7D93C9, 60, -1, Vfx.VOID);
+            spawn(VfxType.AURA, STAGE.add(2, 0, 0), Vec3.ZERO, 1.2f, 0, 0x2A2F55, 0x7D93C9, 60, -1, AbyssVfx.VOID);
         });
         add("beam", 4, mc -> {
             spawn(VfxType.BEAM, STAGE.add(-3.5, 1.4, -1), STAGE.add(3, 1.0, 2), 0, 0.35f, 0xC0182E, 0xFF8A9A, 14, -1, 0);
@@ -139,7 +139,8 @@ public final class VfxShowcase {
         });
         add("bolt", 3, mc -> spawn(VfxType.BOLT, STAGE.add(0, 12, 0), STAGE, 0, 0, 0xF6D77A, 0xFFFFFF, 10, -1, 0));
         add("slash_h", 5, mc -> spawn(VfxType.SLASH, STAGE.add(0, 1.0, 0), new Vec3(0, 0, -1), 2.2f, 220, 0xE6E1F5, 0xFFFFFF, 14, -1, 0));
-        add("slash_v", 5, mc -> spawn(VfxType.SLASH, STAGE.add(0, 1.2, 0), new Vec3(0, 0, -1), 1.6f, 150, 0x3FB58A, 0xC8FFE0, 14, -1, Vfx.VERTICAL));
+        add("slash_v", 5, mc -> spawn(VfxType.SLASH, STAGE.add(0, 1.2, 0), new Vec3(0, 0, -1), 1.6f, 150, 0x3FB58A, 0xC8FFE0, 14, -1, AbyssVfx.VERTICAL));
+        add("crescent", 4, mc -> spawn(VfxType.CRESCENT, STAGE.add(-5, 1.4, 0), new Vec3(1, 0, 0), 10, 2.0f, 0xC0182E, 0xFF6A7A, 16, -1, 0));
         add("vortex", 25, mc -> spawn(VfxType.VORTEX, STAGE.add(0, 1.5, 0), Vec3.ZERO, 5, 0, 0x9B6BFF, 0x2A0F4F, 60, -1, 0));
         add("tendrils", 11, mc -> spawn(VfxType.TENDRILS, STAGE, Vec3.ZERO, 2.4f, 6, 0x232A44, 0x7D93C9, 34, -1, 0));
         add("rift", 6, mc -> spawn(VfxType.RIFT, STAGE.add(0, 1.2, 0), new Vec3(0, 0, -1), 2.4f, 0, 0x9B6BFF, 0xE0D0FF, 18, -1, 0));
@@ -147,7 +148,7 @@ public final class VfxShowcase {
             List<ArmorStand> stands = stands(mc);
             if (stands.size() >= 2) {
                 spawn(VfxType.WINGS, stands.get(0).position(), Vec3.ZERO, 1, 0, 0xFFF1B8, 0xFFFFFF, 80, stands.get(0).getId(), 0);
-                spawn(VfxType.WINGS, stands.get(1).position(), Vec3.ZERO, 1, 0, 0x7A0A1A, 0xFF3048, 80, stands.get(1).getId(), Vfx.VOID);
+                spawn(VfxType.WINGS, stands.get(1).position(), Vec3.ZERO, 1, 0, 0x7A0A1A, 0xFF3048, 80, stands.get(1).getId(), AbyssVfx.VOID);
                 spawn(VfxType.MARK, stands.get(0).position(), Vec3.ZERO, 1, 0, 0x5FD37A, 0xC8FFD8, 80, stands.get(0).getId(), 0);
                 spawn(VfxType.MARK, stands.get(1).position(), Vec3.ZERO, 1, 0, 0xB35CFF, 0xE0B0FF, 80, stands.get(1).getId(), 0);
             }
@@ -181,7 +182,7 @@ public final class VfxShowcase {
 
     private static void spawn(VfxType type, Vec3 pos, Vec3 dir, float scale, float extra, int c1, int c2,
                               int duration, int follow, int flags) {
-        VfxManager.spawn(new VfxSpec(type, pos, dir, scale, extra, c1, c2, duration, follow, flags, (int) System.nanoTime()));
+        AbyssVfxClient.spawn(new VfxSpec(type.id(), pos, dir, scale, extra, c1, c2, duration, follow, flags, (int) System.nanoTime()));
     }
 
     private static void cmd(Minecraft mc, String command) {

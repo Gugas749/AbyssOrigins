@@ -8,7 +8,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 
 /**
- * /abyssorigins profile &lt;player&gt; — opens the staff profile GUI for an online player.
+ * /abyssorigins profile &lt;player&gt; - opens the staff profile GUI for an online player.
  * AbyssCore ADMIN only, and only from a player (the GUI has to open somewhere).
  */
 public final class ProfileCommand {

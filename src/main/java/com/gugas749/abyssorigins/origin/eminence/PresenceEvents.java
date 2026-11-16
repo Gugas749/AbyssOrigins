@@ -48,7 +48,7 @@ public final class PresenceEvents {
     @SubscribeEvent
     public static void onBreak(BlockEvent.BreakEvent event)                 { deny(event.getPlayer(), event); }
 
-    /** Unbowed: no crown kneels, falls silent, or freezes. */
+    /** Unbowed: the Eminence is immune to Awed, Kneeling, Sealed and Stunned. */
     @SubscribeEvent
     public static void onEffect(MobEffectEvent.Applicable event) {
         if (!(event.getEntity() instanceof Player p) || !Eminence.is(p)) return;

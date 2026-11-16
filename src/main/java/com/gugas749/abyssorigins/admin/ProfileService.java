@@ -27,7 +27,7 @@ import java.util.UUID;
 
 /**
  * Server side of the staff profile (/abyssorigins profile). Every request is re-checked
- * against AbyssCore ADMIN — the client's own permission check is only cosmetic — and every
+ * against AbyssCore ADMIN - the client's own permission check is only cosmetic - and every
  * value is validated and clamped here. Edits reuse the same services the commands use and
  * are written to the server log for auditing.
  */

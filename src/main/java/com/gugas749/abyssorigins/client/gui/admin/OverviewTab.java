@@ -16,7 +16,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
-/** Origin and class side by side: identity, level, XP, points — with the edit buttons under each. */
+/** Origin and class side by side: identity, level, XP, points - with the edit buttons under each. */
 final class OverviewTab implements AbyssTab {
 
     private static final int GAP = 8, BTN_GAP = 4, TEXT_H = 64;

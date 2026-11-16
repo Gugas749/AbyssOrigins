@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * Mortal Ingenuity: +25% class XP and -10% class ability cooldowns.
- * Descriptive only — implemented in XpEventHandler and HumanHooks.
+ * Descriptive only - implemented in XpEventHandler and HumanHooks.
  */
 public class HumanIngenuityPassive extends OriginPassive {
     public HumanIngenuityPassive() {

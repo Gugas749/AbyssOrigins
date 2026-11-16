@@ -11,12 +11,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
-/** Dispatches PowerHooks for a player's origin and class, isolating failures. */
+/**
+ * Dispatches PowerHooks for a player's origin and class, isolating failures.
+ * A {@link Nullification nullified} player's hooks are silent: forEach does nothing, any() is false, product() is 1.
+ */
 public final class Powers {
 
     private Powers() {}
 
     public static void forEach(ServerPlayer p, Consumer<PowerHooks> action) {
+        if (Nullification.is(p)) return;
         Origin o = AbyssOriginsAPI.getPlayerOrigin(p);
         if (o != null) run(o.getHooks(), action);
         Specialization s = Skills.specOf(p);
@@ -25,6 +29,7 @@ public final class Powers {
 
     /** True if any hook returns true (short-circuits). */
     public static boolean any(ServerPlayer p, Predicate<PowerHooks> test) {
+        if (Nullification.is(p)) return false;
         Origin o = AbyssOriginsAPI.getPlayerOrigin(p);
         if (o != null && safeTest(o.getHooks(), test)) return true;
         Specialization s = Skills.specOf(p);
@@ -33,6 +38,7 @@ public final class Powers {
 
     /** Product of a multiplier across origin and class hooks. */
     public static float product(ServerPlayer p, ToDoubleFunction<PowerHooks> f) {
+        if (Nullification.is(p)) return 1f;
         double m = 1.0;
         Origin o = AbyssOriginsAPI.getPlayerOrigin(p);
         if (o != null) m *= f.applyAsDouble(o.getHooks());

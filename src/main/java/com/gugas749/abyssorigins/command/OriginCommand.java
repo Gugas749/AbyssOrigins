@@ -2,10 +2,14 @@ package com.gugas749.abyssorigins.command;
 
 import com.gugas749.abyssorigins.Abyssorigins;
 import com.gugas749.abyssorigins.api.AbyssOriginsAPI;
+import com.gugas749.abyssorigins.api.Ascension;
 import com.gugas749.abyssorigins.api.Origin;
+import com.gugas749.abyssorigins.ascension.AscensionCeremony;
 import com.gugas749.abyssorigins.data.OriginAttachments;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.event.XpEventHandler;
+import com.gugas749.abyssorigins.item.gear.OriginWeaponItem;
+import com.gugas749.abyssorigins.item.gear.RelicMastery;
 import com.gugas749.abyssorigins.network.ModPackets;
 import com.gugas749.abyssorigins.power.Assignments;
 import com.gugas749.abyssorigins.skilltree.SkillService;
@@ -22,6 +26,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -70,6 +75,20 @@ public class OriginCommand {
                 .then(Commands.literal("respec")
                     .then(Commands.argument("player", EntityArgument.player())
                         .executes(OriginCommand::respec)))
+                // Mastery of the relic in the player's main hand
+                .then(Commands.literal("mastery")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.literal("set")
+                            .then(Commands.argument("level", IntegerArgumentType.integer(0, RelicMastery.MAX_LEVEL))
+                                .executes(ctx -> mastery(ctx, true))))
+                        .then(Commands.literal("addxp")
+                            .then(Commands.argument("amount", IntegerArgumentType.integer(1))
+                                .executes(ctx -> mastery(ctx, false))))))
+                // Replays an ascension ceremony (no level or stat change)
+                .then(Commands.literal("ascend")
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.literal("noble").executes(ctx -> ascend(ctx, Ascension.NOBLE)))
+                        .then(Commands.literal("lord").executes(ctx -> ascend(ctx, Ascension.LORD)))))
                 // ---- Specialization subcommand ----
                 .then(SpecializationCommand.build())
                 // ---- Abilities: grant / revoke access (hidden Eminence powers included) ----
@@ -126,6 +145,35 @@ public class OriginCommand {
         AbyssOriginsAPI.getAllOrigins().stream().filter(o -> !o.isHidden()).forEach(o -> ctx.getSource().sendSuccess(() ->
             Component.literal("  - " + o.getDisplayName().getString() + " \u00a77(" + o.getId().getPath() + ") [" + o.getImpactLevel() + "]").withStyle(ChatFormatting.YELLOW), false));
         return 1;
+    }
+
+    private static int mastery(CommandContext<CommandSourceStack> ctx, boolean set) {
+        try {
+            ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+            ItemStack stack = player.getMainHandItem();
+            if (!(stack.getItem() instanceof OriginWeaponItem)) {
+                ctx.getSource().sendFailure(Component.literal(player.getName().getString() + " is not holding a relic weapon."));
+                return 0;
+            }
+            if (set) RelicMastery.set(stack, new RelicMastery(IntegerArgumentType.getInteger(ctx, "level"), 0));
+            else RelicMastery.grant(player, stack, IntegerArgumentType.getInteger(ctx, "amount"));
+            RelicMastery m = RelicMastery.of(stack);
+            ctx.getSource().sendSuccess(() -> Component.literal(stack.getHoverName().getString() + " is now at mastery " + m.level()
+                + (m.maxed() ? "" : " (" + m.xp() + "/" + RelicMastery.xpForLevel(m.level()) + " XP)")), true);
+            return 1;
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
+    }
+
+    private static int ascend(CommandContext<CommandSourceStack> ctx, int stage) {
+        try {
+            ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+            if (!AscensionCeremony.play(player, stage)) {
+                ctx.getSource().sendFailure(Component.literal(player.getName().getString() + " has no origin or is busy (ascending or casting)."));
+                return 0;
+            }
+            ctx.getSource().sendSuccess(() -> Component.literal("Playing the ascension of " + player.getName().getString()), true);
+            return 1;
+        } catch (Exception e) { ctx.getSource().sendFailure(Component.literal("Error: " + e.getMessage())); return 0; }
     }
 
     private static int setLevel(CommandContext<CommandSourceStack> ctx) {

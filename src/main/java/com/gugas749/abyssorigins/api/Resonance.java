@@ -3,9 +3,8 @@ package com.gugas749.abyssorigins.api;
 import net.minecraft.network.chat.Component;
 
 /**
- * A bonus a Class grants when paired with a specific Origin — the glue that makes
- * origin + class combinations matter mechanically. Its effect is implemented in the
- * class's PowerHooks, gated by Specialization.hasResonance(player).
+ * A bonus a Class grants when paired with a specific Origin. Its effect is implemented in the
+ * class's PowerHooks, which check the player's current origin.
  */
 public record Resonance(String originPath, Component name, Component description) {
 

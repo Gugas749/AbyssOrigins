@@ -16,8 +16,8 @@ import com.gugas749.abyssorigins.skilltree.data.SkillNode;
 import com.gugas749.abyssorigins.skilltree.data.SkillTree;
 import com.gugas749.abyssorigins.skilltree.registry.SkillEffectHandler;
 import com.gugas749.abyssorigins.skilltree.registry.SkillTreeRegistry;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -99,13 +99,36 @@ public final class SkillService {
         }
 
         var level = player.serverLevel();
-        Vfx.helix(level, player, 2.4f, 0x8E7BD8, 0xE6E1F5, 26);
+        AbyssVfx.helix(level, player, 2.4f, 0x8E7BD8, 0xE6E1F5, 26);
         if (node.isCapstone())
-            Vfx.of(VfxType.PILLAR).at(player.position()).scale(9).extra(1.1f).colors(0xF2C14E, 0xFFFFFF).duration(36).send(level);
+            AbyssVfx.of(VfxType.PILLAR).at(player.position()).scale(9).extra(1.1f).colors(0xF2C14E, 0xFFFFFF).duration(36).send(level);
         Fx.sound(level, player.position(), SoundEvents.ENCHANTMENT_TABLE_USE, 0.7f, node.isCapstone() ? 0.6f : 1.2f);
         if (node.isCapstone()) Fx.sound(level, player.position(), SoundEvents.BEACON_POWER_SELECT, 0.8f, 0.7f);
 
         player.sendSystemMessage(Component.translatable("abyssorigins.message.skill_unlocked", node.getDisplayName()));
+    }
+
+    // ---- Retired nodes -------------------------------------------------------
+
+    /**
+     * Removes unlocked nodes that their origin's tree no longer has (SkillTree.retire) and refunds what they
+     * cost. Called on login. @return points refunded.
+     */
+    public static int refundRetired(ServerPlayer player) {
+        Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
+        SkillTree tree = origin == null ? null : SkillTreeRegistry.getTree(origin.getId()).orElse(null);
+        if (tree == null || tree.getRetired().isEmpty()) return 0;
+        PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
+        int refund = 0;
+        for (var e : tree.getRetired().entrySet())
+            if (skills.removeSkill(e.getKey())) refund += e.getValue();
+        if (refund == 0) return 0;
+        skills.addSkillPoints(refund);
+        Loadouts.prune(player);
+        SkillEffectHandler.refresh(player);
+        ModPackets.syncAll(player);
+        player.sendSystemMessage(Component.translatable("abyssorigins.message.skills_retired", refund));
+        return refund;
     }
 
     // ---- Respec ------------------------------------------------------------

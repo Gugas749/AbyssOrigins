@@ -10,6 +10,7 @@ import com.gugas749.abyssorigins.data.SpecializationAttachments;
 import com.gugas749.abyssorigins.origin.eminence.Eminence;
 import com.gugas749.abyssorigins.registry.SpecializationRegistry;
 import com.gugas749.abyssorigins.skilltree.data.SkillAttachments;
+import com.gugas749.abyssorigins.skilltree.registry.SkillTreeRegistry;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -25,6 +26,30 @@ public final class Skills {
         return p.getData(SkillAttachments.PLAYER_SKILLS.get()).hasSkill(skillId)
             || p.getData(SpecializationAttachments.PLAYER_SPEC.get()).hasSkill(skillId)
             || Eminence.grantsSkill(p, skillId);
+    }
+
+    /**
+     * Cooldown multiplier from unlocked nodes with a cooldown reduction (the ascension rows), origin and class
+     * trees together: 1 minus their sum, never below 0.5. Nullified players get no discount.
+     */
+    public static float cooldownFactor(Player p) {
+        if (Nullification.is(p)) return 1f;
+        double cut = 0;
+        Origin o = AbyssOriginsAPI.getPlayerOrigin(p);
+        if (o != null) {
+            var tree = SkillTreeRegistry.getTree(o.getId()).orElse(null);
+            if (tree != null) for (String id : p.getData(SkillAttachments.PLAYER_SKILLS.get()).getUnlockedSkills()) {
+                var n = tree.getSkill(id);
+                if (n != null) cut += n.getCooldownReduction();
+            }
+        }
+        Specialization s = specOf(p);
+        if (s != null && s.getSkillTree() != null)
+            for (String id : p.getData(SpecializationAttachments.PLAYER_SPEC.get()).getUnlockedSkills()) {
+                var n = s.getSkillTree().getSkill(id);
+                if (n != null) cut += n.getCooldownReduction();
+            }
+        return (float) Math.max(0.5, 1 - cut);
     }
 
     public static boolean isOrigin(Player p, String originPath) {

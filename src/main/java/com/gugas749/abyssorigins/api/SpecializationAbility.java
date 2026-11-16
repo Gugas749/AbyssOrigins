@@ -2,7 +2,7 @@ package com.gugas749.abyssorigins.api;
 
 /**
  * An ability granted by a Class (Specialization). Bound into a class slot ({@link SlotGroup#CLASS}).
- * Class abilities never cost origin resource — they are gated by cooldown only.
+ * Class abilities never cost origin resource - they are gated by cooldown only.
  */
 public abstract class SpecializationAbility extends Ability {
 

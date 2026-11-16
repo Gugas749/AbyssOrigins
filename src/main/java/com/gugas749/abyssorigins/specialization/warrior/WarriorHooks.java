@@ -5,7 +5,7 @@ import com.gugas749.abyssorigins.api.PowerHooks;
 import com.gugas749.abyssorigins.effect.ModEffects;
 import com.gugas749.abyssorigins.power.*;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
@@ -15,8 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
- * Warrior mechanics. Momentum is the class identity: chained melee hits stack damage,
- * and the tree decides whether you cash it in for sustain, executions or armour-breaking.
+ * Warrior mechanics. Momentum is the core mechanic: chained melee hits stack damage,
+ * and the tree decides whether it converts into sustain, executions or armour-breaking.
  */
 public class WarriorHooks implements PowerHooks {
 
@@ -55,7 +55,7 @@ public class WarriorHooks implements PowerHooks {
         PowerState.set(player, LAST, now);
 
         if (stacks == max) {
-            Vfx.sparks(player.serverLevel(), Fx.chest(target), 1.0f, Palette.WAR, Palette.WAR_HI);
+            AbyssVfx.sparks(player.serverLevel(), Fx.chest(target), 1.0f, Palette.WAR, Palette.WAR_HI);
             player.displayClientMessage(Component.translatable("abyssorigins.message.warrior_momentum", stacks), true);
         }
     }

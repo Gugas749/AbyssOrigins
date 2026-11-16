@@ -6,6 +6,7 @@ import com.gugas749.abyssorigins.client.ClientIdentities;
 import com.gugas749.abyssorigins.client.ClientOriginData;
 import com.gugas749.abyssorigins.client.ClientSpecializationData;
 import com.gugas749.abyssorigins.client.ClientTimers;
+import com.gugas749.abyssorigins.client.ascension.AscensionTitle;
 import com.gugas749.abyssorigins.client.hud.AbyssVignetteOverlay;
 import com.gugas749.abyssorigins.client.hud.OriginHudOverlay;
 import com.gugas749.abyssorigins.client.reveal.RevealClient;
@@ -16,6 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import com.gugas749.abysscore.api.vfx.client.AbyssVfxClient;
+import com.gugas749.abyssorigins.client.vfx.AscensionEffect;
+import com.gugas749.abyssorigins.client.vfx.AtomicEffect;
+import com.gugas749.abyssorigins.vfx.OriginVfx;
 import com.gugas749.abyssorigins.block.ModBlocks;
 import com.gugas749.abyssorigins.client.block.PunishCrossRenderer;
 import com.gugas749.abyssorigins.client.entity.DementorRenderer;
@@ -36,6 +42,7 @@ public class ClientEventHandler {
         ClientSpecializationData.clear();
         ClientTimers.clear();
         com.gugas749.abyssorigins.client.eminence.EminenceClientEffects.clear();
+        AscensionTitle.clear();
         ClientIdentities.clear();
         RevealClient.clear();
         ClientRitual.clear();
@@ -44,6 +51,15 @@ public class ClientEventHandler {
 
     @EventBusSubscriber(modid = Abyssorigins.MODID, value = Dist.CLIENT)
     public static class ModEvents {
+        /** AbyssOrigins' own effect types on AbyssCore's VFX engine (the built-in ones need nothing). */
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                AbyssVfxClient.register(OriginVfx.ATOMIC, AtomicEffect::new);
+                AbyssVfxClient.register(OriginVfx.ASCENSION, AscensionEffect::new);
+            });
+        }
+
         @SubscribeEvent
         public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
             // Vignette sits under the vanilla HUD so hearts/hotbar stay readable
@@ -61,10 +77,11 @@ public class ClientEventHandler {
             event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
             event.registerEntityRenderer(ModEntities.ABYSS_MIRE.get(), com.gugas749.abyssorigins.client.entity.AbyssMireRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_SCYTHE.get(), com.gugas749.abyssorigins.client.entity.ThrownScytheRenderer::new);
+            event.registerEntityRenderer(ModEntities.JUDGEMENT_SWORD.get(), com.gugas749.abyssorigins.client.entity.JudgementSwordRenderer::new);
             event.registerBlockEntityRenderer(ModBlocks.PUNISH_CROSS_BE.get(), PunishCrossRenderer::new);
         }
 
-        /** Seeds wear their origin's colour (layer 0; the glint layer stays untinted). */
+        /** Seeds are tinted with their origin's colour (layer 0; the glint layer stays untinted). */
         @SubscribeEvent
         public static void onItemColors(RegisterColorHandlersEvent.Item event) {
             event.register((stack, layer) -> layer == 0 ? OriginSeedItem.tint(stack) : -1, ModItems.ORIGIN_SEED.get());

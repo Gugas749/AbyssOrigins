@@ -50,8 +50,7 @@ public record SyncSkillsPacket(List<String> unlockedSkills, int skillPoints)
 
             PlayerSkillData data = mc.player.getData(SkillAttachments.PLAYER_SKILLS.get());
 
-            // REPLACE — not add. Previous implementation was additive which
-            // caused skill points to accumulate incorrectly on every sync.
+            // Replace, not add (adding accumulated skill points on every sync)
             data.copyFrom(buildFromPacket(pkt));
 
             // Feed HUD cache

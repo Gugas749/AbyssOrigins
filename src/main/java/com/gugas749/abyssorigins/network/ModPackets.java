@@ -25,7 +25,7 @@ import java.util.List;
 public class ModPackets {
 
     public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar reg = event.registrar(Abyssorigins.MODID).versioned("3.1");
+        PayloadRegistrar reg = event.registrar(Abyssorigins.MODID).versioned("3.4");
 
         reg.playToClient(SyncOriginPacket.TYPE,         SyncOriginPacket.STREAM_CODEC,         SyncOriginPacket::handle);
         reg.playToClient(SyncSkillsPacket.TYPE,         SyncSkillsPacket.STREAM_CODEC,         SyncSkillsPacket::handle);
@@ -33,14 +33,13 @@ public class ModPackets {
         reg.playToClient(SyncTimersPacket.TYPE,         SyncTimersPacket.STREAM_CODEC,         SyncTimersPacket::handle);
         reg.playToClient(IdentityPacket.TYPE,           IdentityPacket.STREAM_CODEC,           IdentityPacket::handle);
         reg.playToClient(RevealPacket.TYPE,             RevealPacket.STREAM_CODEC,             RevealPacket::handle);
-        reg.playToClient(VfxPacket.TYPE,                VfxPacket.STREAM_CODEC,                VfxPacket::handle);
         reg.playToClient(SyncAbilitiesPacket.TYPE,      SyncAbilitiesPacket.STREAM_CODEC,      SyncAbilitiesPacket::handle);
         reg.playToClient(OpenProfilePacket.TYPE,        OpenProfilePacket.STREAM_CODEC,        OpenProfilePacket::handle);
         reg.playToClient(RitualPacket.TYPE,             RitualPacket.STREAM_CODEC,             RitualPacket::handle);
-        reg.playToClient(QuakePacket.TYPE,              QuakePacket.STREAM_CODEC,              QuakePacket::handle);
         reg.playToClient(PresencePromptPacket.TYPE,     PresencePromptPacket.STREAM_CODEC,     PresencePromptPacket::handle);
         reg.playToClient(ResistStartPacket.TYPE,        ResistStartPacket.STREAM_CODEC,        ResistStartPacket::handle);
         reg.playToClient(KneelPacket.TYPE,              KneelPacket.STREAM_CODEC,              KneelPacket::handle);
+        reg.playToClient(AscensionPacket.TYPE,          AscensionPacket.STREAM_CODEC,          AscensionPacket::handle);
 
         reg.playToServer(ActivateAbilityPacket.TYPE,    ActivateAbilityPacket.STREAM_CODEC,    ActivateAbilityPacket::handle);
         reg.playToServer(ActivateSpecAbilityPacket.TYPE,ActivateSpecAbilityPacket.STREAM_CODEC,ActivateSpecAbilityPacket::handle);
@@ -67,7 +66,8 @@ public class ModPackets {
     public static void syncSkills(ServerPlayer player) {
         PlayerSkillData skills = player.getData(SkillAttachments.PLAYER_SKILLS.get());
         PacketDistributor.sendToPlayer(player,
-            new SyncSkillsPacket(skills.getUnlockedSkills(), skills.getSkillPoints()));
+            // a snapshot: the packet is encoded later on the network thread while the live list may change
+            new SyncSkillsPacket(List.copyOf(skills.getUnlockedSkills()), skills.getSkillPoints()));
     }
 
     public static void syncSpecialization(ServerPlayer player) {
@@ -79,7 +79,7 @@ public class ModPackets {
             data.getSpecLevel(),
             data.getSpecXp(),
             data.getSkillPoints(),
-            data.getUnlockedSkills()
+            List.copyOf(data.getUnlockedSkills())
         ));
     }
 

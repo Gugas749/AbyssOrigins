@@ -9,8 +9,8 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -62,9 +62,9 @@ public final class WarriorAbilities {
 
             var level = player.serverLevel();
             Vec3 c = player.position().add(0, 0.2, 0);
-            Vfx.shockwave(level, player.position(), 6.5f, Palette.WAR, Palette.WAR_HI, 20);
-            Vfx.of(VfxType.SIGIL).at(player.position()).scale(2.2f).extra(4).colors(Palette.WAR, Palette.WAR_HI).duration(26).send(level);
-            Vfx.helix(level, player, 2.2f, Palette.WAR, Palette.WAR_HI, 22);
+            AbyssVfx.shockwave(level, player.position(), 6.5f, Palette.WAR, Palette.WAR_HI, 20);
+            AbyssVfx.of(VfxType.SIGIL).at(player.position()).scale(2.2f).extra(4).colors(Palette.WAR, Palette.WAR_HI).duration(26).send(level);
+            AbyssVfx.helix(level, player, 2.2f, Palette.WAR, Palette.WAR_HI, 22);
             Fx.sound(level, c, SoundEvents.RAVAGER_ROAR, 0.9f, 1.1f);
             AbilityStates.start(player, WAR_CRY, duration, this);
             return true;
@@ -104,11 +104,11 @@ public final class WarriorAbilities {
             }
 
             int c1 = infernal ? Palette.INFERNO : Palette.BLADE, c2 = infernal ? Palette.INFERNO_HI : Palette.BLADE_HI;
-            Vfx.of(VfxType.SLASH).at(c.add(0, 1.0, 0)).dir(player.getLookAngle()).scale((float) radius).extra(540)
+            AbyssVfx.of(VfxType.SLASH).at(c.add(0, 1.0, 0)).dir(player.getLookAngle()).scale((float) radius).extra(540)
                 .colors(c1, c2).duration(14).send(level);
-            Vfx.of(VfxType.SLASH).at(c.add(0, 0.55, 0)).dir(player.getLookAngle()).scale((float) radius * 0.75f).extra(400)
-                .colors(c1, c2).flags(Vfx.REVERSE).duration(14).send(level);
-            Vfx.shockwave(level, c, (float) radius, c1, c2, 12);
+            AbyssVfx.of(VfxType.SLASH).at(c.add(0, 0.55, 0)).dir(player.getLookAngle()).scale((float) radius * 0.75f).extra(400)
+                .colors(c1, c2).flags(AbyssVfx.REVERSE).duration(14).send(level);
+            AbyssVfx.shockwave(level, c, (float) radius, c1, c2, 12);
             Fx.sound(level, c, SoundEvents.PLAYER_ATTACK_SWEEP, 1.2f, 0.7f);
             Fx.sound(level, c, SoundEvents.BREEZE_SHOOT, 0.7f, 0.8f);
             return true;

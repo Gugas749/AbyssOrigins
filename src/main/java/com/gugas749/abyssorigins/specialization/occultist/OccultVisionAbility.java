@@ -7,8 +7,8 @@ import com.gugas749.abyssorigins.power.AbilityStates;
 import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -20,13 +20,10 @@ import net.minecraft.world.entity.monster.Enemy;
 /**
  * Occult Vision (toggle).
  *
- * BUG FIX: the old version applied the vanilla Glowing effect to every player on the
- * server. Glowing is a shared entity flag, so *everyone* saw everyone outlined, and the
- * revealed players could see that they were glowing.
- *
- * Now the server only records that the vision is active (AbilityStates → synced to the
- * caster alone). The outlines are drawn purely client-side by RevealClient + the
- * Minecraft/Entity mixins, so only the Occultist sees them, coloured by origin.
+ * Does not use vanilla Glowing: it is a shared entity flag, so every player would see the outlines.
+ * The server only records that the vision is active (AbilityStates -> synced to the caster alone).
+ * The outlines are drawn client-side by RevealClient + the Minecraft/Entity mixins, so only the
+ * Occultist sees them, coloured by origin.
  */
 public class OccultVisionAbility extends SpecializationAbility implements Sustained {
 
@@ -49,8 +46,8 @@ public class OccultVisionAbility extends SpecializationAbility implements Sustai
             player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, false, false));
 
         var level = player.serverLevel();
-        Vfx.of(VfxType.SIGIL).at(player.position()).scale(3f).extra(5).colors(Palette.OCCULT, Palette.OCCULT_HI).duration(44).send(level);
-        Vfx.burst(level, player.getEyePosition().add(player.getLookAngle().scale(1.4)), 0.6f, Palette.OCCULT, Palette.OCCULT_HI);
+        AbyssVfx.of(VfxType.SIGIL).at(player.position()).scale(3f).extra(5).colors(Palette.OCCULT, Palette.OCCULT_HI).duration(44).send(level);
+        AbyssVfx.burst(level, player.getEyePosition().add(player.getLookAngle().scale(1.4)), 0.6f, Palette.OCCULT, Palette.OCCULT_HI);
         Fx.sound(level, player.position(), SoundEvents.ILLUSIONER_CAST_SPELL, 0.8f, 0.7f);
         Fx.sound(level, player.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 0.6f, 0.5f);
 

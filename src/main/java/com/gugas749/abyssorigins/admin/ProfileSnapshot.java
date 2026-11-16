@@ -87,7 +87,7 @@ public record ProfileSnapshot(
 
     public List<String> slots(SlotGroup g) { return g == SlotGroup.ORIGIN ? originSlots : classSlots; }
 
-    /** Every ability this player knows in a group, with how — same maths the server uses. */
+    /** Every ability this player knows in a group, with how - same maths the server uses. */
     public Map<String, Loadouts.Source> known(SlotGroup g) {
         return Loadouts.known(g, origin(), spec(), granted, originSkills, classSkills);
     }

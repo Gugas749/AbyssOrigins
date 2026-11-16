@@ -17,7 +17,7 @@ public class SpecializationRegistry {
 
     private SpecializationRegistry() {}
 
-    /** Called once during FMLCommonSetupEvent. Add new classes here — one line each. */
+    /** Called once during FMLCommonSetupEvent. Add new classes here - one line each. */
     public static void registerAll() {
         register(new WarriorSpecialization());
         register(new AssassinSpecialization());

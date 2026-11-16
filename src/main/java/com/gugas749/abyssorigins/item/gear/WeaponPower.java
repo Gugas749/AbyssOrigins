@@ -6,7 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
- * The soul of a relic weapon: a right-click power with its own cooldown, plus an
+ * A relic weapon's abilities: a right-click power with its own cooldown, plus an
  * on-hit passive. Only ever invoked for an attuned wielder (GearEvents / OriginWeaponItem).
  * Lang: abyssorigins.weapon.&lt;id&gt;.power(.desc) and .passive(.desc)
  */

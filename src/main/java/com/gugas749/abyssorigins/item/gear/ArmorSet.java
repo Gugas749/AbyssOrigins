@@ -9,7 +9,7 @@ import net.minecraft.world.item.Items;
 import java.util.function.Supplier;
 
 /**
- * The origin outfits. Some are forged armor, some enchanted clothing (lighter, more
+ * The origin outfits. Some are armor, some clothing (lighter, more
  * enchantable). An origin may have more than one outfit (Seraph: Choir and Seraphim);
  * any complete one grants that origin's set bonus. Defense order: helmet, chestplate, leggings, boots.
  */
@@ -20,7 +20,7 @@ public enum ArmorSet {
     CHOIR    ("choir",     "seraph",   new int[]{2, 5, 4, 2}, 1f, 0f,    25, 22, true,  () -> SoundEvents.ARMOR_EQUIP_GOLD,      () -> Items.GOLD_INGOT),
     ABYSSAL  ("abyssal",   "voidborn", new int[]{3, 7, 6, 3}, 3f, 0.1f,  37, 14, false, () -> SoundEvents.ARMOR_EQUIP_NETHERITE, () -> Items.OBSIDIAN),
     DUSKWEAVE("duskweave", "shade",    new int[]{2, 5, 4, 2}, 1f, 0f,    25, 20, true,  () -> SoundEvents.ARMOR_EQUIP_LEATHER,   () -> Items.PHANTOM_MEMBRANE),
-    // A second Seraph outfit: blackened gold plate under a floating halo-crest. Same set bonus as Choir.
+    // A second Seraph outfit: dark gold plate with a floating halo crest. Same set bonus as Choir.
     SERAPHIM ("seraphim",  "seraph",   new int[]{3, 7, 5, 3}, 2f, 0.05f, 33, 18, false, () -> SoundEvents.ARMOR_EQUIP_GOLD,      () -> Items.GOLD_INGOT);
 
     public final String id, origin;

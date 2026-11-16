@@ -17,11 +17,11 @@ import java.util.function.Consumer;
 /**
  * Crown of All Bloodlines: runs every other origin's PowerHooks for the Eminence.
  * Their skill-gated mechanics all fire because the Eminence holds every origin skill,
- * and the same skills (Tempered, Fallen Grace, Dusk Dweller...) lift the bloodlines' weaknesses.
+ * and the same skills (Tempered, Fallen Grace, Dusk Dweller...) remove those origins' weaknesses.
  */
 public class EminenceHooks implements PowerHooks {
 
-    /** Flat share of incoming damage the Eminence shrugs off, after every bloodline's own reactions. */
+    /** Flat share of incoming damage the Eminence ignores, applied after every other origin's hooks. */
     private static final float SOVEREIGN_REDUCTION = 0.20f;
 
     private List<PowerHooks> subjects;
@@ -62,7 +62,7 @@ public class EminenceHooks implements PowerHooks {
             try { h.onHurt(player, event); }
             catch (Exception e) { Abyssorigins.LOGGER.error("[AbyssOrigins] Eminence relay failed in {}", h.getClass().getSimpleName(), e); }
         }
-        // Sovereign Body: every blow lands lighter on the crown (void and /kill still bite in full)
+        // Sovereign Body: reduced incoming damage (void and /kill still apply in full)
         if (!event.isCanceled() && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))
             event.setAmount(event.getAmount() * (1f - SOVEREIGN_REDUCTION));
     }

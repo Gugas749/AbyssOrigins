@@ -74,7 +74,6 @@ public class PlayerSpecializationData {
     public void        unlockSkill(String id)      { if (!hasSkill(id)) unlockedSkills.add(id); }
     public void        clearSkills()               { unlockedSkills.clear(); }
     public List<String> getUnlockedSkills()        { return Collections.unmodifiableList(unlockedSkills); }
-    public Set<String>  getUnlockedSkillsSet()     { return new HashSet<>(unlockedSkills); }
 
     // ---- Copy (used on death/clone) --------------------------------------
 

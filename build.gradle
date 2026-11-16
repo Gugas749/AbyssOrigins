@@ -9,6 +9,16 @@ version = mod_version
 group = mod_group_id
 
 repositories {
+    // JUnit only (for ./gradlew test)
+    mavenCentral {
+        content {
+            includeGroup "org.junit"
+            includeGroup "org.junit.jupiter"
+            includeGroup "org.junit.platform"
+            includeGroup "org.opentest4j"
+            includeGroup "org.apiguardian"
+        }
+    }
     mavenLocal()
     maven {
         url = "https://cursemaven.com"
@@ -110,6 +120,14 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "com.gugas749:abysscore-neoforge-1.21.1:${abysscore_version}"
     implementation "curse.maven:geckolib-${geckolib_id}:${geckolib_version}"
+
+    // Unit tests (plain JUnit, no game): e.g. that saved HUD layouts still read the same on AbyssCore's HUD API
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

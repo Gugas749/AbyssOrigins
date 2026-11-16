@@ -6,8 +6,8 @@ import com.gugas749.abyssorigins.effect.ModEffects;
 import com.gugas749.abyssorigins.network.packet.RevealPacket;
 import com.gugas749.abyssorigins.power.*;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,10 +47,10 @@ public final class AssassinAbilities {
             }
 
             Vec3 from = player.position();
-            Vfx.of(VfxType.RIFT).at(from.add(0, 1, 0)).dir(dest.subtract(from)).scale(2.2f).colors(Palette.ASSASSIN, Palette.ASSASSIN_HI).duration(14).send(level);
+            AbyssVfx.of(VfxType.RIFT).at(from.add(0, 1, 0)).dir(dest.subtract(from)).scale(2.2f).colors(Palette.ASSASSIN, Palette.ASSASSIN_HI).duration(14).send(level);
             player.teleportTo(level, dest.x, dest.y, dest.z, target.getYRot(), player.getXRot());
             player.fallDistance = 0;
-            Vfx.of(VfxType.BURST).at(dest.add(0, 1, 0)).scale(1.0f).colors(Palette.SHADOW, Palette.ASSASSIN).flags(Vfx.VOID).duration(12).send(level);
+            AbyssVfx.of(VfxType.BURST).at(dest.add(0, 1, 0)).scale(1.0f).colors(Palette.SHADOW, Palette.ASSASSIN).flags(AbyssVfx.VOID).duration(12).send(level);
             Fx.sound(level, dest, SoundEvents.ENDERMAN_TELEPORT, 0.6f, 1.7f);
 
             PowerState.flag(player, "assassin_ss", 40); // next strike is a guaranteed backstab
@@ -59,7 +59,7 @@ public final class AssassinAbilities {
             if (Skills.has(player, "assassin_mark_for_death")) {
                 target.addEffect(new MobEffectInstance(ModEffects.HEXED, 120, 0), player);
                 RevealPacket.send(player, target, 120, 0x3FB58A);
-                Vfx.of(VfxType.MARK).follow(target).colors(Palette.ASSASSIN, Palette.ASSASSIN_HI).duration(120).sendTo(player);
+                AbyssVfx.of(VfxType.MARK).follow(target).colors(Palette.ASSASSIN, Palette.ASSASSIN_HI).duration(120).sendTo(player);
             }
             return true;
         }
@@ -76,8 +76,8 @@ public final class AssassinAbilities {
         @Override
         public boolean activate(ServerPlayer player) {
             int duration = Skills.has(player, "assassin_toxicology") ? 300 : 200;
-            Vfx.burst(player.serverLevel(), Fx.chest(player), 0.7f, Palette.VENOM, Palette.VENOM_HI);
-            Vfx.of(VfxType.AURA).follow(player).scale(0.9f).colors(Palette.VENOM, Palette.VENOM_HI).duration(duration).send(player.serverLevel());
+            AbyssVfx.burst(player.serverLevel(), Fx.chest(player), 0.7f, Palette.VENOM, Palette.VENOM_HI);
+            AbyssVfx.of(VfxType.AURA).follow(player).scale(0.9f).colors(Palette.VENOM, Palette.VENOM_HI).duration(duration).send(player.serverLevel());
             Fx.sound(player.level(), player.position(), SoundEvents.BREWING_STAND_BREW, 1.0f, 1.4f);
             AbilityStates.start(player, VENOM, duration, this);
             return true;
@@ -85,7 +85,7 @@ public final class AssassinAbilities {
 
         @Override
         public void onEnd(ServerPlayer player) {
-            Vfx.stop(player.serverLevel(), player, VfxType.AURA, Palette.VENOM);
+            AbyssVfx.stop(player.serverLevel(), player, VfxType.AURA, Palette.VENOM);
         }
     }
 }

@@ -20,7 +20,7 @@ import static com.gugas749.abyssorigins.client.gui.AbyssTheme.*;
 
 /**
  * Resisting the Presence: a timing skill check. After a random pause a warning chime sounds,
- * a gold arc appears on the dial and the needle sweeps from the top — press SPACE (or click)
+ * a gold arc appears on the dial and the needle sweeps from the top - press SPACE (or click)
  * while it crosses the arc. Three successes break the hold; pressing outside the arc or letting
  * the needle pass it is failure (presses between checks are ignored). Each check is faster and narrower.
  */

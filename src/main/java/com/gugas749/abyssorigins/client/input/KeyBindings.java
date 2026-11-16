@@ -51,10 +51,10 @@ public class KeyBindings {
         return forGroup(group)[slot];
     }
 
-    /** Short key label for slot badges: "R", "F", or "—" when unbound. */
+    /** Short key label for slot badges: "R", "F", or "-" when unbound. */
     public static String label(SlotGroup group, int slot, int max) {
         KeyMapping k = forSlot(group, slot);
-        if (k.isUnbound()) return "—";
+        if (k.isUnbound()) return "-";
         String s = k.getTranslatedKeyMessage().getString();
         return s.length() > max ? s.substring(0, max) : s;
     }

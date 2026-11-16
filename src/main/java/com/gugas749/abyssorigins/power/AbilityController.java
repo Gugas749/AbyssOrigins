@@ -1,6 +1,7 @@
 package com.gugas749.abyssorigins.power;
 
 import com.gugas749.abyssorigins.api.*;
+import com.gugas749.abyssorigins.ascension.AscensionCeremony;
 import com.gugas749.abyssorigins.data.PlayerAbilityData;
 import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.effect.ModEffects;
@@ -16,8 +17,8 @@ import java.util.List;
 /**
  * Single activation path for every ability slot, origin and class alike.
  *
- * Order: slot → still known? → toggle-off for sustained abilities (allowed even on cooldown)
- * → cooldown → resource → canActivate → activate. Cost and cooldown are only consumed when
+ * Order: slot -> still known? -> toggle-off for sustained abilities (allowed even on cooldown)
+ * -> cooldown -> resource -> canActivate -> activate. Cost and cooldown are only consumed when
  * activate() returns true, so "no target" never wastes a cooldown. Cooldowns are kept per
  * ability id, so rebinding a power to another slot can't skip one.
  */
@@ -34,7 +35,7 @@ public final class AbilityController {
         String id = data.slot(group, slot);
         Ability ability = id.isEmpty() ? null : AbilityRegistry.ability(id);
 
-        // Origin / class powers need their origin / class; hidden powers answer to whoever holds the grant
+        // Origin / class powers need their origin / class; hidden powers only need the grant
         Origin origin = AbyssOriginsAPI.getPlayerOrigin(player);
         boolean hidden = ability instanceof HiddenAbility;
         if (!hidden && (group == SlotGroup.ORIGIN ? origin == null : Skills.specOf(player) == null)) return;
@@ -74,8 +75,16 @@ public final class AbilityController {
         ModPackets.syncAbilities(player);
     }
 
-    /** Held by a Presence, kneeling, under a Royal Decree, or crucified: no powers answer. */
+    /** Ascending, held by a Presence, kneeling, under a Royal Decree, crucified or nullified: powers can't be used. */
     private static boolean restrained(ServerPlayer player) {
+        if (AscensionCeremony.active(player)) {
+            player.displayClientMessage(Component.translatable("abyssorigins.message.ascending"), true);
+            return true;
+        }
+        if (Nullification.is(player)) {
+            player.displayClientMessage(Component.translatable("abyssorigins.message.nullified"), true);
+            return true;
+        }
         if (PunishRealm.isPunished(player)) {
             player.displayClientMessage(Component.translatable("abyssorigins.message.crucified"), true);
             return true;
@@ -94,11 +103,11 @@ public final class AbilityController {
     public static int effectiveCooldown(ServerPlayer player, Ability ability) {
         int base = ability.cooldownTicks(player);
         if (ability instanceof HiddenAbility) return Math.max(20, base);   // outside progression: no hook discounts
-        float mult = Math.max(MIN_COOLDOWN_FACTOR, Powers.product(player, h -> h.cooldownMultiplier(player, ability)));
+        float mult = Math.max(MIN_COOLDOWN_FACTOR, Powers.product(player, h -> h.cooldownMultiplier(player, ability)) * Skills.cooldownFactor(player));
         return Math.max(20, Math.round(base * mult));
     }
 
-    /** Reduces a running cooldown — used by reset/refund mechanics. */
+    /** Reduces a running cooldown - used by reset/refund mechanics. */
     public static void reduceCooldown(ServerPlayer player, String abilityId, int ticks) {
         Loadouts.data(player).reduceCooldown(abilityId, ticks);
         ModPackets.syncAbilities(player);

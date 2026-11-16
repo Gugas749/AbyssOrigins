@@ -7,8 +7,8 @@ import com.gugas749.abyssorigins.network.packet.RitualPacket;
 import com.gugas749.abyssorigins.power.Assignments;
 import com.gugas749.abyssorigins.power.Delayed;
 import com.gugas749.abyssorigins.power.Fx;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -30,11 +30,11 @@ import java.util.*;
 /**
  * The transformation shared by the Orb of Origins and the Seeds of Origin.
  *
- *   1. Channel  — while the item is consumed, energy spirals into the player.
- *   2. Awaken   — the item is gone; a pale aura flares around the player (visible to everyone,
- *                 and the player's camera swings to the front so they can watch it).
- *   3. Shape    — the Orb asks which origin to take (OriginChoiceScreen); a Seed already knows.
- *   4. Become   — the origin is assigned and the aura takes on the origin's colour.
+ *   1. Channel  - while the item is consumed, particles spiral into the player.
+ *   2. Awaken   - the item is gone; a pale aura appears around the player (visible to everyone,
+ *                 and the player's camera switches to the front view so they can see it).
+ *   3. Shape    - the Orb asks which origin to take (OriginChoiceScreen); a Seed already knows.
+ *   4. Become   - the origin is assigned and the aura takes on the origin's colour.
  *
  * Server authoritative: a choice is only accepted from a player whose orb is awaiting one, and
  * only for a selectable origin. Closing the menu, dying, logging out or waiting too long ends
@@ -79,8 +79,8 @@ public final class OriginRitual {
 
     public static void beginChannel(ServerPlayer p, int color) {
         ServerLevel level = p.serverLevel();
-        Vfx.of(VfxType.HELIX).follow(p).scale(2.2f).colors(color, NEUTRAL_HI).duration(USE_TICKS).send(level);
-        Vfx.of(VfxType.SIGIL).follow(p).scale(1.7f).extra(6).colors(color, NEUTRAL_HI).duration(USE_TICKS + 6).send(level);
+        AbyssVfx.of(VfxType.HELIX).follow(p).scale(2.2f).colors(color, NEUTRAL_HI).duration(USE_TICKS).send(level);
+        AbyssVfx.of(VfxType.SIGIL).follow(p).scale(1.7f).extra(6).colors(color, NEUTRAL_HI).duration(USE_TICKS + 6).send(level);
         Fx.sound(level, p.position(), SoundEvents.BEACON_ACTIVATE, 0.7f, 1.5f);
     }
 
@@ -92,7 +92,7 @@ public final class OriginRitual {
             for (int i = 0; i < 6; i++) {
                 double a = level.random.nextDouble() * Math.PI * 2, r = 1.8 + level.random.nextDouble() * 0.6;
                 double x = c.x + Math.cos(a) * r, z = c.z + Math.sin(a) * r, y = c.y + (level.random.nextDouble() - 0.4) * 1.4;
-                // count 0: the offset is the velocity — straight at the chest
+                // count 0: the offset is the velocity - straight at the chest
                 level.sendParticles(ParticleTypes.END_ROD, x, y, z, 0, (c.x - x) * 0.12, (c.y - y) * 0.12, (c.z - z) * 0.12, 1);
             }
         }
@@ -102,8 +102,8 @@ public final class OriginRitual {
 
     public static void interrupt(ServerPlayer p) {
         ServerLevel level = p.serverLevel();
-        Vfx.stop(level, p, VfxType.HELIX);
-        Vfx.stop(level, p, VfxType.SIGIL);
+        AbyssVfx.stop(level, p, VfxType.HELIX);
+        AbyssVfx.stop(level, p, VfxType.SIGIL);
     }
 
     // ---- 2. Awaken --------------------------------------------------------------------------
@@ -118,10 +118,10 @@ public final class OriginRitual {
 
         ServerLevel level = p.serverLevel();
         Vec3 chest = p.position().add(0, 1.1, 0);
-        Vfx.burst(level, chest, 1.4f, NEUTRAL, NEUTRAL_HI);
-        Vfx.shockwave(level, p.position(), 3.2f, NEUTRAL, NEUTRAL_HI, 16);
+        AbyssVfx.burst(level, chest, 1.4f, NEUTRAL, NEUTRAL_HI);
+        AbyssVfx.shockwave(level, p.position(), 3.2f, NEUTRAL, NEUTRAL_HI, 16);
         aura(level, p, NEUTRAL, NEUTRAL_HI, AURA_HOLD);
-        Vfx.of(VfxType.HELIX).follow(p).scale(2.6f).colors(NEUTRAL, NEUTRAL_HI).duration(AWAKEN_TICKS + 20).send(level);
+        AbyssVfx.of(VfxType.HELIX).follow(p).scale(2.6f).colors(NEUTRAL, NEUTRAL_HI).duration(AWAKEN_TICKS + 20).send(level);
         Fx.sound(level, chest, SoundEvents.AMETHYST_BLOCK_BREAK, 1.2f, 0.6f);
         Fx.sound(level, chest, SoundEvents.BEACON_POWER_SELECT, 0.9f, 1.3f);
         PacketDistributor.sendToPlayer(p, RitualPacket.awaken());
@@ -143,7 +143,7 @@ public final class OriginRitual {
 
     // ---- 3. Shape ------------------------------------------------------------------------------
 
-    /** From ChooseOriginPacket. Empty id = the player let the power fade. */
+    /** From ChooseOriginPacket. Empty id = the player cancelled. */
     public static void choose(ServerPlayer p, String originId) {
         Ritual ritual = RITUALS.get(p.getUUID());
         if (ritual == null || !ritual.choosing) return;                // no orb awaiting a choice: ignore
@@ -160,17 +160,17 @@ public final class OriginRitual {
 
     private static void transform(ServerPlayer p, Origin origin) {
         ServerLevel level = p.serverLevel();
-        Vfx.stop(level, p, VfxType.AURA, NEUTRAL);
+        AbyssVfx.stop(level, p, VfxType.AURA, NEUTRAL);
         Assignments.setOrigin(p, origin);
 
         int c = origin.getThemeColor() & 0xFFFFFF, hi = lighten(c);
         Vec3 pos = p.position(), chest = pos.add(0, 1.1, 0);
         aura(level, p, c, hi, AURA_LINGER);
-        Vfx.of(VfxType.PILLAR).at(pos).scale(7f).extra(0.9f).colors(c, 0xFFFFFF).duration(30).send(level);
-        Vfx.of(VfxType.SIGIL).at(pos).scale(2.6f).extra(8).colors(c, hi).duration(50).send(level);
-        Vfx.burst(level, chest, 1.8f, c, 0xFFFFFF);
-        Vfx.shockwave(level, pos, 5f, c, hi, 22);
-        Vfx.helix(level, p, 2.8f, c, hi, 30);
+        AbyssVfx.of(VfxType.PILLAR).at(pos).scale(7f).extra(0.9f).colors(c, 0xFFFFFF).duration(30).send(level);
+        AbyssVfx.of(VfxType.SIGIL).at(pos).scale(2.6f).extra(8).colors(c, hi).duration(50).send(level);
+        AbyssVfx.burst(level, chest, 1.8f, c, 0xFFFFFF);
+        AbyssVfx.shockwave(level, pos, 5f, c, hi, 22);
+        AbyssVfx.helix(level, p, 2.8f, c, hi, 30);
         Fx.sound(level, chest, SoundEvents.BEACON_POWER_SELECT, 1.2f, 0.7f);
         Fx.sound(level, chest, SoundEvents.ENCHANTMENT_TABLE_USE, 1f, 0.6f);
         Fx.sound(level, chest, SoundEvents.TOTEM_USE, 0.5f, 1.4f);
@@ -187,7 +187,7 @@ public final class OriginRitual {
         if (!ritual.refund.isEmpty() && !p.getInventory().add(ritual.refund.copy())) p.drop(ritual.refund.copy(), false);
         if (!p.hasDisconnected()) {
             ServerLevel level = p.serverLevel();
-            Vfx.stop(level, p, VfxType.AURA, NEUTRAL);
+            AbyssVfx.stop(level, p, VfxType.AURA, NEUTRAL);
             Fx.sound(level, p.position(), SoundEvents.BEACON_DEACTIVATE, 0.7f, 1.2f);
             p.displayClientMessage(Component.translatable("abyssorigins.message.ritual_faded").withStyle(ChatFormatting.GRAY), true);
             PacketDistributor.sendToPlayer(p, RitualPacket.cancelled());
@@ -195,7 +195,7 @@ public final class OriginRitual {
     }
 
     private static void aura(ServerLevel level, ServerPlayer p, int c1, int c2, int ticks) {
-        Vfx.of(VfxType.AURA).follow(p).scale(1.3f).colors(c1, c2).duration(ticks).send(level);
+        AbyssVfx.of(VfxType.AURA).follow(p).scale(1.3f).colors(c1, c2).duration(ticks).send(level);
     }
 
     private static int lighten(int rgb) {

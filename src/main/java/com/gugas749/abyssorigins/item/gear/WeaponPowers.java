@@ -6,8 +6,8 @@ import com.gugas749.abyssorigins.power.PowerState;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
-import com.gugas749.abyssorigins.vfx.VfxType;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
+import com.gugas749.abysscore.api.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.List;
 
-/** The six origin relics. Each power plays with its origin's own resource and identity. */
+/** The six origin relics. Each power uses its origin's resource and theme. */
 public final class WeaponPowers {
 
     private WeaponPowers() {}
@@ -37,7 +37,7 @@ public final class WeaponPowers {
         @Override
         public boolean activate(ServerPlayer p, ItemStack stack) {
             PowerState.flag(p, "oath_parry", 30);
-            Vfx.of(VfxType.DOME).follow(p).scale(1.3f).colors(Palette.HUMAN, Palette.HUMAN_HI).duration(30).send(p.serverLevel());
+            AbyssVfx.of(VfxType.DOME).follow(p).scale(1.3f).colors(Palette.HUMAN, Palette.HUMAN_HI).duration(30).send(p.serverLevel());
             Fx.sound(p.level(), p.position(), SoundEvents.ARMOR_EQUIP_IRON, 1f, 0.6f);
             return true;
         }
@@ -47,14 +47,14 @@ public final class WeaponPowers {
             if (!(e.getSource().getEntity() instanceof LivingEntity attacker) || attacker == p) return;
             if (!PowerState.consume(p, "oath_parry")) return;
             e.setCanceled(true);
-            Vfx.stop(p.serverLevel(), p, VfxType.DOME);
+            AbyssVfx.stop(p.serverLevel(), p, VfxType.DOME);
             if (attacker.distanceToSqr(p) < 36) {
                 attacker.hurt(Targeting.spell(p), 8f);
                 attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0), p);
-                Vfx.of(VfxType.SLASH).at(Fx.chest(attacker)).dir(attacker.position().subtract(p.position())).scale(1.4f)
-                    .extra(160).colors(Palette.HUMAN, Palette.HUMAN_HI).flags(Vfx.VERTICAL).duration(12).send(p.serverLevel());
+                AbyssVfx.of(VfxType.SLASH).at(Fx.chest(attacker)).dir(attacker.position().subtract(p.position())).scale(1.4f)
+                    .extra(160).colors(Palette.HUMAN, Palette.HUMAN_HI).flags(AbyssVfx.VERTICAL).duration(12).send(p.serverLevel());
             }
-            Vfx.burst(p.serverLevel(), Fx.chest(p), 0.9f, Palette.HUMAN, Palette.HUMAN_HI);
+            AbyssVfx.burst(p.serverLevel(), Fx.chest(p), 0.9f, Palette.HUMAN, Palette.HUMAN_HI);
             Fx.sound(p.level(), p.position(), SoundEvents.SHIELD_BLOCK, 1f, 0.8f);
             Fx.sound(p.level(), p.position(), SoundEvents.ANVIL_LAND, 0.4f, 1.8f);
         }
@@ -67,7 +67,7 @@ public final class WeaponPowers {
 
     // ---- Vampire · Sanguine Scythe ------------------------------------------------------
 
-    /** Crimson Reap: a wide sweeping harvest that bleeds and feeds. Passive: Sanguine Thirst. */
+    /** Crimson Reap: a wide sweep that applies Bleeding and heals. Passive: Sanguine Thirst. */
     public static final class SanguineScythe extends WeaponPower {
         public SanguineScythe() { super("sanguine_scythe", 10); }
 
@@ -83,9 +83,9 @@ public final class WeaponPowers {
                 e.addEffect(new MobEffectInstance(ModEffects.BLEEDING, 80, 1), p);
                 Skills.addResource(p, 4f);
                 p.heal(1f);
-                Vfx.beam(level, Fx.chest(e), mouth, 0.18f, Palette.BLOOD, Palette.BLOOD_HI, 12);
+                AbyssVfx.beam(level, Fx.chest(e), mouth, 0.18f, Palette.BLOOD, Palette.BLOOD_HI, 12);
             }
-            Vfx.of(VfxType.SLASH).at(p.position().add(0, 1.0, 0)).dir(look).scale(3.6f).extra(220)
+            AbyssVfx.of(VfxType.SLASH).at(p.position().add(0, 1.0, 0)).dir(look).scale(3.6f).extra(220)
                 .colors(Palette.BLOOD, Palette.BLOOD_HI).duration(14).send(level);
             Fx.sound(level, p.position(), SoundEvents.PLAYER_ATTACK_SWEEP, 1.2f, 0.6f);
             Fx.sound(level, p.position(), SoundEvents.WARDEN_HEARTBEAT, 0.8f, 1.4f);
@@ -120,11 +120,11 @@ public final class WeaponPowers {
                 e.push(0, 0.6, 0);
                 e.hurtMarked = true;
             }
-            Vfx.shockwave(level, p.position(), 4.5f, Palette.INFERNO, Palette.INFERNO_HI, 18);
-            Vfx.burst(level, p.position().add(0, 0.8, 0), 1.2f, Palette.INFERNO, Palette.INFERNO_HI);
+            AbyssVfx.shockwave(level, p.position(), 4.5f, Palette.INFERNO, Palette.INFERNO_HI, 18);
+            AbyssVfx.burst(level, p.position().add(0, 0.8, 0), 1.2f, Palette.INFERNO, Palette.INFERNO_HI);
             for (int i = 0; i < 4; i++) {
                 double a = Math.PI / 2 * i + Math.PI / 4;
-                Vfx.of(VfxType.PILLAR).at(p.position().add(Math.cos(a) * 2.5, 0, Math.sin(a) * 2.5)).scale(3f).extra(0.4f)
+                AbyssVfx.of(VfxType.PILLAR).at(p.position().add(Math.cos(a) * 2.5, 0, Math.sin(a) * 2.5)).scale(3f).extra(0.4f)
                     .colors(Palette.INFERNO, Palette.INFERNO_HI).duration(16).send(level);
             }
             Fx.sound(level, p.position(), SoundEvents.GENERIC_EXPLODE, 0.6f, 0.8f);
@@ -158,9 +158,9 @@ public final class WeaponPowers {
                 boolean undead = Targeting.isUndead(e);
                 e.hurt(Targeting.spell(p), undead ? 12f : 8f);
                 if (undead) e.igniteForSeconds(4);
-                Vfx.burst(level, Fx.chest(e), 0.8f, Palette.RADIANT, Palette.RADIANT_HI);
+                AbyssVfx.burst(level, Fx.chest(e), 0.8f, Palette.RADIANT, Palette.RADIANT_HI);
             }
-            Vfx.beam(level, Fx.hand(p), end, 0.55f, Palette.RADIANT, Palette.RADIANT_HI, 14);
+            AbyssVfx.beam(level, Fx.hand(p), end, 0.55f, Palette.RADIANT, Palette.RADIANT_HI, 14);
             Fx.sound(level, p.position(), SoundEvents.BEACON_ACTIVATE, 0.8f, 2f);
             Fx.sound(level, p.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.4f);
             return true;
@@ -178,7 +178,7 @@ public final class WeaponPowers {
 
     // ---- Voidborn · Event Horizon (greatsword) ------------------------------------------------
 
-    /** Gravity Well: drag every foe into a collapsing point. Passive: Entropic Edge. */
+    /** Gravity Well: pulls every enemy toward a point. Passive: Entropic Edge. */
     public static final class EventHorizon extends WeaponPower {
         public EventHorizon() { super("event_horizon", 14); }
 
@@ -195,8 +195,8 @@ public final class WeaponPowers {
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), p);
                 e.addEffect(new MobEffectInstance(ModEffects.SUNDERED, 100, 0), p);
             }
-            Vfx.of(VfxType.VORTEX).at(center).scale(3.5f).colors(Palette.VOID, Palette.VOID_DARK).duration(20).send(level);
-            Vfx.shockwave(level, center.subtract(0, 1, 0), 7, Palette.VOID, Palette.VOID_HI, 16);
+            AbyssVfx.of(VfxType.VORTEX).at(center).scale(3.5f).colors(Palette.VOID, Palette.VOID_DARK).duration(20).send(level);
+            AbyssVfx.shockwave(level, center.subtract(0, 1, 0), 7, Palette.VOID, Palette.VOID_HI, 16);
             Fx.sound(level, center, SoundEvents.WARDEN_SONIC_BOOM, 0.5f, 1.6f);
             Fx.sound(level, center, SoundEvents.PORTAL_TRIGGER, 0.4f, 1.8f);
             return true;
@@ -212,7 +212,7 @@ public final class WeaponPowers {
 
     // ---- Shade · Shadowfang (dagger) ------------------------------------------------------------
 
-    /** Nightstep: dash through the shadows and vanish. Passive: Unseen Fang. */
+    /** Nightstep: teleport forward and turn invisible. Passive: Unseen Fang. */
     public static final class Shadowfang extends WeaponPower {
         public Shadowfang() { super("shadowfang", 8); }
 
@@ -235,10 +235,10 @@ public final class WeaponPowers {
             p.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, false, false));
             PowerState.flag(p, "fang_empower", 60);
 
-            Vfx.of(VfxType.RIFT).at(from.add(0, 1, 0)).dir(look).scale(2.2f).colors(Palette.SHADOW_HI, 0xE0E8FF).duration(12).send(level);
-            Vfx.of(VfxType.BEAM).at(from.add(0, 1, 0)).to(dest.add(0, 1, 0)).extra(0.3f)
-                .colors(Palette.SHADOW, Palette.SHADOW_HI).flags(Vfx.VOID).duration(10).send(level);
-            Vfx.of(VfxType.BURST).at(dest.add(0, 1, 0)).scale(0.8f).colors(Palette.SHADOW, Palette.SHADOW_HI).flags(Vfx.VOID).duration(12).send(level);
+            AbyssVfx.of(VfxType.RIFT).at(from.add(0, 1, 0)).dir(look).scale(2.2f).colors(Palette.SHADOW_HI, 0xE0E8FF).duration(12).send(level);
+            AbyssVfx.of(VfxType.BEAM).at(from.add(0, 1, 0)).to(dest.add(0, 1, 0)).extra(0.3f)
+                .colors(Palette.SHADOW, Palette.SHADOW_HI).flags(AbyssVfx.VOID).duration(10).send(level);
+            AbyssVfx.of(VfxType.BURST).at(dest.add(0, 1, 0)).scale(0.8f).colors(Palette.SHADOW, Palette.SHADOW_HI).flags(AbyssVfx.VOID).duration(12).send(level);
             Fx.sound(level, from, SoundEvents.ENDERMAN_TELEPORT, 0.5f, 1.8f);
             return true;
         }
@@ -248,8 +248,8 @@ public final class WeaponPowers {
             boolean empowered = PowerState.consume(p, "fang_empower");
             if (empowered || Targeting.isBehind(p, target) || p.hasEffect(MobEffects.INVISIBILITY)) {
                 e.setAmount(e.getAmount() * 1.8f);
-                Vfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(p.position())).scale(1.1f).extra(130)
-                    .colors(Palette.SHADOW_HI, 0xE0E8FF).flags(Vfx.VERTICAL).duration(10).send(p.serverLevel());
+                AbyssVfx.of(VfxType.SLASH).at(Fx.chest(target)).dir(target.position().subtract(p.position())).scale(1.1f).extra(130)
+                    .colors(Palette.SHADOW_HI, 0xE0E8FF).flags(AbyssVfx.VERTICAL).duration(10).send(p.serverLevel());
             }
             Skills.addResource(p, 3f);
         }

@@ -11,7 +11,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Server → ADMIN client: a player's profile. {@code open} = from the command (open the screen);
+ * Server -> ADMIN client: a player's profile. {@code open} = from the command (open the screen);
  * otherwise a refresh after an edit, applied only if that profile is still on screen.
  */
 public record OpenProfilePacket(ProfileSnapshot snapshot, boolean open) implements CustomPacketPayload {

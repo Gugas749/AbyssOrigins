@@ -28,9 +28,10 @@ public class SkillTree {
     private final Component        displayName;
     private final Map<String, SkillNode> nodes = new LinkedHashMap<>();
     private final List<SkillConnection>  connections = new ArrayList<>();
+    private final Map<String, Integer>   retired = new HashMap<>();
 
     /**
-     * @param displayNameKey  A lang key — stored as Component.translatable(displayNameKey)
+     * @param displayNameKey  A lang key - stored as Component.translatable(displayNameKey)
      */
     public SkillTree(ResourceLocation originId, String displayNameKey) {
         this.originId    = originId;
@@ -45,6 +46,11 @@ public class SkillTree {
             connections.add(new SkillConnection(prereqId, node.getId(), true));
         return this;
     }
+
+    /** Node ids removed from this tree, with what they cost; unlocked ones are refunded (SkillService.refundRetired). */
+    public SkillTree retire(Map<String, Integer> idsAndCosts) { retired.putAll(idsAndCosts); return this; }
+
+    public Map<String, Integer>  getRetired()     { return Collections.unmodifiableMap(retired); }
 
     public ResourceLocation      getOriginId()    { return originId; }
     public Component             getDisplayName()  { return displayName; }
@@ -66,7 +72,7 @@ public class SkillTree {
             SkillNode n = nodes.get(id);
             if (n != null) out.addAll(n.getExclusions());
         }
-        // Exclusions are symmetric in practice — a node that excludes an unlocked node is also locked out.
+        // Exclusions are symmetric in practice - a node that excludes an unlocked node is also locked out.
         for (SkillNode n : nodes.values())
             for (String ex : n.getExclusions())
                 if (unlocked.contains(ex)) out.add(n.getId());

@@ -5,7 +5,7 @@ import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.power.Targeting;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -38,14 +38,14 @@ public class HumanAdaptabilityAbility extends OriginAbility {
                 if (ally == player) continue;
                 ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, DURATION, 0, false, true));
                 ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, DURATION, 0, false, true));
-                Vfx.helix(level, ally, 2.0f, Palette.HUMAN, Palette.HUMAN_HI, 24);
+                AbyssVfx.helix(level, ally, 2.0f, Palette.HUMAN, Palette.HUMAN_HI, 24);
             }
-            Vfx.shockwave(level, player.position(), 8, Palette.HUMAN, Palette.HUMAN_HI, 26);
+            AbyssVfx.shockwave(level, player.position(), 8, Palette.HUMAN, Palette.HUMAN_HI, 26);
             Fx.sound(level, player.position(), SoundEvents.RAID_HORN, 0.6f, 1.4f);
         }
 
-        Vfx.helix(level, player, 2.2f, Palette.HUMAN, Palette.HUMAN_HI, 26);
-        Vfx.shockwave(level, player.position(), 2.6f, Palette.HUMAN, Palette.HUMAN_HI, 16);
+        AbyssVfx.helix(level, player, 2.2f, Palette.HUMAN, Palette.HUMAN_HI, 26);
+        AbyssVfx.shockwave(level, player.position(), 2.6f, Palette.HUMAN, Palette.HUMAN_HI, 16);
         Fx.sound(level, player.position(), SoundEvents.ARMOR_EQUIP_IRON, 1.0f, 0.8f);
         player.displayClientMessage(Component.translatable("abyssorigins.message.adaptability_activated"), true);
         return true;

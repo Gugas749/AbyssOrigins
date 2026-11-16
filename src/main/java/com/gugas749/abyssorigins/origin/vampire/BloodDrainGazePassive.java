@@ -6,7 +6,7 @@ import com.gugas749.abyssorigins.data.PlayerOriginData;
 import com.gugas749.abyssorigins.power.Fx;
 import com.gugas749.abyssorigins.power.Skills;
 import com.gugas749.abyssorigins.vfx.Palette;
-import com.gugas749.abyssorigins.vfx.Vfx;
+import com.gugas749.abysscore.api.vfx.AbyssVfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -62,7 +62,7 @@ public class BloodDrainGazePassive extends OriginPassive {
             player.displayClientMessage(Component.literal(bar), true);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.2f, 1.5f);
             if (player.level() instanceof ServerLevel sl)
-                Vfx.beam(sl, Fx.hand(player), Fx.chest(target), 0.07f, Palette.BLOOD_DARK, Palette.BLOOD, 10);
+                AbyssVfx.beam(sl, Fx.hand(player), Fx.chest(target), 0.07f, Palette.BLOOD_DARK, Palette.BLOOD, 10);
         }
         if (state.ticks >= focus) {
             if (!state.draining) {
@@ -108,8 +108,8 @@ public class BloodDrainGazePassive extends OriginPassive {
     /** A pulsing crimson stream from the victim to the vampire's mouth. */
     private void spawnParticles(Player player, LivingEntity target) {
         if (!(player.level() instanceof ServerLevel sl)) return;
-        Vfx.beam(sl, Fx.chest(target), player.getEyePosition().subtract(0, 0.25, 0), 0.24f, Palette.BLOOD, Palette.BLOOD_HI, 12);
-        Vfx.sparks(sl, Fx.chest(target), 0.4f, Palette.BLOOD, Palette.BLOOD_DARK);
+        AbyssVfx.beam(sl, Fx.chest(target), player.getEyePosition().subtract(0, 0.25, 0), 0.24f, Palette.BLOOD, Palette.BLOOD_HI, 12);
+        AbyssVfx.sparks(sl, Fx.chest(target), 0.4f, Palette.BLOOD, Palette.BLOOD_DARK);
     }
 
     private void resetDrain(Player player, DrainState state) {

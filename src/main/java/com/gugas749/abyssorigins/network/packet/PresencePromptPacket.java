@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-/** Server to subject: the Eminence's Presence demands an answer, kneel or resist. */
+/** Server to subject: Presence prompt, choose kneel or resist. */
 public record PresencePromptPacket(String casterName, int ticks) implements CustomPacketPayload {
 
     public static final Type<PresencePromptPacket> TYPE =
